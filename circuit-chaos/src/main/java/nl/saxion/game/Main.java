@@ -1,7 +1,7 @@
 package nl.saxion.game;
 
-import nl.saxion.game.circuitchaos.YourGameScreen;
-import nl.saxion.game.circuitchaos.MainMenuScreen;
+import nl.saxion.game.circuitchaos.ui.screen.YourGameScreen;
+import nl.saxion.game.circuitchaos.ui.screen.MainMenuScreen;
 import nl.saxion.gameapp.GameApp;
 
 public class Main {

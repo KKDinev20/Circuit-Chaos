@@ -1,6 +1,7 @@
-package nl.saxion.game.circuitchaos;
+package nl.saxion.game.circuitchaos.ui.screen;
 
 import com.badlogic.gdx.Input;
+import nl.saxion.game.circuitchaos.entities.Box;
 import nl.saxion.gameapp.GameApp;
 import nl.saxion.gameapp.screens.ScalableGameScreen;
 

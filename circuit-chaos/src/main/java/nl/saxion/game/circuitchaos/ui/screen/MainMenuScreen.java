@@ -1,4 +1,4 @@
-package nl.saxion.game.circuitchaos;
+package nl.saxion.game.circuitchaos.ui.screen;
 
 import com.badlogic.gdx.Input;
 import nl.saxion.gameapp.GameApp;
