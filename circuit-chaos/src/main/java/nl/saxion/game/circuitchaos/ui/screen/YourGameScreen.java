@@ -1,12 +1,13 @@
 package nl.saxion.game.circuitchaos.ui.screen;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import nl.saxion.game.circuitchaos.entities.Box;
 import nl.saxion.gameapp.GameApp;
 import nl.saxion.gameapp.screens.ScalableGameScreen;
 
 public class YourGameScreen extends ScalableGameScreen {
-    String randomBoxColor = "violet-500";
+    //String randomBoxColor = "violet-500";
     String randomBackgroundColor = "black";
     Box centeredBox = new Box();
 
@@ -16,7 +17,7 @@ public class YourGameScreen extends ScalableGameScreen {
 
     @Override
     public void show() {
-        randomBoxColor = getRandomColor();
+        //randomBoxColor = Color.WHITE;
         centeredBox.width = 400;
         centeredBox.height = 400;
     }
@@ -35,7 +36,7 @@ public class YourGameScreen extends ScalableGameScreen {
 
             if (mouseX > boxX && mouseX < boxX + centeredBox.width && mouseY > boxY && mouseY < boxY + centeredBox.height) {
                 // If we pressed the box, then change the color of the box
-                randomBoxColor = getRandomColor();
+                //randomBoxColor = getRandomColor();
             } else {
                 // Otherwise change the color of the background
                 randomBackgroundColor = getRandomColor();
@@ -45,13 +46,17 @@ public class YourGameScreen extends ScalableGameScreen {
         // Draw elements
         GameApp.clearScreen(randomBackgroundColor);
         GameApp.startShapeRenderingFilled();
-        GameApp.drawRect(boxX, boxY, centeredBox.width, centeredBox.height, randomBoxColor);
+        GameApp.drawRect(boxX, boxY, centeredBox.width, centeredBox.height, Color.WHITE);
+        for (int i = 1; i <= 4; i++) {
+            GameApp.drawLine(boxX + (80 * i), boxY, boxX + (80 * i), boxY + centeredBox.height, Color.BLUE);
+            GameApp.drawLine(boxX, boxY + (80 * i), boxX + centeredBox.width, boxY + (80 * i), Color.BLUE);
+        }
         GameApp.endShapeRendering();
 
     }
 
     private String getRandomColor() {
-        int randomIndex = (int)GameApp.random(0, GameApp.getAllColors().length-1);
+        int randomIndex = (int) GameApp.random(0, GameApp.getAllColors().length - 1);
         return GameApp.getAllColors()[randomIndex];
     }
 
