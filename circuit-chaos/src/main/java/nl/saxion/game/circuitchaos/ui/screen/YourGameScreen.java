@@ -1,67 +1,128 @@
 package nl.saxion.game.circuitchaos.ui.screen;
 
-import com.badlogic.gdx.Input;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
-import nl.saxion.game.circuitchaos.entities.Box;
+import nl.saxion.game.circuitchaos.core.*;
+import nl.saxion.game.circuitchaos.entities.*;
+import nl.saxion.game.circuitchaos.util.GameConstants;
 import nl.saxion.gameapp.GameApp;
 import nl.saxion.gameapp.screens.ScalableGameScreen;
 
 public class YourGameScreen extends ScalableGameScreen {
-    //String randomBoxColor = "violet-500";
-    String randomBackgroundColor = "black";
-    Box centeredBox = new Box();
+    private Box centeredBox = new Box();
+    private ToolManager toolManager;
+    private ExampleObject currentlyDragging = null;
 
     public YourGameScreen() {
         super(1280, 720);
+        toolManager = new ToolManager();
     }
 
     @Override
     public void show() {
-        //randomBoxColor = Color.WHITE;
-        centeredBox.width = 400;
-        centeredBox.height = 400;
+        centeredBox.width = GameConstants.GRID_WIDTH;
+        centeredBox.height = GameConstants.GRID_HEIGHT;
     }
 
     @Override
     public void render(float delta) {
         super.render(delta);
 
-        // Calculate where the box would be (we draw it in the center of the world)
-        float boxX = getWorldWidth() / 2 - centeredBox.width / 2;
-        float boxY = getWorldHeight() / 2 - centeredBox.height / 2;
+        float centerX = getWorldWidth() / 2;
+        float centerY = getWorldHeight() / 2;
+        float gridX = centerX - centeredBox.width / 2;
+        float gridY = centerY - centeredBox.height / 2;
 
-        if (GameApp.isButtonJustPressed(Input.Buttons.LEFT)) {
-            float mouseX = getMouseX();
-            float mouseY = getMouseY();
-
-            if (mouseX > boxX && mouseX < boxX + centeredBox.width && mouseY > boxY && mouseY < boxY + centeredBox.height) {
-                // If we pressed the box, then change the color of the box
-                //randomBoxColor = getRandomColor();
-            } else {
-                // Otherwise change the color of the background
-                randomBackgroundColor = getRandomColor();
-            }
+        // Initialize tools if not already done
+        if (toolManager.getToolboxTools()[0] == null) {
+            toolManager.initializeTools(gridX, gridY);
         }
 
-        // Draw elements
-        GameApp.clearScreen(randomBackgroundColor);
+        handleInput(gridX, gridY);
+
+        GameApp.clearScreen(Color.BLACK);
         GameApp.startShapeRenderingFilled();
-        GameApp.drawRect(boxX, boxY, centeredBox.width, centeredBox.height, Color.WHITE);
-        for (int i = 1; i <= 4; i++) {
-            GameApp.drawLine(boxX + (80 * i), boxY, boxX + (80 * i), boxY + centeredBox.height, Color.BLUE);
-            GameApp.drawLine(boxX, boxY + (80 * i), boxX + centeredBox.width, boxY + (80 * i), Color.BLUE);
-        }
-        GameApp.endShapeRendering();
 
+        // Draw all elements
+        GridManager.drawGrid(gridX, gridY, centeredBox.width, centeredBox.height);
+        drawHearts(gridX, gridY);
+        drawHintsButton(gridX, gridY);
+        drawToolBoxes(gridX, gridY);
+        drawTimer(gridX, gridY);
+        toolManager.drawTools();
+
+        GameApp.endShapeRendering();
     }
 
-    private String getRandomColor() {
-        int randomIndex = (int) GameApp.random(0, GameApp.getAllColors().length - 1);
-        return GameApp.getAllColors()[randomIndex];
+    private void handleInput(float gridX, float gridY) {
+        float mouseX = getMouseX();
+        float mouseY = getMouseY();
+
+        if (GameApp.isButtonJustPressed(Input.Buttons.LEFT)) {
+            currentlyDragging = toolManager.getToolAtPosition(mouseX, mouseY);
+        }
+
+        if (GameApp.isButtonPressed(Input.Buttons.LEFT) && currentlyDragging != null) {
+            currentlyDragging.x = mouseX - currentlyDragging.width / 2;
+            currentlyDragging.y = mouseY - currentlyDragging.height / 2;
+        }
+
+        if (!GameApp.isButtonPressed(Input.Buttons.LEFT) && currentlyDragging != null) {
+            if (mouseX > gridX && mouseX < gridX + centeredBox.width &&
+                    mouseY > gridY && mouseY < gridY + centeredBox.height) {
+
+                // Try to place the tool - if placement fails (cell occupied), return to toolbox
+                boolean placementSuccessful = toolManager.placeTool(currentlyDragging, gridX, gridY, mouseX, mouseY);
+                if (!placementSuccessful) {
+                    toolManager.returnToolToToolbox(currentlyDragging);
+                }
+            } else {
+                // Return to toolbox if not placed in grid
+                toolManager.returnToolToToolbox(currentlyDragging);
+            }
+            currentlyDragging = null;
+        }
+    }
+
+    private void drawHearts(float gridX, float gridY) {
+        float heartsX = gridX;
+        float heartsY = gridY + GameConstants.GRID_HEARTS_SPACING + GameConstants.GRID_HEIGHT;
+
+        for (int i = 0; i < GameConstants.HEARTS_COUNT; i++) {
+            float heartX = heartsX + (i * (GameConstants.HEARTS_SIZE + GameConstants.HEARTS_SPACING));
+            GameApp.drawRect(heartX, heartsY, GameConstants.HEARTS_SIZE, GameConstants.HEARTS_SIZE, Color.GREEN);
+        }
+    }
+
+    private void drawHintsButton(float gridX, float gridY) {
+        float buttonWidth = 120f;
+        float buttonHeight = 50f;
+        float buttonX = gridX + centeredBox.width - buttonWidth;
+        float buttonY = gridY + 30f + centeredBox.height;
+
+        GameApp.drawRect(buttonX, buttonY, buttonWidth, buttonHeight, Color.YELLOW);
+    }
+
+    private void drawToolBoxes(float gridX, float gridY) {
+        float toolY = gridY - GameConstants.GRID_TOOL_SPACING - GameConstants.TOOL_SIZE;
+        float startX = gridX + 15f;
+
+        for (int i = 0; i < GameConstants.TOOL_COUNT; i++) {
+            float toolX = startX + (i * GameConstants.TOOL_SPACING);
+            GameApp.drawRect(toolX, toolY, GameConstants.TOOL_SIZE, GameConstants.TOOL_SIZE, Color.DARK_GRAY);
+        }
+    }
+
+    private void drawTimer(float gridX, float gridY) {
+        float timerHeight = 10f;
+        float timerY = gridY + centeredBox.height + 8f;
+
+        GameApp.drawRect(gridX, timerY, centeredBox.width, timerHeight, Color.GREEN);
+        GameApp.drawRect(gridX, timerY, centeredBox.width - 80f, timerHeight, Color.RED);
     }
 
     @Override
     public void hide() {
-
+        // Cleanup if needed
     }
 }
