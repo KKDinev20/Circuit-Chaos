@@ -10,7 +10,6 @@ public class GridManager {
         float cellSize = width / GameConstants.GRID_SIZE;
 
         GameApp.addTextureAtlas("tile", "textures/atlases/gridTile.atlas");
-        GameApp.startSpriteRendering();
         for (int gx = 0; gx < GameConstants.GRID_SIZE; gx++) {
             for (int gy = 0; gy < GameConstants.GRID_SIZE; gy++) {
                 float cellX = x + gx * cellSize;
@@ -19,7 +18,6 @@ public class GridManager {
                 GameApp.drawAtlasRegion("tile", "gridTile", cellX, cellY, cellSize, cellSize);
             }
         }
-        GameApp.endSpriteRendering();
     }
 
 

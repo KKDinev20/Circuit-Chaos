@@ -18,7 +18,7 @@ public class GameConstants {
     public static final int HEARTS_COUNT = 3;
     public static final float TOOL_SIZE = 66.67f; // size of one tile
     public static final float TOOL_SPACING = 100f;
-    public static final float HEARTS_SIZE = 30f;
+    public static final float HEARTS_SIZE = 35f;
     public static final float HEARTS_SPACING = 10f;
 
     // Positioning & Spacing of objects

@@ -33,7 +33,6 @@ public class YourGameScreen extends ScalableGameScreen {
         float gridX = centerX - centeredBox.width / 2;
         float gridY = centerY - centeredBox.height / 2;
 
-        // Initialize tools if not already done
         if (toolManager.getToolboxTools()[0] == null) {
             toolManager.initializeTools(gridX, gridY);
         }
@@ -41,17 +40,22 @@ public class YourGameScreen extends ScalableGameScreen {
         handleInput(gridX, gridY);
 
         GameApp.clearScreen(Color.BLACK);
+
         GameApp.startShapeRenderingFilled();
 
-        // Draw all elements
-        GridManager.drawGrid(gridX, gridY, centeredBox.width, centeredBox.height);
-        drawHearts(gridX, gridY);
         drawHintsButton(gridX, gridY);
         drawToolBoxes(gridX, gridY);
         drawTimer(gridX, gridY);
         toolManager.drawTools();
 
         GameApp.endShapeRendering();
+
+        GameApp.startSpriteRendering();
+
+        GridManager.drawGrid(gridX, gridY, centeredBox.width);
+        drawHearts(gridX, gridY);
+
+        GameApp.endSpriteRendering();
     }
 
     private void handleInput(float gridX, float gridY) {
@@ -88,11 +92,21 @@ public class YourGameScreen extends ScalableGameScreen {
         float heartsX = gridX;
         float heartsY = gridY + GameConstants.GRID_HEARTS_SPACING + GameConstants.GRID_HEIGHT;
 
+        GameApp.addTextureAtlas("heart", "textures/atlases/hearts.atlas");
         for (int i = 0; i < GameConstants.HEARTS_COUNT; i++) {
             float heartX = heartsX + (i * (GameConstants.HEARTS_SIZE + GameConstants.HEARTS_SPACING));
-            GameApp.drawRect(heartX, heartsY, GameConstants.HEARTS_SIZE, GameConstants.HEARTS_SIZE, Color.GREEN);
+
+            GameApp.drawAtlasRegion(
+                    "heart",
+                    "hearts",
+                    heartX,
+                    heartsY,
+                    GameConstants.HEARTS_SIZE,
+                    GameConstants.HEARTS_SIZE
+            );
         }
     }
+
 
     private void drawHintsButton(float gridX, float gridY) {
         float buttonWidth = 120f;
