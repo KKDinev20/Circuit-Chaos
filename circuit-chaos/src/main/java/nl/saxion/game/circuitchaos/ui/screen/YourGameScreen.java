@@ -41,6 +41,13 @@ public class YourGameScreen extends ScalableGameScreen {
 
         GameApp.clearScreen(Color.BLACK);
 
+        GameApp.startSpriteRendering();
+
+        GridManager.drawGrid(gridX, gridY, centeredBox.width);
+        drawHearts(gridX, gridY);
+
+        GameApp.endSpriteRendering();
+
         GameApp.startShapeRenderingFilled();
 
         drawHintsButton(gridX, gridY);
@@ -49,13 +56,6 @@ public class YourGameScreen extends ScalableGameScreen {
         toolManager.drawTools();
 
         GameApp.endShapeRendering();
-
-        GameApp.startSpriteRendering();
-
-        GridManager.drawGrid(gridX, gridY, centeredBox.width);
-        drawHearts(gridX, gridY);
-
-        GameApp.endSpriteRendering();
     }
 
     private void handleInput(float gridX, float gridY) {
