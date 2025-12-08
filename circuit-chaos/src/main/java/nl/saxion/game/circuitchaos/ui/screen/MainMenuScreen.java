@@ -1,10 +1,16 @@
 package nl.saxion.game.circuitchaos.ui.screen;
 
+import com.badlogic.gdx.Input;
 import nl.saxion.gameapp.GameApp;
 import nl.saxion.gameapp.screens.ScalableGameScreen;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
 public class MainMenuScreen extends ScalableGameScreen {
+    private float btnW, btnH;
+    private float startX, startY;
+    private float levelSelectX, levelSelectY;
+    private float quitX, quitY;
+    private boolean startHovered = false, levelHovered = false, quitHovered = false;
 
     public MainMenuScreen() {
         super(1280, 720);
@@ -14,46 +20,67 @@ public class MainMenuScreen extends ScalableGameScreen {
     public void show() {
         enableHUD((int)getWorldWidth(), (int)getWorldHeight());
         // Load assets
-        GameApp.addFont("basic", "fonts/basic.ttf", 150);// normal font
+        GameApp.addFont("basic", "fonts/basic.ttf", 75);// normal font
         GameApp.addSkin("mainSkin", "skins/example-skin/skin.json");
 
+        btnW = 300;
+        btnH = 100;
 
-        // Add UI components (use the named API from the docs)
-        GameApp.addButton(
-                "startButton",      // name (key)
-                "mainSkin",         // skin key
-                getWorldWidth() / 2f - 200f, // x (bottom-left), center the button by subtracting half width
-                getWorldHeight() / 2f - 75f, // y
-                400f,               // width
-                100f,                // height
-                "Start"             // text
-        );
-        GameApp.addButton(
-                "levelSelect",
-                "mainSkin",
-                getWorldWidth() / 2f - 200f,
-                getWorldHeight() / 2f - 175f,
-                400f,
-                100f,
-                "Level Select"
-        );
-        GameApp.addButton(
-                "quitButton",
-                "mainSkin",
-                getWorldWidth() / 2f - 200f,
-                getWorldHeight() / 2f - 275f,
-                400f,
-                100f,
-                "Quit"
-        );
+        startX = getHUDWidth()/2f - btnW/2f;
+        startY = getHUDHeight()/2f - btnH/2f;
+
+        levelSelectX = startX;
+        levelSelectY = startY - 125;
+
+        quitX = startX;
+        quitY = startY - 250;
     }
 
     @Override
     public void render(float delta) {
         super.render(delta);
 
+        float[] m = windowToWorldMouse();
+        float mx = m[0];
+        float my = m[1];
+
+        startHovered = (
+                mx >= startX && mx <= startX + btnW &&
+                        my >= startY && my <= startY + btnH
+        );
+
+        levelHovered = (mx >= levelSelectX && mx <= levelSelectX + btnW &&
+                my >= levelSelectY && my <= levelSelectY + btnH);
+
+        quitHovered = (mx >= quitX && mx <= quitX + btnW &&
+                my >= quitY && my <= quitY + btnH);
+
         // Clear background and draw world/title
         GameApp.clearScreen("black");
+
+        GameApp.startShapeRenderingFilled();
+
+        GameApp.drawRect(startX, startY, btnW, btnH, startHovered ? "blue-400" : "blue-300");
+        GameApp.drawRect(levelSelectX, levelSelectY, btnW, btnH, levelHovered ? "blue-400" : "blue-300");
+        GameApp.drawRect(quitX, quitY, btnW, btnH, quitHovered ? "blue-400" : "blue-300");
+
+        GameApp.endShapeRendering();
+
+        GameApp.startShapeRenderingOutlined();
+
+        if (startHovered) {
+            GameApp.drawRect(startX, startY, btnW, btnH, "white");
+        }
+
+        if (levelHovered) {
+            GameApp.drawRect(levelSelectX, levelSelectY, btnW, btnH, "white");
+        }
+
+        if (quitHovered) {
+            GameApp.drawRect(quitX, quitY, btnW, btnH, "white");
+        }
+
+        GameApp.endShapeRendering();
 
         GameApp.startSpriteRendering();
         GameApp.drawTextCentered(
@@ -63,10 +90,67 @@ public class MainMenuScreen extends ScalableGameScreen {
                 getWorldHeight() - 150f,
                 "amber-500"
         );
+
+        GameApp.drawTextCentered("basic", "Play", startX + btnW / 2f,
+                startY + btnH / 2f, "white");
+        GameApp.drawTextCentered("basic", "Level Select", levelSelectX + btnW / 2f,
+                levelSelectY + btnH / 2f, "white");
+        GameApp.drawTextCentered("basic", "Quit", quitX + btnW / 2f,
+                quitY + btnH / 2f, "white");
         GameApp.endSpriteRendering();
+
+        // Input check
+        if (GameApp.isButtonJustPressed(Input.Buttons.LEFT)) {
+            if (startHovered) {
+                GameApp.switchScreen("YourGameScreen");
+            }
+            if (levelHovered) {
+                // to-do - add level selection screen
+            }
+            if (quitHovered) {
+                GameApp.quit();
+            }
+        }
+
+        handleInput();
 
         // Render the UI elements (required by docs)
         renderUI();
+
+    }
+
+    private void handleInput() {
+        if (!GameApp.isButtonJustPressed(Input.Buttons.LEFT)) return;
+
+        float mx = GameApp.getMousePositionInWindowX();
+        float my = getWorldHeight() - GameApp.getMousePositionInWindowY();
+
+        // simple collision check
+        if (mx >= startX && mx <= startX + btnW &&
+                my >= startY && my <= startY + btnH && GameApp.isButtonJustPressed(Input.Buttons.LEFT)) {
+
+            GameApp.log("Custom start clicked!");
+            GameApp.switchScreen("YourGameScreen");
+        }
+    }
+
+    private float[] windowToWorldMouse() {
+        float wx = GameApp.getMousePositionInWindowX();
+        float wy = GameApp.getMousePositionInWindowY();
+
+        int winW = com.badlogic.gdx.Gdx.graphics.getWidth();
+        int winH = com.badlogic.gdx.Gdx.graphics.getHeight();
+
+        float worldW = getWorldWidth();
+        float worldH = getWorldHeight();
+
+        float sx = worldW / winW;
+        float sy = worldH / winH;
+
+        float worldX = wx * sx;
+        float worldY = (winH - wy) * sy; // flip Y
+
+        return new float[]{worldX, worldY};
     }
 
     /**
