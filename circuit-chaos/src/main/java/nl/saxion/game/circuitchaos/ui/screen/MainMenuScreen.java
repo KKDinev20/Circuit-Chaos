@@ -22,6 +22,8 @@ public class MainMenuScreen extends ScalableGameScreen {
         // Load assets
         GameApp.addFont("basic", "fonts/basic.ttf", 75);// normal font
         GameApp.addSkin("mainSkin", "skins/example-skin/skin.json");
+        GameApp.addTexture("background", "textures/backgrounds/main menu.png");
+
 
         btnW = 300;
         btnH = 100;
@@ -55,31 +57,30 @@ public class MainMenuScreen extends ScalableGameScreen {
         quitHovered = (mx >= quitX && mx <= quitX + btnW &&
                 my >= quitY && my <= quitY + btnH);
 
-        // Clear background and draw world/title
+        // Clear background
         GameApp.clearScreen("black");
 
-        GameApp.startShapeRenderingFilled();
 
+        GameApp.startSpriteRendering();
+        GameApp.drawTexture("background", 0, 0, getWorldWidth(), getWorldHeight());
+        GameApp.endSpriteRendering();
+
+        GameApp.startShapeRenderingFilled();
         GameApp.drawRect(startX, startY, btnW, btnH, startHovered ? "blue-400" : "blue-300");
         GameApp.drawRect(levelSelectX, levelSelectY, btnW, btnH, levelHovered ? "blue-400" : "blue-300");
         GameApp.drawRect(quitX, quitY, btnW, btnH, quitHovered ? "blue-400" : "blue-300");
-
         GameApp.endShapeRendering();
 
         GameApp.startShapeRenderingOutlined();
-
         if (startHovered) {
             GameApp.drawRect(startX, startY, btnW, btnH, "white");
         }
-
         if (levelHovered) {
             GameApp.drawRect(levelSelectX, levelSelectY, btnW, btnH, "white");
         }
-
         if (quitHovered) {
             GameApp.drawRect(quitX, quitY, btnW, btnH, "white");
         }
-
         GameApp.endShapeRendering();
 
         GameApp.startSpriteRendering();
@@ -99,7 +100,6 @@ public class MainMenuScreen extends ScalableGameScreen {
                 quitY + btnH / 2f, "white");
         GameApp.endSpriteRendering();
 
-        // Input check
         if (GameApp.isButtonJustPressed(Input.Buttons.LEFT)) {
             if (startHovered) {
                 GameApp.switchScreen("YourGameScreen");
@@ -114,18 +114,14 @@ public class MainMenuScreen extends ScalableGameScreen {
 
         handleInput();
 
-        // Render the UI elements (required by docs)
         renderUI();
-
     }
-
     private void handleInput() {
         if (!GameApp.isButtonJustPressed(Input.Buttons.LEFT)) return;
 
         float mx = GameApp.getMousePositionInWindowX();
         float my = getWorldHeight() - GameApp.getMousePositionInWindowY();
 
-        // simple collision check
         if (mx >= startX && mx <= startX + btnW &&
                 my >= startY && my <= startY + btnH && GameApp.isButtonJustPressed(Input.Buttons.LEFT)) {
 
