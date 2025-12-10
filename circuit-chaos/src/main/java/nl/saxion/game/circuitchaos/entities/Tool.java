@@ -3,7 +3,7 @@ package nl.saxion.game.circuitchaos.entities;
 import com.badlogic.gdx.graphics.Color;
 
 
-public class ExampleObject {
+public class Tool {
     public float x;
     public float y;
     public float width;
@@ -11,7 +11,7 @@ public class ExampleObject {
     public Color color;
     public int usedPlacements;
 
-    public ExampleObject(float x, float y, float width, float height, Color color, int usedPlacements) {
+    public Tool(float x, float y, float width, float height, Color color, int usedPlacements) {
         this.x = x;
         this.y = y;
         this.width = width;

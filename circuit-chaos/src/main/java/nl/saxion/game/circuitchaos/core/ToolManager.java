@@ -1,7 +1,7 @@
 package nl.saxion.game.circuitchaos.core;
 
 import com.badlogic.gdx.graphics.Color;
-import nl.saxion.game.circuitchaos.entities.ExampleObject;
+import nl.saxion.game.circuitchaos.entities.Tool;
 import nl.saxion.game.circuitchaos.util.GameConstants;
 import nl.saxion.gameapp.GameApp;
 
@@ -10,15 +10,15 @@ import java.util.List;
 
 public class ToolManager {
     // Array of tools available in the toolbox
-    private ExampleObject[] toolboxTools;
+    private Tool[] toolboxTools;
     // List of tools that have been placed on the grid
-    private List<ExampleObject> placedTools;
+    private List<Tool> placedTools;
     // Store original positions for returning tools to toolbox
     private float[] originalToolX;
     private float[] originalToolY;
 
     public ToolManager() {
-        toolboxTools = new ExampleObject[GameConstants.TOOL_COUNT];
+        toolboxTools = new Tool[GameConstants.TOOL_COUNT];
         placedTools = new ArrayList<>();
         originalToolX = new float[GameConstants.TOOL_COUNT];
         originalToolY = new float[GameConstants.TOOL_COUNT];
@@ -33,7 +33,7 @@ public class ToolManager {
         // Create each tool with its specific properties
         for (int i = 0; i < GameConstants.TOOL_COUNT; i++) {
             float toolX = startX + (i * GameConstants.TOOL_SPACING);
-            toolboxTools[i] = new ExampleObject(toolX, toolY, GameConstants.TOOL_SIZE, GameConstants.TOOL_SIZE,
+            toolboxTools[i] = new Tool(toolX, toolY, GameConstants.TOOL_SIZE, GameConstants.TOOL_SIZE,
                     GameConstants.TOOL_COLORS[i], 0);
             // Store original position for returning tools later
             originalToolX[i] = toolX;
@@ -43,9 +43,9 @@ public class ToolManager {
 
     // Finds and returns a tool at the given screen coordinates
     // Returns null if no tool is found or if the tool cannot be placed
-    public ExampleObject getToolAtPosition(float x, float y) {
+    public Tool getToolAtPosition(float x, float y) {
         for (int i = 0; i < toolboxTools.length; i++) {
-            ExampleObject tool = toolboxTools[i];
+            Tool tool = toolboxTools[i];
             // Check if tool exists, contains the point, and can still be placed
             if (tool != null && tool.containsPoint(x, y) &&
                     tool.canBePlaced(GameConstants.MAX_PLACEMENTS[i], tool.usedPlacements)) {
@@ -56,7 +56,7 @@ public class ToolManager {
     }
 
     public boolean isCellOccupied(float gridX, float gridY, float cellX, float cellY) {
-        for (ExampleObject placedTool : placedTools) {
+        for (Tool placedTool : placedTools) {
                if (Math.abs(placedTool.x - cellX) < 1f && Math.abs(placedTool.y - cellY) < 1f) {
                 return true;
             }
@@ -65,7 +65,7 @@ public class ToolManager {
     }
 
     // Places a tool from the toolbox onto the grid at the mouse position
-    public boolean placeTool(ExampleObject tool, float gridX, float gridY, float mouseX, float mouseY) {
+    public boolean placeTool(Tool tool, float gridX, float gridY, float mouseX, float mouseY) {
         // Calculate the grid cell position to snap to
         float[] cellPos = GridManager.getGridCellPosition(gridX, gridY, GameConstants.GRID_WIDTH, mouseX, mouseY);
 
@@ -75,7 +75,7 @@ public class ToolManager {
         }
 
         // Create a new tool instance for the grid
-        ExampleObject placedTool = new ExampleObject(
+        Tool placedTool = new Tool(
                 cellPos[0], cellPos[1],
                 GameConstants.TOOL_SIZE, GameConstants.TOOL_SIZE,
                 tool.color, 0
@@ -95,7 +95,7 @@ public class ToolManager {
     }
 
     // Returns a tool to its original position in the toolbox
-    public void returnToolToToolbox(ExampleObject tool) {
+    public void returnToolToToolbox(Tool tool) {
         for (int i = 0; i < toolboxTools.length; i++) {
             if (toolboxTools[i] == tool) {
                 toolboxTools[i].x = originalToolX[i];
@@ -109,7 +109,7 @@ public class ToolManager {
     public void drawTools() {
         // Draw toolbox tools - these may be grayed out if all placements are used
         for (int i = 0; i < toolboxTools.length; i++) {
-            ExampleObject tool = toolboxTools[i];
+            Tool tool = toolboxTools[i];
             if (tool != null) {
                 // Gray out tool if it can no longer be placed
                 Color drawColor = tool.canBePlaced(GameConstants.MAX_PLACEMENTS[i], tool.usedPlacements)
@@ -119,12 +119,12 @@ public class ToolManager {
         }
 
         // Draw tools that have been placed on the grid - these are always colorful
-        for (ExampleObject placedTool : placedTools) {
+        for (Tool placedTool : placedTools) {
             GameApp.drawRect(placedTool.x, placedTool.y, placedTool.width, placedTool.height, placedTool.color);
         }
     }
 
     // Getter methods for accessing the tool arrays
-    public ExampleObject[] getToolboxTools() { return toolboxTools; }
-    //public List<ExampleObject> getPlacedTools() { return placedTools; }
+    public Tool[] getToolboxTools() { return toolboxTools; }
+    //public List<Tool> getPlacedTools() { return placedTools; }
 }
