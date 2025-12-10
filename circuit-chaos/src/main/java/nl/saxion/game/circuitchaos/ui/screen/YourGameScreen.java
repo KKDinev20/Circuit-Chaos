@@ -104,6 +104,7 @@ public class YourGameScreen extends ScalableGameScreen {
         GameApp.startSpriteRendering();
         GameApp.drawTexture("level1", 0,0, getWorldWidth(),getWorldHeight());
         GridManager.drawGrid(gridX, gridY, centeredBox.width);
+        drawHintsButton(gridX, gridY);
         drawHearts(gridX, gridY);
 
         // NEW: Draw bulbs (textures)
@@ -121,7 +122,6 @@ public class YourGameScreen extends ScalableGameScreen {
 
         // 2. Draw UI shapes
         GameApp.startShapeRenderingFilled();
-        drawHintsButton(gridX, gridY);
         drawToolBoxes(gridX, gridY);
         drawTimer(gridX, gridY);
         toolManager.drawTools();
@@ -201,7 +201,8 @@ public class YourGameScreen extends ScalableGameScreen {
         float buttonX = gridX + centeredBox.width - buttonWidth;
         float buttonY = gridY + 30f + centeredBox.height;
 
-        GameApp.drawRect(buttonX, buttonY, buttonWidth, buttonHeight, Color.YELLOW);
+        GameApp.addTexture("hint","textures/hint.png");
+        GameApp.drawTexture("hint", buttonX,buttonY,buttonWidth,buttonHeight);
     }
 
     private void drawToolBoxes(float gridX, float gridY) {
