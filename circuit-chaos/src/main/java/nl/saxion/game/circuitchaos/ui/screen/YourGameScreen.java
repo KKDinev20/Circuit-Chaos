@@ -39,6 +39,8 @@ public class YourGameScreen extends ScalableGameScreen {
         enableHUD((int) getWorldWidth(), (int) getWorldHeight());
         ElementManager.addTextures(); // Load bulb textures
 
+        GameApp.addTexture("level1", "textures/backgrounds/house.png");
+
         centeredBox.width = GameConstants.GRID_WIDTH;
         centeredBox.height = GameConstants.GRID_HEIGHT;
 
@@ -100,6 +102,7 @@ public class YourGameScreen extends ScalableGameScreen {
 
         // 1. Draw grid and hearts (textures)
         GameApp.startSpriteRendering();
+        GameApp.drawTexture("level1", 0,0, getWorldWidth(),getWorldHeight());
         GridManager.drawGrid(gridX, gridY, centeredBox.width);
         drawHearts(gridX, gridY);
 
