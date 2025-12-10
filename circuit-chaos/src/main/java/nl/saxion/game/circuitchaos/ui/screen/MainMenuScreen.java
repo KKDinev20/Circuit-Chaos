@@ -20,7 +20,7 @@ public class MainMenuScreen extends ScalableGameScreen {
     public void show() {
         enableHUD((int)getWorldWidth(), (int)getWorldHeight());
         // Load assets
-        GameApp.addFont("basic", "fonts/basic.ttf", 75);// normal font
+        GameApp.addFont("basic_large", "fonts/basic.ttf", 75);
         GameApp.addSkin("mainSkin", "skins/example-skin/skin.json");
         GameApp.addTexture("background", "textures/backgrounds/main menu.png");
 
@@ -85,18 +85,18 @@ public class MainMenuScreen extends ScalableGameScreen {
 
         GameApp.startSpriteRendering();
         GameApp.drawTextCentered(
-                "basic",
+                "basic_large",
                 "Circuit Chaos",
                 getWorldWidth() / 2f,
                 getWorldHeight() - 150f,
                 "amber-500"
         );
 
-        GameApp.drawTextCentered("basic", "Play", startX + btnW / 2f,
+        GameApp.drawTextCentered("basic_large", "Play", startX + btnW / 2f,
                 startY + btnH / 2f, "white");
-        GameApp.drawTextCentered("basic", "Level Select", levelSelectX + btnW / 2f,
+        GameApp.drawTextCentered("basic_large", "Level Select", levelSelectX + btnW / 2f,
                 levelSelectY + btnH / 2f, "white");
-        GameApp.drawTextCentered("basic", "Quit", quitX + btnW / 2f,
+        GameApp.drawTextCentered("basic_large", "Quit", quitX + btnW / 2f,
                 quitY + btnH / 2f, "white");
         GameApp.endSpriteRendering();
 
@@ -105,7 +105,7 @@ public class MainMenuScreen extends ScalableGameScreen {
                 GameApp.switchScreen("YourGameScreen");
             }
             if (levelHovered) {
-                // to-do - add level selection screen
+                GameApp.switchScreen("LevelSelectScreen");
             }
             if (quitHovered) {
                 GameApp.quit();
@@ -174,9 +174,7 @@ public class MainMenuScreen extends ScalableGameScreen {
     @Override
     public void hide() {
         // Dispose UI elements + other assets
-        GameApp.disposeUIElements();   // recommended in docs
-        GameApp.disposeFont("basic");
-        GameApp.disposeFont("mainFont");
+        GameApp.disposeUIElements();
         GameApp.disposeSkin("mainSkin");
     }
 }

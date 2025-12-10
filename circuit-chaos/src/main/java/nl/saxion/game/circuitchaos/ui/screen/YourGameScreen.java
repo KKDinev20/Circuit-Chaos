@@ -251,11 +251,11 @@ public class YourGameScreen extends ScalableGameScreen {
         // ==== TEXT ====
         GameApp.startSpriteRendering();
 
-        GameApp.drawTextCentered("basic", "Are you sure you want to quit?", panelX + panelW / 2f, panelY + panelH - 60f, "white");
+        GameApp.drawTextCentered("basic_large", "Are you sure you want to quit?", panelX + panelW / 2f, panelY + panelH - 60f, "white");
 
-        GameApp.drawTextCentered("basic", "Yes", btnYesX + btnYesW / 2f, btnYesY + btnYesH / 2f, "white");
+        GameApp.drawTextCentered("basic_large", "Yes", btnYesX + btnYesW / 2f, btnYesY + btnYesH / 2f, "white");
 
-        GameApp.drawTextCentered("basic", "No", btnNoX + btnNoW / 2f, btnNoY + btnNoH / 2f, "white");
+        GameApp.drawTextCentered("basic_large", "No", btnNoX + btnNoW / 2f, btnNoY + btnNoH / 2f, "white");
 
         GameApp.endSpriteRendering();
     }
