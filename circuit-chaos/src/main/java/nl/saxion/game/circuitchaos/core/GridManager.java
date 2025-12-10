@@ -9,13 +9,13 @@ public class GridManager {
     public static void drawGrid(float x, float y, float width) {
         float cellSize = width / GameConstants.GRID_SIZE;
 
-        GameApp.addTextureAtlas("tile", "textures/atlases/gridTile.atlas");
+        GameApp.addTexture("Grid Tile","textures/tile.png");
         for (int gx = 0; gx < GameConstants.GRID_SIZE; gx++) {
             for (int gy = 0; gy < GameConstants.GRID_SIZE; gy++) {
                 float cellX = x + gx * cellSize;
                 float cellY = y + gy * cellSize;
 
-                GameApp.drawAtlasRegion("tile", "gridTile", cellX, cellY, cellSize, cellSize);
+                GameApp.drawTexture("Grid Tile", cellX, cellY, cellSize, cellSize);
             }
         }
     }
