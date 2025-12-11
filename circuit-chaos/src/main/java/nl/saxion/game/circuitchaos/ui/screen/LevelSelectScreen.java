@@ -25,7 +25,7 @@ public class LevelSelectScreen extends ScalableGameScreen {
     public void show() {
         enableHUD((int)getWorldWidth(), (int)getWorldHeight());
 
-        GameApp.addTexture("background1", "textures/backgrounds/main menu.png");
+        GameApp.addTexture("background1", "textures/backgrounds/house.png");
 
         startX = getWorldWidth() / 2f - btnW / 2f;
         startY = getWorldHeight() / 2f - 200;

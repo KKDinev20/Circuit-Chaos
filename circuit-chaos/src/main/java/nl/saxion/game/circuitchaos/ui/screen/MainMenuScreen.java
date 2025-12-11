@@ -53,13 +53,6 @@ public class MainMenuScreen extends ScalableGameScreen {
         GameApp.endSpriteRendering();
 
         GameApp.startSpriteRendering();
-        GameApp.drawTextCentered(
-                "basic_large",
-                "Circuit Chaos",
-                getWorldWidth() / 2f,
-                getWorldHeight() - 150f,
-                "amber-500"
-        );
         GameApp.endSpriteRendering();
 
         if (GameApp.isButtonJustPressed(Input.Buttons.LEFT)) {
