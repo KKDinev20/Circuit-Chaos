@@ -8,13 +8,10 @@ import nl.saxion.game.circuitchaos.util.GameConstants;
 import nl.saxion.gameapp.GameApp;
 import nl.saxion.gameapp.screens.ScalableGameScreen;
 
-import javax.sound.sampled.Port;
-import java.util.ArrayList;
-import java.util.List;
-
 public class YourGameScreen extends ScalableGameScreen {
     private Box centeredBox = new Box();
     private ToolManager toolManager;
+    private LevelManager levelManager;
     private Tool currentlyDragging = null;
     private boolean showQuitMenu = false;
 
@@ -24,21 +21,16 @@ public class YourGameScreen extends ScalableGameScreen {
     private float panelX, panelY, panelW, panelH;
     private boolean yesHover = false, noHover = false;
 
-    // NEW: Store bulbs
-    private List<Bulb> bulbs = new ArrayList<>();
-    private List<WirePort> ports = new ArrayList<>();
-    private boolean bulbsInitialized = false;
-
     public YourGameScreen() {
         super(1280, 720);
         toolManager = new ToolManager();
+        levelManager = new LevelManager();
     }
 
     @Override
     public void show() {
         enableHUD((int) getWorldWidth(), (int) getWorldHeight());
         ElementManager.addTextures(); // Load bulb textures
-
         GameApp.addTexture("level1", "textures/backgrounds/house.png");
 
         centeredBox.width = GameConstants.GRID_WIDTH;
@@ -70,13 +62,6 @@ public class YourGameScreen extends ScalableGameScreen {
         float gridX = centerX - centeredBox.width / 2;
         float gridY = centerY - centeredBox.height / 2;
 
-
-        // NEW: Create bulbs once
-        if (!bulbsInitialized) {
-            createBulbs(gridX, gridY, centeredBox.width);
-            bulbsInitialized = true;
-        }
-
         if (GameApp.isKeyJustPressed(Input.Keys.ESCAPE)) {
             showQuitMenu = !showQuitMenu;
         }
@@ -89,71 +74,54 @@ public class YourGameScreen extends ScalableGameScreen {
             return;
         }
 
+        // Initialize tools if not done
         if (toolManager.getToolboxTools()[0] == null) {
             toolManager.initializeTools(gridX, gridY);
         }
+
+        // Initialize level if not done
+        levelManager.initializeLevel(gridX, gridY, centeredBox.width);
 
         handleInput(gridX, gridY);
 
         GameApp.clearScreen(Color.BLACK);
 
-        // NEW: Update bulbs
-        updateBulbs();
+        // Update level elements (bulbs animation)
+        levelManager.updateElements();
 
-        // 1. Draw grid and hearts (textures)
+        // --- START SPRITE RENDERING (textures) ---
         GameApp.startSpriteRendering();
-        GameApp.drawTexture("level1", 0,0, getWorldWidth(),getWorldHeight());
+
+        // Draw background
+        GameApp.drawTexture("level1", 0, 0, getWorldWidth(), getWorldHeight());
+
+        // Draw grid
         GridManager.drawGrid(gridX, gridY, centeredBox.width);
-        drawHintsButton(gridX, gridY);
+
+        // Draw hearts
         drawHearts(gridX, gridY);
 
-        // NEW: Draw bulbs (textures)
-        for (Bulb bulb : bulbs) {
-            bulb.draw();
-        }
+        // Draw hints button (as texture)
+        drawHintsButton(gridX, gridY);
 
-        for (WirePort port : ports) {
-            port.draw();
-        }
-
-
+        // Draw level elements (bulbs and ports)
+        levelManager.drawElements();
 
         GameApp.endSpriteRendering();
+        // --- END SPRITE RENDERING ---
 
-        // 2. Draw UI shapes
+        // --- START SHAPE RENDERING (rectangles, lines) ---
         GameApp.startShapeRenderingFilled();
+
+        // Draw UI shapes
         drawToolBoxes(gridX, gridY);
         drawTimer(gridX, gridY);
+
+        // Draw tools
         toolManager.drawTools();
+
         GameApp.endShapeRendering();
-    }
-
-    // NEW: Create two bulbs in the grid
-    private void createBulbs(float gridX, float gridY, float gridWidth) {
-        float cellSize = gridWidth / GameConstants.GRID_SIZE;
-
-        // Bulb 1: At grid position (1, 1) - powered (lit)
-        Bulb bulb1 = new Bulb(gridX + (1 * cellSize), gridY + (1 * cellSize), cellSize);
-        bulb1.hasPower = true; // This bulb is lit
-        bulb1.update(); // Update to set isLit = true
-
-        // Bulb 2: At grid position (4, 4) - not powered (unlit)
-        Bulb bulb2 = new Bulb(gridX + (4 * cellSize), gridY + (4 * cellSize), cellSize);
-        bulb2.hasPower = false; // This bulb is unlit
-        bulb2.update(); // Update to set isLit = false
-
-        WirePort port1 = new WirePort(gridX + (3 * cellSize), gridY + (3 * cellSize), cellSize);
-
-        bulbs.add(bulb1);
-        bulbs.add(bulb2);
-        ports.add(port1);
-    }
-
-    // NEW: Update bulbs
-    private void updateBulbs() {
-        for (Bulb bulb : bulbs) {
-            bulb.update();
-        }
+        // --- END SHAPE RENDERING ---
     }
 
     private void handleInput(float gridX, float gridY) {
@@ -170,11 +138,25 @@ public class YourGameScreen extends ScalableGameScreen {
         }
 
         if (!GameApp.isButtonPressed(Input.Buttons.LEFT) && currentlyDragging != null) {
-            if (mouseX > gridX && mouseX < gridX + centeredBox.width && mouseY > gridY && mouseY < gridY + centeredBox.height) {
+            if (mouseX > gridX && mouseX < gridX + centeredBox.width &&
+                    mouseY > gridY && mouseY < gridY + centeredBox.height) {
 
-                boolean placementSuccessful = toolManager.placeTool(currentlyDragging, gridX, gridY, mouseX, mouseY);
-                if (!placementSuccessful) {
+                // Calculate grid cell
+                float cellSize = centeredBox.width / GameConstants.GRID_SIZE;
+                int gridCellX = (int) ((mouseX - gridX) / cellSize);
+                int gridCellY = (int) ((mouseY - gridY) / cellSize);
+
+                // Check if cell is occupied by level element
+                if (levelManager.isCellOccupied(gridCellX, gridCellY, gridX, gridY, cellSize)) {
+                    // Can't place tool here - cell has bulb/port
                     toolManager.returnToolToToolbox(currentlyDragging);
+                } else {
+                    // Try to place tool
+                    boolean placementSuccessful = toolManager.placeTool(
+                            currentlyDragging, gridX, gridY, mouseX, mouseY);
+                    if (!placementSuccessful) {
+                        toolManager.returnToolToToolbox(currentlyDragging);
+                    }
                 }
             } else {
                 toolManager.returnToolToToolbox(currentlyDragging);
@@ -201,8 +183,8 @@ public class YourGameScreen extends ScalableGameScreen {
         float buttonX = gridX + centeredBox.width - buttonWidth;
         float buttonY = gridY + 30f + centeredBox.height;
 
-        GameApp.addTexture("hint","textures/hint.png");
-        GameApp.drawTexture("hint", buttonX,buttonY,buttonWidth,buttonHeight);
+        GameApp.addTexture("hint", "textures/hint.png");
+        GameApp.drawTexture("hint", buttonX, buttonY, buttonWidth, buttonHeight);
     }
 
     private void drawToolBoxes(float gridX, float gridY) {

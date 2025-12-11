@@ -1,16 +1,18 @@
 // Generator.java - Simple with texture
 package nl.saxion.game.circuitchaos.entities;
 
+import nl.saxion.game.circuitchaos.entities.enums.PortColor;
 import nl.saxion.gameapp.GameApp;
 
 public class WirePort extends CircuitElement {
-
-    public WirePort(float x, float y, float size) {
+    private PortColor color;
+    public WirePort(float x, float y, float size, PortColor color) {
         super(x, y, size, size);
         hasPower = true;
         for (int i = 0; i < 4; i++) {
             ports[i] = true;
         }
+        this.color = color;
     }
 
     public WirePort(float x, float y, float size,
@@ -30,12 +32,14 @@ public class WirePort extends CircuitElement {
 
     @Override
     public void draw() {
+        String textureName = color.getTextureName();
         float portSize = Math.min(positionWidth, positionHeight) * 0.9f; // example resize 130% - a bit bigger than the tile
+
 
         float centerX = positionX + (positionWidth - portSize) / 2;
         float centerY = positionY + (positionHeight - portSize) / 2;
 
-        GameApp.drawTexture("red port", centerX, centerY, portSize, portSize);
+        GameApp.drawTexture(textureName, centerX, centerY, portSize, portSize);
     }
 
 }

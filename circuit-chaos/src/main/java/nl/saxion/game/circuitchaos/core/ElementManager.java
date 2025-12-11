@@ -15,6 +15,7 @@ public class ElementManager {
 
         // Load wire port textures
         GameApp.addTexture("red port", "textures/entities/red wireport.png");
+        GameApp.addTexture("blue port", "textures/entities/blue wireport.png");
 
 
 
