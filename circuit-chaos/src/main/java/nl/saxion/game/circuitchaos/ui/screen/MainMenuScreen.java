@@ -18,7 +18,7 @@ public class MainMenuScreen extends ScalableGameScreen {
     public void show() {
         enableHUD((int)getWorldWidth(), (int)getWorldHeight());
         // Load assets
-        GameApp.addFont("basic_large", "fonts/basic.ttf", 75);
+        GameApp.addFont("buttonFont", "fonts/Cause-Medium.ttf", 40);
         GameApp.addTexture("background", "textures/backgrounds/main menu.png");
 
         playY = getWorldHeight() / 2f;
@@ -90,8 +90,8 @@ public class MainMenuScreen extends ScalableGameScreen {
     }
 
     private boolean isTextHovered(String text, float centerY) {
-        float textWidth = GameApp.getTextWidth("basic_large", text);
-        float textHeight = GameApp.getTextHeight("basic_large", text);
+        float textWidth = GameApp.getTextWidth("buttonFont", text);
+        float textHeight = GameApp.getTextHeight("buttonFont", text);
 
         float centerX = getWorldWidth() / 2f;
 
@@ -110,14 +110,14 @@ public class MainMenuScreen extends ScalableGameScreen {
         float centerX = getWorldWidth() / 2f;
 
         if (isHovered) {
-            GameApp.drawText("basic_large", "<", centerX + GameApp.getTextWidth("basic_large", text) / 2 + 25, centerY - 20, "white");
+            GameApp.drawText("buttonFont", "<", centerX + GameApp.getTextWidth("buttonFont", text) / 2 + 25, centerY - 20, "white");
         }
 
-        GameApp.drawTextCentered("basic_large", text, centerX, centerY, "white");
+        GameApp.drawTextCentered("buttonFont", text, centerX, centerY, "white");
 
         if (isHovered) {
-            float width = GameApp.getTextWidth("basic_large", text);
-            float height = GameApp.getTextHeight("basic_large", text);
+            float width = GameApp.getTextWidth("buttonFont", text);
+            float height = GameApp.getTextHeight("buttonFont", text);
 
             GameApp.endSpriteRendering();
 

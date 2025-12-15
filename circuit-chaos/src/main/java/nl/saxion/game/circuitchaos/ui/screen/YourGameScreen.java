@@ -35,7 +35,8 @@ public class YourGameScreen extends ScalableGameScreen {
 
     @Override
     public void show() {
-        GameApp.addFont("pixel_timer", "fonts/PressStart2P-Regular.ttf", 40);
+        GameApp.addFont("pixel_timer", "fonts/PressStart2P-Regular.ttf", 20);
+        GameApp.addFont("levelSelectFont", "fonts/Cause-Medium.ttf", 40);
 
         timeLeft = 120f;
         timeUp = false;
@@ -329,6 +330,11 @@ public class YourGameScreen extends ScalableGameScreen {
 
         noHover = (mx >= btnNoX && mx <= btnNoX + btnNoW && my >= btnNoY && my <= btnNoY + btnNoH);
 
+        // background of level stays
+        GameApp.startSpriteRendering();
+        GameApp.drawTexture("level1", 0, 0, getWorldWidth(), getWorldHeight());
+        GameApp.endSpriteRendering();
+
         // ==== DRAW PANEL ====
         GameApp.startShapeRenderingFilled();
         GameApp.drawRect(panelX, panelY, panelW, panelH, "gray-800");
@@ -347,11 +353,13 @@ public class YourGameScreen extends ScalableGameScreen {
         // ==== TEXT ====
         GameApp.startSpriteRendering();
 
-        GameApp.drawTextCentered("basic_large", "Are you sure you want to quit?", panelX + panelW / 2f, panelY + panelH - 60f, "white");
+        GameApp.drawTextCentered("levelSelectFont", "Are you sure you", panelX + panelW / 2f, panelY + panelH - 60f, "white");
 
-        GameApp.drawTextCentered("basic_large", "Yes", btnYesX + btnYesW / 2f, btnYesY + btnYesH / 2f, "white");
+        GameApp.drawTextCentered("levelSelectFont", "want to quit?", panelX + panelW / 2f, panelY + panelH - 130f, "white");
 
-        GameApp.drawTextCentered("basic_large", "No", btnNoX + btnNoW / 2f, btnNoY + btnNoH / 2f, "white");
+        GameApp.drawTextCentered("buttonFont", "Yes", btnYesX + btnYesW / 2f, btnYesY + btnYesH / 2f, "white");
+
+        GameApp.drawTextCentered("buttonFont", "No", btnNoX + btnNoW / 2f, btnNoY + btnNoH / 2f, "white");
 
         GameApp.endSpriteRendering();
     }
@@ -365,7 +373,8 @@ public class YourGameScreen extends ScalableGameScreen {
 
         // YES
         if (mx >= btnYesX && mx <= btnYesX + btnYesW && my >= btnYesY && my <= btnYesY + btnYesH) {
-            GameApp.quit();
+            GameApp.switchScreen("MainMenuScreen");
+            showQuitMenu = false;
             return;
         }
 

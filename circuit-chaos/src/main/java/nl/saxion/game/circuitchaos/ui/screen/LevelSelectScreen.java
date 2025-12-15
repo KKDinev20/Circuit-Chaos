@@ -26,8 +26,14 @@ public class LevelSelectScreen extends ScalableGameScreen {
     public void show() {
         enableHUD((int)getWorldWidth(), (int)getWorldHeight());
 
-        GameApp.addFont("basic_large", "fonts/basic.ttf", 75);
+        GameApp.addFont("levelSelectFont", "fonts/Cause-Medium.ttf", 50);
+        GameApp.addFont("buttonFont", "fonts/Cause-Medium.ttf", 40);
         GameApp.addTexture("background1", "textures/backgrounds/house.png");
+        GameApp.addTexture("background2", "textures/backgrounds/Supermarket.png");
+        GameApp.addTexture("background3", "textures/backgrounds/coffee bar.png");
+        GameApp.addTexture("background4", "textures/backgrounds/Mall.png");
+        GameApp.addTexture("background5", "textures/backgrounds/electronics repair.png");
+        GameApp.addTexture("background6", "textures/backgrounds/City power station.png");
 
         startX = getWorldWidth() / 2f - btnW / 2f;
         startY = getWorldHeight() / 2f - 200;
@@ -52,7 +58,7 @@ public class LevelSelectScreen extends ScalableGameScreen {
 
         // Background
         GameApp.startSpriteRendering();
-        GameApp.drawTexture("background1", 0, 0, getWorldWidth(), getWorldHeight());
+        setBackground(currentLevel);
         GameApp.endSpriteRendering();
 
         //-----------------------------
@@ -61,15 +67,15 @@ public class LevelSelectScreen extends ScalableGameScreen {
         GameApp.startSpriteRendering();
 
         GameApp.drawTextCentered(
-                "basic_large",
+                "levelSelectFont",
                 "Level " + currentLevel,
                 getWorldWidth() / 2f,
-                getWorldHeight() / 2f + 150,
+                getWorldHeight() - 100,
                 "white"
         );
 
         GameApp.drawTextCentered(
-                "basic_large",
+                "levelSelectFont",
                 "<        >",
                 getWorldWidth() / 2f,
                 getWorldHeight() / 2f + 40,
@@ -90,7 +96,7 @@ public class LevelSelectScreen extends ScalableGameScreen {
         }
 
         GameApp.startSpriteRendering();
-        GameApp.drawTextCentered("basic_large", "Start",
+        GameApp.drawTextCentered("buttonFont", "Start",
                 startX + btnW / 2f, startY + btnH / 2f, "white");
         GameApp.endSpriteRendering();
 
@@ -106,12 +112,35 @@ public class LevelSelectScreen extends ScalableGameScreen {
         }
 
         GameApp.startSpriteRendering();
-        GameApp.drawTextCentered("basic_large", "Back",
+        GameApp.drawTextCentered("buttonFont", "Back",
                 backX + btnW / 2f, backY + btnH / 2f, "white");
         GameApp.endSpriteRendering();
 
         handleInput();
         renderUI();
+    }
+
+    private void setBackground(int currentLevel) {
+        switch (currentLevel) {
+            case 1:
+                GameApp.drawTexture("background1", 0, 0, getWorldWidth(), getWorldHeight());
+                break;
+            case 2:
+                GameApp.drawTexture("background2", 0, 0, getWorldWidth(), getWorldHeight());
+                break;
+            case 3:
+                GameApp.drawTexture("background3", 0, 0, getWorldWidth(), getWorldHeight());
+                break;
+            case 4:
+                GameApp.drawTexture("background4", 0, 0, getWorldWidth(), getWorldHeight());
+                break;
+            case 5:
+                GameApp.drawTexture("background5", 0, 0, getWorldWidth(), getWorldHeight());
+                break;
+            case 6:
+                GameApp.drawTexture("background6", 0, 0, getWorldWidth(), getWorldHeight());
+                break;
+        }
     }
 
     private void handleInput() {
