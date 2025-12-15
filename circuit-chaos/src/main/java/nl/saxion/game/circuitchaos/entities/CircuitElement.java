@@ -1,5 +1,7 @@
 package nl.saxion.game.circuitchaos.entities;
 
+import nl.saxion.game.circuitchaos.entities.enums.PortColor;
+
 public abstract class CircuitElement {
     public float positionX;
     public float positionY;
@@ -9,6 +11,10 @@ public abstract class CircuitElement {
 
     public boolean[] ports = new boolean[4]; // N, E, S, W
     public boolean hasPower;
+    public boolean isSelected = false;
+
+    public PortColor color;
+
 
     public CircuitElement(float x, float y, float width, float height) {
         positionX = x;

@@ -6,13 +6,12 @@ import nl.saxion.game.circuitchaos.util.GameConstants;
 import nl.saxion.gameapp.GameApp;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ToolManager {
     // Array of tools available in the toolbox
     private Tool[] toolboxTools;
     // List of tools that have been placed on the grid
-    private List<Tool> placedTools;
+    private ArrayList<Tool> placedTools;
     // Store original positions for returning tools to toolbox
     private float[] originalToolX;
     private float[] originalToolY;
@@ -57,7 +56,7 @@ public class ToolManager {
 
     public boolean isCellOccupied(float gridX, float gridY, float cellX, float cellY) {
         for (Tool placedTool : placedTools) {
-               if (Math.abs(placedTool.x - cellX) < 1f && Math.abs(placedTool.y - cellY) < 1f) {
+            if (Math.abs(placedTool.x - cellX) < 1f && Math.abs(placedTool.y - cellY) < 1f) {
                 return true;
             }
         }
@@ -125,6 +124,8 @@ public class ToolManager {
     }
 
     // Getter methods for accessing the tool arrays
-    public Tool[] getToolboxTools() { return toolboxTools; }
+    public Tool[] getToolboxTools() {
+        return toolboxTools;
+    }
     //public List<Tool> getPlacedTools() { return placedTools; }
 }

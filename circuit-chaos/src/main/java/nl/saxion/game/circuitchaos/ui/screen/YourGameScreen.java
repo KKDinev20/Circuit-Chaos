@@ -12,6 +12,7 @@ public class YourGameScreen extends ScalableGameScreen {
     private Box centeredBox = new Box();
     private ToolManager toolManager;
     private LevelManager levelManager;
+    private TileConnectionManager connectionManager;
     private Tool currentlyDragging = null;
     private boolean showQuitMenu = false;
 
@@ -25,6 +26,7 @@ public class YourGameScreen extends ScalableGameScreen {
         super(1280, 720);
         toolManager = new ToolManager();
         levelManager = new LevelManager();
+        connectionManager = new TileConnectionManager();
     }
 
     @Override
@@ -88,6 +90,7 @@ public class YourGameScreen extends ScalableGameScreen {
 
         // Update level elements (bulbs animation)
         levelManager.updateElements();
+        connectionManager.updateWirePaths();
 
         // --- START SPRITE RENDERING (textures) ---
         GameApp.startSpriteRendering();
@@ -115,7 +118,8 @@ public class YourGameScreen extends ScalableGameScreen {
 
         // Draw UI shapes
         drawToolBoxes(gridX, gridY);
-        drawTimer(gridX, gridY);
+        connectionManager.drawWirePaths();
+        //drawTimer(gridX, gridY);
 
         // Draw tools
         toolManager.drawTools();
@@ -127,9 +131,75 @@ public class YourGameScreen extends ScalableGameScreen {
     private void handleInput(float gridX, float gridY) {
         float mouseX = getMouseX();
         float mouseY = getMouseY();
+        float cellSize = centeredBox.width / GameConstants.GRID_SIZE;
 
         if (GameApp.isButtonJustPressed(Input.Buttons.LEFT)) {
-            currentlyDragging = toolManager.getToolAtPosition(mouseX, mouseY);
+
+            // 1. Check if clicked on circuit element
+            boolean clickedElement = false;
+
+            // Check bulbs
+            for (Bulb bulb : levelManager.getBulbs()) {
+                if (bulb.contains(mouseX, mouseY)) {
+                    if (connectionManager.isBuilding()) {
+                        // Finish connection - NO GRID PARAMETERS NEEDED
+                        connectionManager.finishBuilding(bulb);
+                    } else {
+                        // Start new connection - ADD GRID PARAMETERS
+                        connectionManager.startBuilding(bulb, gridX, gridY, cellSize);
+                    }
+                    clickedElement = true;
+                    break;
+                }
+            }
+
+            // Check ports
+            if (!clickedElement) {
+                for (WirePort port : levelManager.getPorts()) {
+                    if (port.contains(mouseX, mouseY)) {
+                        if (connectionManager.isBuilding()) {
+                            // Finish connection - NO GRID PARAMETERS
+                            connectionManager.finishBuilding(port);
+                        } else {
+                            // Start new connection - ADD GRID PARAMETERS
+                            connectionManager.startBuilding(port, gridX, gridY, cellSize);
+                        }
+                        clickedElement = true;
+                        break;
+                    }
+                }
+            }
+
+            // 2. If clicked on grid tile (and we're building)
+            if (!clickedElement && connectionManager.isBuilding() &&
+                    mouseX > gridX && mouseX < gridX + centeredBox.width &&
+                    mouseY > gridY && mouseY < gridY + centeredBox.height) {
+
+                // Get grid coordinates
+                int gridCellX = (int) ((mouseX - gridX) / cellSize);
+                int gridCellY = (int) ((mouseY - gridY) / cellSize);
+
+                // Get tile center
+                float tileCenterX = gridX + gridCellX * cellSize + cellSize / 2;
+                float tileCenterY = gridY + gridCellY * cellSize + cellSize / 2;
+
+                // Add to path (checks adjacency automatically)
+                boolean added = connectionManager.addTileToPath(gridCellX, gridCellY, tileCenterX, tileCenterY);
+                if (!added) {
+                    System.out.println("Tile not adjacent to path!");
+                }
+            }
+
+            // 3. If not wiring, check tools
+            if (!clickedElement && !connectionManager.isBuilding()) {
+                currentlyDragging = toolManager.getToolAtPosition(mouseX, mouseY);
+            }
+        }
+
+        // Cancel with right click or ESC
+        if (GameApp.isButtonJustPressed(Input.Buttons.RIGHT) ||
+                GameApp.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            connectionManager.cancelBuilding();
         }
 
         if (GameApp.isButtonPressed(Input.Buttons.LEFT) && currentlyDragging != null) {
@@ -142,7 +212,6 @@ public class YourGameScreen extends ScalableGameScreen {
                     mouseY > gridY && mouseY < gridY + centeredBox.height) {
 
                 // Calculate grid cell
-                float cellSize = centeredBox.width / GameConstants.GRID_SIZE;
                 int gridCellX = (int) ((mouseX - gridX) / cellSize);
                 int gridCellY = (int) ((mouseY - gridY) / cellSize);
 
@@ -167,7 +236,7 @@ public class YourGameScreen extends ScalableGameScreen {
 
     private void drawHearts(float gridX, float gridY) {
         float heartsX = gridX;
-        float heartsY = gridY + GameConstants.GRID_HEARTS_SPACING + GameConstants.GRID_HEIGHT;
+        float heartsY = gridY + GameConstants.GRID_HEARTS_SPACING + GameConstants.GRID_HEIGHT - 25;
 
         GameApp.addTextureAtlas("heart", "textures/atlases/hearts.atlas");
         for (int i = 0; i < GameConstants.HEARTS_COUNT; i++) {
@@ -181,7 +250,7 @@ public class YourGameScreen extends ScalableGameScreen {
         float buttonWidth = 120f;
         float buttonHeight = 50f;
         float buttonX = gridX + centeredBox.width - buttonWidth;
-        float buttonY = gridY + 30f + centeredBox.height;
+        float buttonY = gridY + 10f + centeredBox.height;
 
         GameApp.addTexture("hint", "textures/hint.png");
         GameApp.drawTexture("hint", buttonX, buttonY, buttonWidth, buttonHeight);
@@ -197,13 +266,13 @@ public class YourGameScreen extends ScalableGameScreen {
         }
     }
 
-    private void drawTimer(float gridX, float gridY) {
+    /*private void drawTimer(float gridX, float gridY) {
         float timerHeight = 10f;
         float timerY = gridY + centeredBox.height + 8f;
 
         GameApp.drawRect(gridX, timerY, centeredBox.width, timerHeight, Color.GREEN);
         GameApp.drawRect(gridX, timerY, centeredBox.width - 80f, timerHeight, Color.RED);
-    }
+    }*/
 
     private void renderQuitMenu() {
         float[] m = windowToWorldMouse();
@@ -284,5 +353,6 @@ public class YourGameScreen extends ScalableGameScreen {
     @Override
     public void hide() {
         // Cleanup if needed
+        GameApp.disposeUIElements();
     }
 }

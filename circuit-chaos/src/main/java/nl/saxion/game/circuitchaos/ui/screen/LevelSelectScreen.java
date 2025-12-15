@@ -1,6 +1,7 @@
 package nl.saxion.game.circuitchaos.ui.screen;
 
 import com.badlogic.gdx.Input;
+import nl.saxion.game.circuitchaos.core.LevelManager;
 import nl.saxion.game.circuitchaos.levels.Level;
 import nl.saxion.gameapp.GameApp;
 import nl.saxion.gameapp.screens.ScalableGameScreen;
@@ -25,6 +26,7 @@ public class LevelSelectScreen extends ScalableGameScreen {
     public void show() {
         enableHUD((int)getWorldWidth(), (int)getWorldHeight());
 
+        GameApp.addFont("basic_large", "fonts/basic.ttf", 75);
         GameApp.addTexture("background1", "textures/backgrounds/house.png");
 
         startX = getWorldWidth() / 2f - btnW / 2f;
@@ -129,7 +131,9 @@ public class LevelSelectScreen extends ScalableGameScreen {
         if (GameApp.isButtonJustPressed(Input.Buttons.LEFT)) {
 
             if (startHover) {
-                GameApp.log("Start level " + currentLevel);
+                LevelManager.currentLevel = currentLevel;
+
+                // Switch screen
                 GameApp.switchScreen("YourGameScreen");
             }
 

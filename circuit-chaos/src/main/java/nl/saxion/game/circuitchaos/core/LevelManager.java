@@ -3,37 +3,42 @@ package nl.saxion.game.circuitchaos.core;
 import nl.saxion.game.circuitchaos.entities.*;
 import nl.saxion.game.circuitchaos.entities.enums.PortColor;
 import nl.saxion.game.circuitchaos.util.GameConstants;
+
 import java.util.ArrayList;
 
 public class LevelManager {
     private ArrayList<Bulb> bulbs = new ArrayList<>();
     private ArrayList<WirePort> ports = new ArrayList<>();
-    private int currentLevel = 1;
+    public static int currentLevel = 1;
     private boolean initialized = false;
 
     public void generateLevelOne(float gridX, float gridY, float cellSize) {
         bulbs.clear();
         ports.clear();
 
-        // Bulb 1: At grid position (1, 1) - powered (lit)
+        // Bulb 1: At grid position (2, 4) - powered (lit)
         Bulb bulb1 = new Bulb(gridX + (2 * cellSize), gridY + (4 * cellSize), cellSize);
         bulb1.hasPower = true;
         bulb1.update();
 
-        // Bulb 2: At grid position (4, 1) - not powered (unlit)
-        Bulb bulb2 = new Bulb(gridX + (3 * cellSize), gridY + (0 * cellSize), cellSize);
+        // Bulb 2: At grid position (3, 0) - not powered (unlit)
+        Bulb bulb2 = new Bulb(gridX + (3 * cellSize), gridY, cellSize);
         bulb2.hasPower = false;
         bulb2.update();
 
+        // Port 1: position (0, 2)
         WirePort port1 = new WirePort(gridX, gridY + (2 * cellSize), cellSize, PortColor.RED);
         port1.update();
 
+        // Port 2: position (2,0)
         WirePort port2 = new WirePort(gridX + (2 * cellSize), gridY, cellSize, PortColor.RED);
         port2.update();
 
+        // Port 3: position (0, 5)
         WirePort port3 = new WirePort(gridX, gridY + (5 * cellSize), cellSize, PortColor.BLUE);
         port3.update();
 
+        // Port 4: position (4, 4)
         WirePort port4 = new WirePort(gridX + (4 * cellSize), gridY + (4 * cellSize), cellSize, PortColor.BLUE);
         port4.update();
 
@@ -45,11 +50,56 @@ public class LevelManager {
         ports.add(port4);
     }
 
+    public void generateLevelTwo(float gridX, float gridY, float cellSize) {
+        bulbs.clear();
+        ports.clear();
+
+        // Port 1A
+        WirePort port1A = new WirePort(gridX, gridY + (5 * cellSize), cellSize, PortColor.BLUE);
+        port1A.update();
+        ports.add(port1A);
+
+        // Port 1B
+        WirePort port1B = new WirePort(gridX + (2 * cellSize), gridY + (2 * cellSize), cellSize, PortColor.BLUE);
+        port1B.update();
+        ports.add(port1B);
+
+        // Port 2A
+        WirePort port2A = new WirePort(gridX, gridY, cellSize, PortColor.GREEN);
+        port2A.update();
+        ports.add(port2A);
+
+        // Port 2B
+        WirePort port2B = new WirePort(gridX + (2 * cellSize), gridY + cellSize, cellSize, PortColor.GREEN);
+        port2B.update();
+        ports.add(port2B);
+
+        // Port 3A
+        WirePort port3A = new WirePort(gridX + (5 * cellSize), gridY + (3 * cellSize), cellSize, PortColor.RED);
+        port3A.update();
+        ports.add(port3A);
+
+        // Port 3B
+        WirePort port3B = new WirePort(gridX + (4 * cellSize), gridY + (5 * cellSize), cellSize, PortColor.RED);
+        port3B.update();
+        ports.add(port3B);
+    }
+
     // Call this from YourGameScreen.render()
     public void initializeLevel(float gridX, float gridY, float gridWidth) {
         if (!initialized) {
             float cellSize = gridWidth / GameConstants.GRID_SIZE;
-            generateLevelOne(gridX, gridY, cellSize);
+
+            switch(currentLevel) {
+                case 1:
+                    generateLevelOne(gridX, gridY, cellSize);
+                    break;
+                case 2:
+                    generateLevelTwo(gridX, gridY, cellSize);
+                    break;
+                default:
+                    generateLevelOne(gridX, gridY, cellSize); // Default
+            }
             initialized = true;
         }
     }
@@ -71,13 +121,40 @@ public class LevelManager {
 
     // For checking if cells are occupied
     public boolean isCellOccupied(int gridX, int gridY, float actualGridX, float actualGridY, float cellSize) {
+        float cellScreenX = actualGridX + (gridX * cellSize);
+        float cellScreenY = actualGridY + (gridY * cellSize);
+
         for (Bulb bulb : bulbs) {
-            int bulbGridX = (int)((bulb.positionX - actualGridX) / cellSize);
-            int bulbGridY = (int)((bulb.positionY - actualGridY) / cellSize);
-            if (bulbGridX == gridX && bulbGridY == gridY) {
+            if (rectanglesOverlap(cellScreenX, cellScreenY, cellSize, cellSize,
+                    bulb.positionX, bulb.positionY, bulb.positionWidth, bulb.positionHeight)) {
                 return true;
             }
         }
+
+        for (WirePort port : ports) {
+            if (rectanglesOverlap(cellScreenX, cellScreenY, cellSize, cellSize,
+                    port.positionX, port.positionY, port.positionWidth, port.positionHeight)) {
+                return true;
+            }
+        }
+
         return false;
     }
+
+    private boolean rectanglesOverlap(float x1, float y1, float w1, float h1,
+                                      float x2, float y2, float w2, float h2) {
+        return x1 < x2 + w2 &&
+                x1 + w1 > x2 &&
+                y1 < y2 + h2 &&
+                y1 + h1 > y2;
+    }
+
+    public ArrayList<Bulb> getBulbs() {
+        return bulbs;
+    }
+
+    public ArrayList<WirePort> getPorts() {
+        return ports;
+    }
+
 }

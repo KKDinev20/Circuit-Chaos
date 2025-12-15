@@ -16,9 +16,11 @@ public class ElementManager {
         // Load wire port textures
         GameApp.addTexture("red port", "textures/entities/red wireport.png");
         GameApp.addTexture("blue port", "textures/entities/blue wireport.png");
+        GameApp.addTexture("green port", "textures/entities/green wireport.png");
 
-
-
+        GameApp.addTexture("red wire extension", "textures/entities/wire extension red.png");
+        GameApp.addTexture("blue wire extension", "textures/entities/wire extension blue.png");
+        GameApp.addTexture("green wire extension", "textures/entities/wire extension green.png");
         loaded = true;
     }
 }
