@@ -15,6 +15,10 @@ public class YourGameScreen extends ScalableGameScreen {
     private TileConnectionManager connectionManager;
     private Tool currentlyDragging = null;
     private boolean showQuitMenu = false;
+    // TIMER
+    private float timeLeft = 120f;   // 2 minutes
+    private boolean timeUp = false;
+
 
     // UI positions for quit menu
     private float btnYesX, btnYesY, btnYesW, btnYesH;
@@ -31,6 +35,11 @@ public class YourGameScreen extends ScalableGameScreen {
 
     @Override
     public void show() {
+        GameApp.addFont("pixel_timer", "fonts/PressStart2P-Regular.ttf", 40);
+
+        timeLeft = 120f;
+        timeUp = false;
+
         enableHUD((int) getWorldWidth(), (int) getWorldHeight());
         ElementManager.addTextures(); // Load bulb textures
         GameApp.addTexture("level1", "textures/backgrounds/house.png");
@@ -53,11 +62,23 @@ public class YourGameScreen extends ScalableGameScreen {
         btnNoH = 80;
         btnNoX = panelX + panelW - btnNoW - 60;
         btnNoY = panelY + 40;
+
     }
 
     @Override
     public void render(float delta) {
         super.render(delta);
+
+        if (!timeUp && !showQuitMenu) {
+            timeLeft -= delta;
+
+            if (timeLeft <= 0) {
+                timeLeft = 0;
+                timeUp = true;
+                GameApp.switchScreen("MainMenuScreen");
+                return; // stops the rest of render this frame
+            }
+        }
 
         float centerX = getWorldWidth() / 2;
         float centerY = getWorldHeight() / 2;
@@ -103,6 +124,9 @@ public class YourGameScreen extends ScalableGameScreen {
 
         // Draw hearts
         drawHearts(gridX, gridY);
+
+        // Draw timer (middle top)
+        drawTimer(gridX, gridY);
 
         // Draw hints button (as texture)
         drawHintsButton(gridX, gridY);
@@ -254,6 +278,27 @@ public class YourGameScreen extends ScalableGameScreen {
 
         GameApp.addTexture("hint", "textures/hint.png");
         GameApp.drawTexture("hint", buttonX, buttonY, buttonWidth, buttonHeight);
+    }
+    private void drawTimer(float gridX, float gridY) {
+        int totalSeconds = (int) timeLeft;
+        int minutes = totalSeconds / 60;
+        int seconds = totalSeconds % 60;
+
+        String timeText = String.format("%02d:%02d", minutes, seconds);
+
+        float x = getWorldWidth() / 2f;
+        float y = gridY + GameConstants.GRID_HEIGHT + GameConstants.GRID_HEARTS_SPACING + 60;
+
+        float border = 2f; // thickness of border (pixel look)
+
+        // color border
+        GameApp.drawTextCentered("pixel_timer", timeText, x - border, y, "black");
+        GameApp.drawTextCentered("pixel_timer", timeText, x + border, y, "black");
+        GameApp.drawTextCentered("pixel_timer", timeText, x, y - border, "black");
+        GameApp.drawTextCentered("pixel_timer", timeText, x, y + border, "black");
+
+        //text color
+        GameApp.drawTextCentered("pixel_timer", timeText, x, y, "orange-400");
     }
 
     private void drawToolBoxes(float gridX, float gridY) {
