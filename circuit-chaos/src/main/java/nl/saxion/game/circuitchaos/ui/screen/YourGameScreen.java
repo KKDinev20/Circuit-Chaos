@@ -289,7 +289,7 @@ public class YourGameScreen extends ScalableGameScreen {
         float x = getWorldWidth() / 2f;
         float y = gridY + GameConstants.GRID_HEIGHT + GameConstants.GRID_HEARTS_SPACING + 60;
 
-        float border = 2f; // thickness of border (pixel look)
+        float border = 4f; // thickness of border (pixel look)
 
         // color border
         GameApp.drawTextCentered("pixel_timer", timeText, x - border, y, "black");
