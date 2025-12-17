@@ -44,7 +44,4 @@ public class Bulb extends CircuitElement {
         GameApp.drawTexture(texture, centerX, centerY, textureWidth, textureHeight);
     }
 
-    public boolean isLit() {
-        return isLit;
-    }
 }

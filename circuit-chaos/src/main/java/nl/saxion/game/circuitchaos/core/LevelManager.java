@@ -18,11 +18,13 @@ public class LevelManager {
 
         // Bulb 1: At grid position (2, 4) - powered (lit)
         Bulb bulb1 = new Bulb(gridX + (2 * cellSize), gridY + (4 * cellSize), cellSize);
+        bulb1.color = PortColor.YELLOW;
         bulb1.hasPower = true;
         bulb1.update();
 
         // Bulb 2: At grid position (3, 0) - not powered (unlit)
         Bulb bulb2 = new Bulb(gridX + (3 * cellSize), gridY, cellSize);
+        bulb1.color = PortColor.YELLOW;
         bulb2.hasPower = false;
         bulb2.update();
 

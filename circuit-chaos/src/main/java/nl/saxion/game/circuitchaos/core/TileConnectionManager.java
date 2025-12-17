@@ -23,12 +23,9 @@ public class TileConnectionManager {
     private float gridY;
     private float cellSize;
 
-    // ==== PUBLIC API ====
-
     public void startBuilding(CircuitElement element, float gridX, float gridY, float cellSize) {
         if (element == null) return;
         if (connectedElements.contains(element)) return;
-        if (!element.hasPower) return;
 
         cancelBuilding();
 
@@ -80,7 +77,8 @@ public class TileConnectionManager {
         if (!isBuilding || endElement == null) return;
         if (endElement == selectedElement) return;
         if (connectedElements.contains(endElement)) return;
-        if (!canConnect(selectedElement, endElement)) return;
+        if (!canConnect(selectedElement, endElement)) return;  // ADD THIS BACK!
+        if (!selectedElement.hasPower() && !endElement.hasPower()) return;
 
         int[] endPos = getElementGridPos(endElement);
         GridCenterPoint last = currentPath.get(currentPath.size() - 1);
@@ -148,8 +146,6 @@ public class TileConnectionManager {
         return isBuilding;
     }
 
-    // ==== PRIVATE HELPERS ====
-
     private int[] getElementGridPos(CircuitElement e) {
         int gx = Math.round((e.positionX - gridX) / cellSize);
         int gy = Math.round((e.positionY - gridY) / cellSize);
@@ -171,11 +167,7 @@ public class TileConnectionManager {
     }
 
     private boolean canConnect(CircuitElement a, CircuitElement b) {
-        // Option 1: only same colors; null cannot connect
-        if (a.color == null || b.color == null) return false;
-        return a.color == b.color;
-        // If you want null to be wildcard instead, use:
-        // return a.color == null || b.color == null || a.color == b.color;
+        return a.color == null || b.color == null || a.color == b.color;
     }
 
     private String key(int x, int y) {
