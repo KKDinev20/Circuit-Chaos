@@ -21,6 +21,12 @@ public class ElementManager {
         GameApp.addTexture("red wire extension", "textures/entities/wire extension red.png");
         GameApp.addTexture("blue wire extension", "textures/entities/wire extension blue.png");
         GameApp.addTexture("green wire extension", "textures/entities/wire extension green.png");
+
+        GameApp.addTexture("red wire vertical", "textures/entities/wire extension red vertical.png");
+        GameApp.addTexture("blue wire vertical", "textures/entities/wire extension blue vertical.png");
+        GameApp.addTexture("green wire vertical", "textures/entities/wire extension green vertical.png");
+        //GameApp.addTexture("yellow wire vertical", "textures/entities/wire extension yellow vertical.png");
+
         loaded = true;
     }
 }

@@ -77,7 +77,7 @@ public class YourGameScreen extends ScalableGameScreen {
                 timeLeft = 0;
                 timeUp = true;
                 GameApp.switchScreen("MainMenuScreen");
-                return; // stops the rest of render this frame
+                return;
             }
         }
 
@@ -123,6 +123,12 @@ public class YourGameScreen extends ScalableGameScreen {
         // Draw grid
         GridManager.drawGrid(gridX, gridY, centeredBox.width);
 
+        // Draw level elements (bulbs and ports) FIRST
+        levelManager.drawElements();
+
+        // Draw wire textures ON TOP of elements
+        connectionManager.drawWirePathsTextures();
+
         // Draw hearts
         drawHearts(gridX, gridY);
 
@@ -132,9 +138,6 @@ public class YourGameScreen extends ScalableGameScreen {
         // Draw hints button (as texture)
         drawHintsButton(gridX, gridY);
 
-        // Draw level elements (bulbs and ports)
-        levelManager.drawElements();
-
         GameApp.endSpriteRendering();
         // --- END SPRITE RENDERING ---
 
@@ -143,8 +146,9 @@ public class YourGameScreen extends ScalableGameScreen {
 
         // Draw UI shapes
         drawToolBoxes(gridX, gridY);
-        connectionManager.drawWirePaths();
-        //drawTimer(gridX, gridY);
+
+        // Draw wire building preview (cyan tiles)
+        connectionManager.drawWirePathsPreview();
 
         // Draw tools
         toolManager.drawTools();
@@ -209,7 +213,7 @@ public class YourGameScreen extends ScalableGameScreen {
                 float tileCenterY = gridY + gridCellY * cellSize + cellSize / 2;
 
                 // Add to path (checks adjacency automatically)
-                boolean added = connectionManager.addTileToPath(gridCellX, gridCellY, tileCenterX, tileCenterY);
+                boolean added = connectionManager.addTileToPath(gridCellX, gridCellY);
                 if (!added) {
                     System.out.println("Tile not adjacent to path!");
                 }

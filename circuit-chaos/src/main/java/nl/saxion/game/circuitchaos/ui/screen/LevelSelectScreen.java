@@ -3,6 +3,7 @@ package nl.saxion.game.circuitchaos.ui.screen;
 import com.badlogic.gdx.Input;
 import nl.saxion.game.circuitchaos.core.LevelManager;
 import nl.saxion.game.circuitchaos.levels.Level;
+import nl.saxion.game.circuitchaos.util.HelperMethods;
 import nl.saxion.gameapp.GameApp;
 import nl.saxion.gameapp.screens.ScalableGameScreen;
 
@@ -45,7 +46,7 @@ public class LevelSelectScreen extends ScalableGameScreen {
     public void render(float delta) {
         super.render(delta);
 
-        float[] m = windowToWorldMouse();
+        float[] m = HelperMethods.windowToWorldMouse(getWorldWidth(), getWorldHeight());
         float mx = m[0];
         float my = m[1];
 
@@ -170,25 +171,6 @@ public class LevelSelectScreen extends ScalableGameScreen {
                 GameApp.switchScreen("MainMenuScreen");
             }
         }
-    }
-
-    private float[] windowToWorldMouse() {
-        float wx = GameApp.getMousePositionInWindowX();
-        float wy = GameApp.getMousePositionInWindowY();
-
-        int winW = com.badlogic.gdx.Gdx.graphics.getWidth();
-        int winH = com.badlogic.gdx.Gdx.graphics.getHeight();
-
-        float worldW = getWorldWidth();
-        float worldH = getWorldHeight();
-
-        float sx = worldW / winW;
-        float sy = worldH / winH;
-
-        float worldX = wx * sx;
-        float worldY = (winH - wy) * sy; // flip Y
-
-        return new float[]{worldX, worldY};
     }
 
     public void hide() {

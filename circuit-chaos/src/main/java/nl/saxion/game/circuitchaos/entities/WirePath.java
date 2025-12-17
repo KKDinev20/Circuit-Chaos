@@ -1,95 +1,134 @@
 package nl.saxion.game.circuitchaos.entities;
 
-import com.badlogic.gdx.graphics.Color;
 import nl.saxion.gameapp.GameApp;
+
 import java.util.ArrayList;
 
 public class WirePath {
+
     public CircuitElement start;
     public CircuitElement end;
     public ArrayList<GridCenterPoint> path;
     public boolean hasPower = false;
 
+    private final String horizontalTexture;
+    private final String verticalTexture;
+
     public WirePath(CircuitElement start, CircuitElement end, ArrayList<GridCenterPoint> path) {
         this.start = start;
         this.end = end;
-        this.path = new ArrayList<>(path);
+        this.path = path;
+        this.horizontalTexture = getWireTexture(start, false);
+        this.verticalTexture = getWireTexture(start, true);
+    }
+
+    private String getWireTexture(CircuitElement element, boolean vertical) {
+        if (element.color == null) return null;
+        return switch (element.color) {
+            case RED -> vertical ? "red wire vertical" : "red wire extension";
+            case BLUE -> vertical ? "blue wire vertical" : "blue wire extension";
+            case GREEN -> vertical ? "green wire vertical" : "green wire extension";
+            case YELLOW -> vertical ? "yellow wire vertical" : "yellow wire extension";
+        };
     }
 
     public void draw() {
-        Color wireColor = hasPower ? Color.YELLOW : Color.GRAY;
+        if (path.size() < 2) return;
 
-        // Get all wire segments (orthogonal lines)
-        ArrayList<WireSegment> segments = buildSegments();
+        float extend = path.get(0).tileSize * 0.25f;
 
-        // Draw each segment
-        for (WireSegment seg : segments) {
-            GameApp.drawLine(seg.x1, seg.y1, seg.x2, seg.y2, wireColor);
-            GameApp.setLineWidth(4);
+        // Draw only intermediate path tiles (skip first and last which are element positions)
+        for (int i = 1; i < path.size() - 1; i++) {
+            GridCenterPoint tile = path.get(i);
+
+            boolean connectLeft = false;
+            boolean connectRight = false;
+            boolean connectUp = false;
+            boolean connectDown = false;
+
+            // Connect to previous tile
+            GridCenterPoint prev = path.get(i - 1);
+            connectLeft = prev.gridX < tile.gridX;
+            connectRight = prev.gridX > tile.gridX;
+            connectDown = prev.gridY < tile.gridY;
+            connectUp = prev.gridY > tile.gridY;
+
+            // Connect to next tile
+            GridCenterPoint next = path.get(i + 1);
+            connectLeft |= next.gridX < tile.gridX;
+            connectRight |= next.gridX > tile.gridX;
+            connectDown |= next.gridY < tile.gridY;
+            connectUp |= next.gridY > tile.gridY;
+
+            // Extension for connection to elements at path boundaries
+            float extendLeft = 0;
+            float extendRight = 0;
+            float extendUp = 0;
+            float extendDown = 0;
+
+            // If this is the first wire tile (connects to start element)
+            if (i == 1 && start != null) {
+                if (connectLeft) extendLeft = extend;
+                if (connectRight) extendRight = extend;
+                if (connectUp) extendUp = extend;
+                if (connectDown) extendDown = extend;
+            }
+
+            // If this is the last wire tile (connects to end element)
+            if (i == path.size() - 2 && end != null) {
+                if (connectLeft) extendLeft = extend;
+                if (connectRight) extendRight = extend;
+                if (connectUp) extendUp = extend;
+                if (connectDown) extendDown = extend;
+            }
+
+            drawSegments(tile, connectLeft, connectRight, connectUp, connectDown,
+                    extendLeft, extendRight, extendUp, extendDown);
         }
     }
 
-    private ArrayList<WireSegment> buildSegments() {
-        ArrayList<WireSegment> segments = new ArrayList<>();
+    private void drawSegments(GridCenterPoint tile, boolean left, boolean right, boolean up, boolean down,
+                              float extendLeft, float extendRight, float extendUp, float extendDown) {
+        float size = tile.tileSize;
+        float half = size / 2f;
+        float x = tile.centerX - half;
+        float y = tile.centerY - half;
 
-        // Start point (element center)
-        float startX = start.positionX + start.positionWidth / 2;
-        float startY = start.positionY + start.positionHeight / 2;
-
-        // End point (element center)
-        float endX = end.positionX + end.positionWidth / 2;
-        float endY = end.positionY + end.positionHeight / 2;
-
-        if (path.isEmpty()) {
-            // Direct connection: draw orthogonal path
-            segments.addAll(createOrthogonalPath(startX, startY, endX, endY));
-        } else {
-            // Connect start to first tile
-            GridCenterPoint first = path.getFirst();
-            segments.addAll(createOrthogonalPath(startX, startY, first.centerX, first.centerY));
-
-            // Connect tiles to each other
-            for (int i = 0; i < path.size() - 1; i++) {
-                GridCenterPoint curr = path.get(i);
-                GridCenterPoint next = path.get(i + 1);
-                segments.addAll(createOrthogonalPath(curr.centerX, curr.centerY, next.centerX, next.centerY));
-            }
-
-            // Connect last tile to end
-            GridCenterPoint last = path.getLast();
-            segments.addAll(createOrthogonalPath(last.centerX, last.centerY, endX, endY));
+        // Horizontal
+        if (left) {
+            GameApp.drawTexture(horizontalTexture,
+                    x - extendLeft,
+                    tile.centerY - size * 0.25f,
+                    half + extendLeft,
+                    size * 0.5f);
+        }
+        if (right) {
+            GameApp.drawTexture(horizontalTexture,
+                    tile.centerX,
+                    tile.centerY - size * 0.25f,
+                    half + extendRight,
+                    size * 0.5f);
         }
 
-        return segments;
-    }
-
-    // Create orthogonal (only horizontal/vertical) path between two points
-    private ArrayList<WireSegment> createOrthogonalPath(float x1, float y1, float x2, float y2) {
-        ArrayList<WireSegment> segments = new ArrayList<>();
-
-        // Always go horizontal first, then vertical (or vice versa based on distance)
-        float dx = Math.abs(x2 - x1);
-        float dy = Math.abs(y2 - y1);
-
-        if (dx > 0.1f) {
-            // Horizontal segment
-            segments.add(new WireSegment(x1, y1, x2, y1));
-            if (dy > 0.1f) {
-                // Vertical segment
-                segments.add(new WireSegment(x2, y1, x2, y2));
-            }
-        } else if (dy > 0.1f) {
-            // Only vertical segment needed
-            segments.add(new WireSegment(x1, y1, x1, y2));
+        // Vertical
+        if (up) {
+            GameApp.drawTexture(verticalTexture,
+                    tile.centerX - size * 0.25f,
+                    tile.centerY,
+                    size * 0.5f,
+                    half + extendUp);
         }
-
-        return segments;
+        if (down) {
+            GameApp.drawTexture(verticalTexture,
+                    tile.centerX - size * 0.25f,
+                    y - extendDown,
+                    size * 0.5f,
+                    half + extendDown);
+        }
     }
 
     public void update() {
         hasPower = start.hasPower;
-        if (hasPower) {
-            end.hasPower = true;
-        }
+        if (hasPower) end.hasPower = true;
     }
 }
