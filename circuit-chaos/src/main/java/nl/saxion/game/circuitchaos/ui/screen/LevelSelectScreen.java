@@ -37,10 +37,10 @@ public class LevelSelectScreen extends ScalableGameScreen {
         GameApp.addTexture("background6", "textures/backgrounds/City power station.png");
 
         startX = getWorldWidth() / 2f - btnW / 2f;
-        startY = getWorldHeight() / 2f - 200;
+        startY = getWorldHeight() / 2f - 150;
 
         backX = getWorldWidth() / 2f - btnW / 2f;
-        backY = getWorldHeight() / 2f - 325;
+        backY = getWorldHeight() / 2f - 250;
     }
 
     public void render(float delta) {
@@ -85,40 +85,65 @@ public class LevelSelectScreen extends ScalableGameScreen {
 
         GameApp.endSpriteRendering();
 
-        // Start button
-        GameApp.startShapeRenderingFilled();
-        GameApp.drawRect(startX, startY, btnW, btnH, startHover ? "green-400" : "green-300");
-        GameApp.endShapeRendering();
-
-        if (startHover) {
-            GameApp.startShapeRenderingOutlined();
-            GameApp.drawRect(startX, startY, btnW, btnH, "white");
-            GameApp.endShapeRendering();
-        }
+        startHover = isTextHovered("Start", startY);
+        backHover = isTextHovered("Back", backY);
 
         GameApp.startSpriteRendering();
-        GameApp.drawTextCentered("buttonFont", "Start",
-                startX + btnW / 2f, startY + btnH / 2f, "white");
+        drawMenuText("Start", startY, startHover);
+        drawMenuText("Back", backY, backHover);
         GameApp.endSpriteRendering();
 
-        // Back button
-        GameApp.startShapeRenderingFilled();
-        GameApp.drawRect(backX, backY, btnW, btnH, backHover ? "red-400" : "red-300");
-        GameApp.endShapeRendering();
-
-        if (backHover) {
-            GameApp.startShapeRenderingOutlined();
-            GameApp.drawRect(backX, backY, btnW, btnH, "white");
-            GameApp.endShapeRendering();
+        if (GameApp.isButtonJustPressed(Input.Buttons.LEFT)) {
+            if (startHover) {
+                GameApp.switchScreen("YourGameScreen");
+            }
+            if (backHover) {
+                GameApp.switchScreen("MainMenuScreen");
+            }
         }
-
-        GameApp.startSpriteRendering();
-        GameApp.drawTextCentered("buttonFont", "Back",
-                backX + btnW / 2f, backY + btnH / 2f, "white");
-        GameApp.endSpriteRendering();
 
         handleInput();
         renderUI();
+    }
+
+    private void drawMenuText(String text, float centerY, boolean isHovered) {
+        float centerX = getWorldWidth() / 2f;
+
+        if (isHovered) {
+            GameApp.drawText("buttonFont", "<", centerX + GameApp.getTextWidth("buttonFont", text) / 2 + 25, centerY - 20, "white");
+        }
+
+        GameApp.drawTextCentered("buttonFont", text, centerX, centerY, "white");
+
+        if (isHovered) {
+            float width = GameApp.getTextWidth("buttonFont", text);
+            float height = GameApp.getTextHeight("buttonFont", text);
+
+            GameApp.endSpriteRendering();
+
+            GameApp.startShapeRenderingFilled();
+            GameApp.drawRect(centerX - width / 2, centerY - height / 2 - 20, width, 10, "white");
+            GameApp.endShapeRendering();
+
+            GameApp.startSpriteRendering();
+        }
+    }
+
+    private boolean isTextHovered(String text, float centerY) {
+        float textWidth = GameApp.getTextWidth("buttonFont", text);
+        float textHeight = GameApp.getTextHeight("buttonFont", text);
+
+        float centerX = getWorldWidth() / 2f;
+
+        float x = centerX - textWidth / 2f;
+        float y = centerY - textHeight / 2f;
+
+        float[] m = HelperMethods.windowToWorldMouse(getWorldWidth(), getWorldHeight());
+        float mx = m[0];
+        float my = m[1];
+
+        return (mx >= x && mx <= x + textWidth &&
+                my >= y && my <= y + textHeight);
     }
 
     private void setBackground(int currentLevel) {

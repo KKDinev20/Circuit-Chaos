@@ -30,10 +30,6 @@ public class MainMenuScreen extends ScalableGameScreen {
     public void render(float delta) {
         super.render(delta);
 
-        float[] m = windowToWorldMouse();
-        float mx = m[0];
-        float my = m[1];
-
         // Clear background
         GameApp.clearScreen("black");
 
