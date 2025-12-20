@@ -24,7 +24,7 @@ public class LevelManager {
 
         // Bulb 2: At grid position (3, 0) - not powered (unlit)
         Bulb bulb2 = new Bulb(gridX + (3 * cellSize), gridY, cellSize);
-        bulb1.color = PortColor.YELLOW;
+        bulb2.color = PortColor.YELLOW;
         bulb2.hasPower = false;
         bulb2.update();
 
@@ -87,7 +87,26 @@ public class LevelManager {
         ports.add(port3B);
     }
 
-    // Call this from YourGameScreen.render()
+    public void generateLevelThree(float gridX, float gridY, float cellSize) {
+        bulbs.clear();
+        ports.clear();
+    }
+
+    public void generateLevelFour(float gridX, float gridY, float cellSize) {
+        bulbs.clear();
+        ports.clear();
+    }
+
+    public void generateLevelFive(float gridX, float gridY, float cellSize) {
+        bulbs.clear();
+        ports.clear();
+    }
+
+    public void generateLevelSix(float gridX, float gridY, float cellSize) {
+        bulbs.clear();
+        ports.clear();
+    }
+
     public void initializeLevel(float gridX, float gridY, float gridWidth) {
         if (!initialized) {
             float cellSize = gridWidth / GameConstants.GRID_SIZE;
@@ -99,11 +118,29 @@ public class LevelManager {
                 case 2:
                     generateLevelTwo(gridX, gridY, cellSize);
                     break;
+                case 3:
+                    generateLevelThree(gridX, gridY,cellSize);
+                    break;
+                case 4:
+                    generateLevelFour(gridX, gridY,cellSize);
+                    break;
+                case 5:
+                    generateLevelFive(gridX, gridY,cellSize);
+                    break;
+                case 6:
+                    generateLevelSix(gridX, gridY,cellSize);
+                    break;
                 default:
                     generateLevelOne(gridX, gridY, cellSize); // Default
             }
             initialized = true;
         }
+    }
+
+    public void resetLevel() {
+        initialized = false;
+        bulbs.clear();
+        ports.clear();
     }
 
     public void updateElements() {
@@ -158,5 +195,4 @@ public class LevelManager {
     public ArrayList<WirePort> getPorts() {
         return ports;
     }
-
 }

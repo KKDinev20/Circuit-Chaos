@@ -41,6 +41,10 @@ public class YourGameScreen extends ScalableGameScreen {
         timeLeft = 120f;
         timeUp = false;
 
+        levelManager.resetLevel();
+        connectionManager.reset();
+        toolManager = new ToolManager();
+
         enableHUD((int) getWorldWidth(), (int) getWorldHeight());
         ElementManager.addTextures(); // Load bulb textures
         GameApp.addTexture("level1", "textures/backgrounds/house.png");
@@ -284,6 +288,7 @@ public class YourGameScreen extends ScalableGameScreen {
         GameApp.addTexture("hint", "textures/hint.png");
         GameApp.drawTexture("hint", buttonX, buttonY, buttonWidth, buttonHeight);
     }
+
     private void drawTimer(float gridX, float gridY) {
         int totalSeconds = (int) timeLeft;
         int minutes = totalSeconds / 60;
@@ -377,6 +382,8 @@ public class YourGameScreen extends ScalableGameScreen {
 
         // YES
         if (mx >= btnYesX && mx <= btnYesX + btnYesW && my >= btnYesY && my <= btnYesY + btnYesH) {
+            levelManager.resetLevel();
+            connectionManager.reset();
             GameApp.switchScreen("MainMenuScreen");
             showQuitMenu = false;
             return;

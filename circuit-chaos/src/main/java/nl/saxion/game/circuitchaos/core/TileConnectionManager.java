@@ -26,6 +26,7 @@ public class TileConnectionManager {
     public void startBuilding(CircuitElement element, float gridX, float gridY, float cellSize) {
         if (element == null) return;
         if (connectedElements.contains(element)) return;
+        if (element instanceof Bulb && !element.hasPower()) return;
 
         cancelBuilding();
 
@@ -172,5 +173,12 @@ public class TileConnectionManager {
 
     private String key(int x, int y) {
         return x + "," + y;
+    }
+
+    public void reset() {
+        cancelBuilding();
+        wirePaths.clear();
+        occupiedTiles.clear();
+        connectedElements.clear();
     }
 }
