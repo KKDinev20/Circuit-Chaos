@@ -6,6 +6,7 @@ import nl.saxion.gameapp.GameApp;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 public class TileConnectionManager {
@@ -23,9 +24,16 @@ public class TileConnectionManager {
     private float gridY;
     private float cellSize;
 
+    // Wire breaking system
+    private Random random = new Random();
+    private float wireBreakTimer = 0f;
+    private float wireBreakInterval = 5f; // Break a wire every 5 seconds
+
     public void startBuilding(CircuitElement element, float gridX, float gridY, float cellSize) {
         if (element == null) return;
         if (connectedElements.contains(element)) return;
+
+        // Dead bulbs cannot start connections
         if (element instanceof Bulb && !element.hasPower()) return;
 
         cancelBuilding();
@@ -78,7 +86,7 @@ public class TileConnectionManager {
         if (!isBuilding || endElement == null) return;
         if (endElement == selectedElement) return;
         if (connectedElements.contains(endElement)) return;
-        if (!canConnect(selectedElement, endElement)) return;  // ADD THIS BACK!
+        if (!canConnect(selectedElement, endElement)) return;
         if (!selectedElement.hasPower() && !endElement.hasPower()) return;
 
         int[] endPos = getElementGridPos(endElement);
@@ -86,10 +94,8 @@ public class TileConnectionManager {
 
         if (!isAdjacent((int) last.gridX, (int) last.gridY, endPos[0], endPos[1])) return;
 
-        // Store ALL tiles including start and end positions as the complete path
         ArrayList<GridCenterPoint> completePath = new ArrayList<>(currentPath);
 
-        // Add the end tile to complete the path
         GridCenterPoint endTile = new GridCenterPoint(
                 endPos[0], endPos[1],
                 gridToWorldCenterX(endPos[0]),
@@ -99,7 +105,6 @@ public class TileConnectionManager {
         );
         completePath.add(endTile);
 
-        // Mark only intermediate tiles as occupied (not start/end element positions)
         for (int i = 1; i < completePath.size() - 1; i++) {
             GridCenterPoint tile = completePath.get(i);
             occupiedTiles.add(key((int) tile.gridX, (int) tile.gridY));
@@ -108,7 +113,6 @@ public class TileConnectionManager {
         connectedElements.add(selectedElement);
         connectedElements.add(endElement);
 
-        // Pass the complete path to WirePath
         wirePaths.add(new WirePath(selectedElement, endElement, completePath));
         cancelBuilding();
     }
@@ -143,8 +147,89 @@ public class TileConnectionManager {
         }
     }
 
+    // Wire breaking system - call this with delta time when timer is low
+    // In TileConnectionManager
+    public void updateWireBreaking(float delta, boolean shouldBreakWires) {
+        if (!shouldBreakWires || wirePaths.isEmpty()) {
+            // Add debug
+            if (shouldBreakWires && wirePaths.isEmpty()) {
+                System.out.println("Cannot break wires - no wires exist!");
+            }
+            return;
+        }
+
+        wireBreakTimer += delta;
+
+        // Add debug
+        if (wireBreakTimer > wireBreakInterval - 0.1f) {
+            System.out.println("Wire break timer: " + wireBreakTimer + " / " + wireBreakInterval);
+        }
+
+        if (wireBreakTimer >= wireBreakInterval) {
+            wireBreakTimer = 0f;
+            breakRandomWire();
+        }
+    }
+
+    private void breakRandomWire() {
+        // Find all non-broken wires
+        ArrayList<WirePath> workingWires = new ArrayList<>();
+        for (WirePath wire : wirePaths) {
+            if (!wire.isBroken()) {
+                workingWires.add(wire);
+            }
+        }
+
+        if (workingWires.isEmpty()) return;
+
+        // Break a random wire
+        int index = random.nextInt(workingWires.size());
+        workingWires.get(index).breakWire();
+
+        System.out.println("Wire broken! Right-click to repair.");
+    }
+
+    // Repair wire at mouse position
+    public boolean repairWireAt(float mouseX, float mouseY) {
+        for (WirePath wire : wirePaths) {
+            if (wire.isBroken() && wire.containsPoint(mouseX, mouseY, 20f)) {
+                wire.repair();
+                System.out.println("Wire repaired!");
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Check if two elements are connected
+    public boolean areElementsConnected(CircuitElement a, CircuitElement b) {
+        for (WirePath wire : wirePaths) {
+            if (!wire.isBroken() && wire.connects(a, b)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Count broken wires
+    public int getBrokenWireCount() {
+        int count = 0;
+        for (WirePath wire : wirePaths) {
+            if (wire.isBroken()) count++;
+        }
+        return count;
+    }
+
     public boolean isBuilding() {
         return isBuilding;
+    }
+
+    public void reset() {
+        cancelBuilding();
+        wirePaths.clear();
+        occupiedTiles.clear();
+        connectedElements.clear();
+        wireBreakTimer = 0f;
     }
 
     private int[] getElementGridPos(CircuitElement e) {
@@ -168,17 +253,11 @@ public class TileConnectionManager {
     }
 
     private boolean canConnect(CircuitElement a, CircuitElement b) {
-        return a.color == null || b.color == null || a.color == b.color;
+        if (a.color == null || b.color == null) return false;
+        return a.color == b.color;
     }
 
     private String key(int x, int y) {
         return x + "," + y;
-    }
-
-    public void reset() {
-        cancelBuilding();
-        wirePaths.clear();
-        occupiedTiles.clear();
-        connectedElements.clear();
     }
 }

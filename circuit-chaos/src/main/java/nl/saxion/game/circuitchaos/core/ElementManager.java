@@ -28,6 +28,10 @@ public class ElementManager {
         GameApp.addTexture("green wire vertical", "textures/entities/wire extension green vertical.png");
         GameApp.addTexture("yellow wire vertical", "textures/entities/wire extension yellow vertical.png");
 
+
+        GameApp.addTexture("black wire extension", "textures/entities/wire extension black.png");
+        GameApp.addTexture("black wire vertical", "textures/entities/wire extension black vertical.png");
+
         loaded = true;
     }
 }

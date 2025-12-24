@@ -1,6 +1,6 @@
 package nl.saxion.game.circuitchaos.ui.screen;
 
-import com.badlogic.gdx.*;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import nl.saxion.game.circuitchaos.core.*;
 import nl.saxion.game.circuitchaos.entities.*;
@@ -15,9 +15,14 @@ public class YourGameScreen extends ScalableGameScreen {
     private TileConnectionManager connectionManager;
     private Tool currentlyDragging = null;
     private boolean showQuitMenu = false;
+    private WinConditionManager winManager;
+    private boolean levelEnded = false;
+
     // TIMER
-    private float timeLeft = 120f;   // 2 minutes
-    private boolean timeUp = false;
+    private float timeLeft = 35f;   // 2 minutes
+
+    private boolean showEndScreen = false;
+    private boolean wonLevel = false;
 
 
     // UI positions for quit menu
@@ -26,11 +31,18 @@ public class YourGameScreen extends ScalableGameScreen {
     private float panelX, panelY, panelW, panelH;
     private boolean yesHover = false, noHover = false;
 
+    private float btnContinueX, btnContinueY, btnContinueW, btnContinueH;
+    private float btnRetryX, btnRetryY, btnRetryW, btnRetryH;
+    private float btnMenuX, btnMenuY, btnMenuW, btnMenuH;
+    private boolean continueHover = false, retryHover = false, menuHover = false;
+
+
     public YourGameScreen() {
         super(1280, 720);
         toolManager = new ToolManager();
         levelManager = new LevelManager();
         connectionManager = new TileConnectionManager();
+        winManager = new WinConditionManager();
     }
 
     @Override
@@ -38,19 +50,39 @@ public class YourGameScreen extends ScalableGameScreen {
         GameApp.addFont("pixel_timer", "fonts/PressStart2P-Regular.ttf", 20);
         GameApp.addFont("levelSelectFont", "fonts/Cause-Medium.ttf", 40);
 
-        timeLeft = 120f;
-        timeUp = false;
-
+        // RESET ALL STATE
         levelManager.resetLevel();
         connectionManager.reset();
         toolManager = new ToolManager();
+        winManager.reset();
+
+        // Reset game state flags
+        levelEnded = false;
+        showEndScreen = false;
+        wonLevel = false;
+        showQuitMenu = false;
+        timeLeft = 35f;
+        currentlyDragging = null;
 
         enableHUD((int) getWorldWidth(), (int) getWorldHeight());
-        ElementManager.addTextures(); // Load bulb textures
+        ElementManager.addTextures();
         GameApp.addTexture("level1", "textures/backgrounds/house.png");
 
         centeredBox.width = GameConstants.GRID_WIDTH;
         centeredBox.height = GameConstants.GRID_HEIGHT;
+
+        // Setup win conditions based on current level
+        if (LevelManager.currentLevel == 1) {
+            winManager.setupLevelOneConditions();
+        } else if (LevelManager.currentLevel == 2) {
+            winManager.setupLevelTwoConditions();
+        } else {
+            // Handle undefined levels - return to menu or show message
+            System.out.println("Level " + LevelManager.currentLevel + " not yet implemented!");
+            LevelManager.currentLevel = 1;
+            GameApp.switchScreen("MainMenuScreen");
+        }
+        // Add more levels here as needed
 
         // Quit menu positions
         panelW = 600;
@@ -68,38 +100,71 @@ public class YourGameScreen extends ScalableGameScreen {
         btnNoX = panelX + panelW - btnNoW - 60;
         btnNoY = panelY + 40;
 
+        System.out.println("YourGameScreen.show() - Current level: " + LevelManager.currentLevel);
     }
 
     @Override
     public void render(float delta) {
         super.render(delta);
 
-        if (!timeUp && !showQuitMenu) {
-            timeLeft -= delta;
-
-            if (timeLeft <= 0) {
-                timeLeft = 0;
-                timeUp = true;
-                GameApp.switchScreen("MainMenuScreen");
-                return;
-            }
-        }
-
         float centerX = getWorldWidth() / 2;
         float centerY = getWorldHeight() / 2;
         float gridX = centerX - centeredBox.width / 2;
         float gridY = centerY - centeredBox.height / 2;
 
-        if (GameApp.isKeyJustPressed(Input.Keys.ESCAPE)) {
+        // Handle ESC key for quit menu (only if not showing end screen)
+        if (GameApp.isKeyJustPressed(Input.Keys.ESCAPE) && !showEndScreen) {
             showQuitMenu = !showQuitMenu;
         }
 
+        // PRIORITY 1: SHOW END SCREEN (win or lose)
+        if (showEndScreen) {
+            renderEndScreen();
+            renderEndScreenClick();
+            return; // Stop here
+        }
+
+        // PRIORITY 2: SHOW QUIT MENU
         if (showQuitMenu) {
-            GameApp.clearScreen(Color.BLACK);
             renderQuitMenu();
             renderQuitMenuClick();
-            renderUI();
-            return;
+            return; // Stop here
+        }
+
+        // GAME IS RUNNING - update timer and check conditions
+        if (!levelEnded) {
+            timeLeft -= delta;
+
+            // CHECK WIN CONDITION EVERY FRAME
+            winManager.checkConnections(connectionManager, levelManager.getPorts(), levelManager.getBulbs());
+
+            if (winManager.checkWinCondition()) {
+                // LEVEL COMPLETE!
+                levelEnded = true;
+                wonLevel = true;
+                showEndScreen = true;
+
+                System.out.println("=== LEVEL COMPLETE! ===");
+                System.out.println("Time remaining: " + timeLeft + " seconds");
+                System.out.println("Hearts lost: " + winManager.calculateHeartsLost());
+                return; // Stop this frame
+            }
+
+            // Check if time ran out (LOSE condition)
+            if (timeLeft <= 0) {
+                timeLeft = 0;
+                levelEnded = true;
+                wonLevel = false;
+                showEndScreen = true;
+
+                System.out.println("=== TIME UP! ===");
+                return; // Stop this frame
+            }
+
+            // Start breaking wires when 30 seconds left
+            if (timeLeft < 30f && timeLeft > 0) {
+                connectionManager.updateWireBreaking(delta, true);
+            }
         }
 
         // Initialize tools if not done
@@ -110,55 +175,31 @@ public class YourGameScreen extends ScalableGameScreen {
         // Initialize level if not done
         levelManager.initializeLevel(gridX, gridY, centeredBox.width);
 
-        handleInput(gridX, gridY);
+        // Handle player input (only if level not ended)
+        if (!levelEnded) {
+            handleInput(gridX, gridY);
+        }
 
-        GameApp.clearScreen(Color.BLACK);
-
-        // Update level elements (bulbs animation)
+        // Update level elements
         levelManager.updateElements();
         connectionManager.updateWirePaths();
 
-        // --- START SPRITE RENDERING (textures) ---
+        // === RENDERING ===
         GameApp.startSpriteRendering();
-
-        // Draw background
         GameApp.drawTexture("level1", 0, 0, getWorldWidth(), getWorldHeight());
-
-        // Draw grid
         GridManager.drawGrid(gridX, gridY, centeredBox.width);
-
-        // Draw level elements (bulbs and ports) FIRST
         levelManager.drawElements();
-
-        // Draw wire textures ON TOP of elements
         connectionManager.drawWirePathsTextures();
-
-        // Draw hearts
         drawHearts(gridX, gridY);
-
-        // Draw timer (middle top)
         drawTimer(gridX, gridY);
-
-        // Draw hints button (as texture)
         drawHintsButton(gridX, gridY);
-
         GameApp.endSpriteRendering();
-        // --- END SPRITE RENDERING ---
 
-        // --- START SHAPE RENDERING (rectangles, lines) ---
         GameApp.startShapeRenderingFilled();
-
-        // Draw UI shapes
         drawToolBoxes(gridX, gridY);
-
-        // Draw wire building preview (cyan tiles)
         connectionManager.drawWirePathsPreview();
-
-        // Draw tools
         toolManager.drawTools();
-
         GameApp.endShapeRendering();
-        // --- END SHAPE RENDERING ---
     }
 
     private void handleInput(float gridX, float gridY) {
@@ -175,10 +216,8 @@ public class YourGameScreen extends ScalableGameScreen {
             for (Bulb bulb : levelManager.getBulbs()) {
                 if (bulb.contains(mouseX, mouseY)) {
                     if (connectionManager.isBuilding()) {
-                        // Finish connection - NO GRID PARAMETERS NEEDED
                         connectionManager.finishBuilding(bulb);
                     } else {
-                        // Start new connection - ADD GRID PARAMETERS
                         connectionManager.startBuilding(bulb, gridX, gridY, cellSize);
                     }
                     clickedElement = true;
@@ -230,9 +269,21 @@ public class YourGameScreen extends ScalableGameScreen {
         }
 
         // Cancel with right click or ESC
-        if (GameApp.isButtonJustPressed(Input.Buttons.RIGHT) ||
-                GameApp.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            connectionManager.cancelBuilding();
+        if (GameApp.isButtonJustPressed(Input.Buttons.RIGHT)) {
+            if (connectionManager.isBuilding()) {
+                connectionManager.cancelBuilding();
+            } else {
+                // Try to repair broken wire
+                connectionManager.repairWireAt(mouseX, mouseY);
+            }
+        }
+
+        if (GameApp.isButtonJustPressed(Input.Buttons.RIGHT)) {
+            if (connectionManager.isBuilding()) {
+                connectionManager.cancelBuilding();
+            } else {
+                connectionManager.repairWireAt(mouseX, mouseY);
+            }
         }
 
         if (GameApp.isButtonPressed(Input.Buttons.LEFT) && currentlyDragging != null) {
@@ -413,6 +464,306 @@ public class YourGameScreen extends ScalableGameScreen {
         float worldY = (winH - wy) * sy; // flip Y
 
         return new float[]{worldX, worldY};
+    }
+
+    private void renderEndScreen() {
+        // Draw game in background
+        float centerX = getWorldWidth() / 2;
+        float centerY = getWorldHeight() / 2;
+        float gridX = centerX - centeredBox.width / 2;
+        float gridY = centerY - centeredBox.height / 2;
+
+        GameApp.startSpriteRendering();
+        GameApp.drawTexture("level1", 0, 0, getWorldWidth(), getWorldHeight());
+        GridManager.drawGrid(gridX, gridY, centeredBox.width);
+        levelManager.drawElements();
+        connectionManager.drawWirePathsTextures();
+        GameApp.endSpriteRendering();
+
+        // Semi-transparent overlay
+        GameApp.startShapeRenderingFilled();
+        GameApp.drawRect(0, 0, getWorldWidth(), getWorldHeight(), new Color(0, 0, 0, 0.7f));
+        GameApp.endShapeRendering();
+
+        // Calculate positions
+        panelW = 800;
+        panelH = 550;
+        panelX = getWorldWidth() / 2f - panelW / 2f;
+        panelY = getWorldHeight() / 2f - panelH / 2f;
+
+        float buttonWidth = 220;
+        float buttonHeight = 70;
+        float buttonSpacing = 40;
+
+        // Get mouse position
+        float mouseX = getMouseX(); // Use getMouseX() directly
+        float mouseY = getMouseY();
+
+        // Panel background
+        GameApp.startShapeRenderingFilled();
+        GameApp.drawRect(panelX, panelY, panelW, panelH, "gray-900");
+        GameApp.endShapeRendering();
+
+        int yellowConnected = winManager.getYellowConnected();
+        int yellowRequired = winManager.getYellowRequired();
+        int redConnected = winManager.getRedConnected();
+        int redRequired = winManager.getRedRequired();
+        int blueConnected = winManager.getBlueConnected();
+        int blueRequired = winManager.getBlueRequired();
+        int greenConnected = winManager.getGreenConnected();
+        int greenRequired = winManager.getGreenRequired();
+
+        if (wonLevel) {
+            // === WIN SCREEN ===
+
+            // Button positions
+            btnContinueW = buttonWidth;
+            btnContinueH = buttonHeight;
+            btnContinueX = panelX + panelW / 2f - btnContinueW - buttonSpacing / 2f;
+            btnContinueY = panelY + 50;
+
+            btnMenuW = buttonWidth;
+            btnMenuH = buttonHeight;
+            btnMenuX = panelX + panelW / 2f + buttonSpacing / 2f;
+            btnMenuY = panelY + 50;
+
+            // Check hover
+            continueHover = (mouseX >= btnContinueX && mouseX <= btnContinueX + btnContinueW &&
+                    mouseY >= btnContinueY && mouseY <= btnContinueY + btnContinueH);
+            menuHover = (mouseX >= btnMenuX && mouseX <= btnMenuX + btnMenuW &&
+                    mouseY >= btnMenuY && mouseY <= btnMenuY + btnMenuH);
+
+            // Draw buttons
+            GameApp.startShapeRenderingFilled();
+            GameApp.drawRect(btnContinueX - (continueHover ? 5 : 0),
+                    btnContinueY - (continueHover ? 5 : 0),
+                    btnContinueW + (continueHover ? 10 : 0),
+                    btnContinueH + (continueHover ? 10 : 0),
+                    continueHover ? "green-400" : "green-600");
+
+            GameApp.drawRect(btnMenuX - (menuHover ? 5 : 0),
+                    btnMenuY - (menuHover ? 5 : 0),
+                    btnMenuW + (menuHover ? 10 : 0),
+                    btnMenuH + (menuHover ? 10 : 0),
+                    menuHover ? "blue-400" : "blue-600");
+            GameApp.endShapeRendering();
+
+            // Draw text content
+            GameApp.startSpriteRendering();
+
+            // Title
+            GameApp.drawTextCentered("levelSelectFont", "LEVEL COMPLETE!",
+                    panelX + panelW / 2f, panelY + panelH - 50f, "green-400");
+
+            // Stats section
+            float statsY = panelY + panelH - 140f;
+            float lineHeight = 35f;
+
+            // Time
+            int totalSeconds = (int) timeLeft;
+            int minutes = totalSeconds / 60;
+            int seconds = totalSeconds % 60;
+            String timeText = String.format("Time Remaining: %02d:%02d", minutes, seconds);
+            GameApp.drawTextCentered("pixel_timer", timeText, panelX + panelW / 2f, statsY, "white");
+            statsY -= lineHeight;
+
+            // Hearts lost
+            int heartsLost = winManager.calculateHeartsLost();
+            String heartsText = "Hearts Lost: " + heartsLost + " / 3";
+            GameApp.drawTextCentered("pixel_timer", heartsText, panelX + panelW / 2f, statsY,
+                    heartsLost == 0 ? "green-300" : "orange-400");
+            statsY -= lineHeight;
+
+            // Connection details
+            statsY -= 10f; // Extra space
+            GameApp.drawText("pixel_timer", "Connections:", panelX + 80f, statsY, "yellow-400");
+            statsY -= lineHeight;
+
+            // Yellow bulbs
+            if (yellowRequired > 0) {
+                String status = yellowConnected >= yellowRequired ? "[✓]" : "[✗]";
+                String color = yellowConnected >= yellowRequired ? "green-300" : "red-400";
+                GameApp.drawText("pixel_timer", status + " Yellow Bulbs: " + yellowConnected + "/" + yellowRequired,
+                        panelX + 100f, statsY, color);
+                statsY -= lineHeight;
+            }
+
+            // Red ports
+            if (redRequired > 0) {
+                String status = redConnected >= redRequired ? "[✓]" : "[✗]";
+                String color = redConnected >= redRequired ? "green-300" : "red-400";
+                GameApp.drawText("pixel_timer", status + " Red Ports: " + redConnected + "/" + redRequired,
+                        panelX + 100f, statsY, color);
+                statsY -= lineHeight;
+            }
+
+            // Blue ports
+            if (blueRequired > 0) {
+                String status = blueConnected >= blueRequired ? "[✓]" : "[✗]";
+                String color = blueConnected >= blueRequired ? "green-300" : "red-400";
+                GameApp.drawText("pixel_timer", status + " Blue Ports: " + blueConnected + "/" + blueRequired,
+                        panelX + 100f, statsY, color);
+                statsY -= lineHeight;
+            }
+
+            // Green ports
+            if (greenRequired > 0) {
+                String status = greenConnected >= greenRequired ? "[✓]" : "[✗]";
+                String color = greenConnected >= greenRequired ? "green-300" : "red-400";
+                GameApp.drawText("pixel_timer", status + " Green Ports: " + greenConnected + "/" + greenRequired,
+                        panelX + 100f, statsY, color);
+            }
+
+            // Button text
+            GameApp.drawTextCentered("levelSelectFont", "Continue",
+                    btnContinueX + btnContinueW / 2f, btnContinueY + btnContinueH / 2f, "white");
+            GameApp.drawTextCentered("levelSelectFont", "Menu",
+                    btnMenuX + btnMenuW / 2f, btnMenuY + btnMenuH / 2f, "white");
+
+            GameApp.endSpriteRendering();
+
+        } else {
+            // === LOSE SCREEN ===
+
+            // Button positions
+            btnRetryW = buttonWidth;
+            btnRetryH = buttonHeight;
+            btnRetryX = panelX + panelW / 2f - btnRetryW - buttonSpacing / 2f;
+            btnRetryY = panelY + 50;
+
+            btnMenuW = buttonWidth;
+            btnMenuH = buttonHeight;
+            btnMenuX = panelX + panelW / 2f + buttonSpacing / 2f;
+            btnMenuY = panelY + 50;
+
+            // Check hover
+            retryHover = (mouseX >= btnRetryX && mouseX <= btnRetryX + btnRetryW &&
+                    mouseY >= btnRetryY && mouseY <= btnRetryY + btnRetryH);
+            menuHover = (mouseX >= btnMenuX && mouseX <= btnMenuX + btnMenuW &&
+                    mouseY >= btnMenuY && mouseY <= btnMenuY + btnMenuH);
+
+            // Draw buttons
+            GameApp.startShapeRenderingFilled();
+            GameApp.drawRect(btnRetryX - (retryHover ? 5 : 0),
+                    btnRetryY - (retryHover ? 5 : 0),
+                    btnRetryW + (retryHover ? 10 : 0),
+                    btnRetryH + (retryHover ? 10 : 0),
+                    retryHover ? "yellow-400" : "yellow-600");
+
+            GameApp.drawRect(btnMenuX - (menuHover ? 5 : 0),
+                    btnMenuY - (menuHover ? 5 : 0),
+                    btnMenuW + (menuHover ? 10 : 0),
+                    btnMenuH + (menuHover ? 10 : 0),
+                    menuHover ? "blue-400" : "blue-600");
+            GameApp.endShapeRendering();
+
+            // Draw text content
+            GameApp.startSpriteRendering();
+
+            // Title
+            GameApp.drawTextCentered("levelSelectFont", "TIME'S UP!",
+                    panelX + panelW / 2f, panelY + panelH - 50f, "red-400");
+
+            // Stats section
+            float statsY = panelY + panelH - 140f;
+            float lineHeight = 35f;
+
+            // Hearts lost
+            int heartsLost = winManager.calculateHeartsLost();
+            String heartsText = "Hearts Lost: " + heartsLost + " / 3";
+            GameApp.drawTextCentered("pixel_timer", heartsText, panelX + panelW / 2f, statsY, "red-400");
+            statsY -= lineHeight;
+
+            // Connection details
+            statsY -= 10f;
+            GameApp.drawText("pixel_timer", "Missing Connections:", panelX + 80f, statsY, "red-400");
+            statsY -= lineHeight;
+
+            // Yellow bulbs
+            if (yellowRequired > 0) {
+                String status = yellowConnected >= yellowRequired ? "[✓]" : "[✗]";
+                String color = yellowConnected >= yellowRequired ? "green-300" : "red-400";
+                GameApp.drawText("pixel_timer", status + " Yellow Bulbs: " + yellowConnected + "/" + yellowRequired,
+                        panelX + 100f, statsY, color);
+                statsY -= lineHeight;
+            }
+
+            // Red ports
+            if (redRequired > 0) {
+                String status = redConnected >= redRequired ? "[✓]" : "[✗]";
+                String color = redConnected >= redRequired ? "green-300" : "red-400";
+                GameApp.drawText("pixel_timer", status + " Red Ports: " + redConnected + "/" + redRequired,
+                        panelX + 100f, statsY, color);
+                statsY -= lineHeight;
+            }
+
+            // Blue ports
+            if (blueRequired > 0) {
+                String status = blueConnected >= blueRequired ? "[✓]" : "[✗]";
+                String color = blueConnected >= blueRequired ? "green-300" : "red-400";
+                GameApp.drawText("pixel_timer", status + " Blue Ports: " + blueConnected + "/" + blueRequired,
+                        panelX + 100f, statsY, color);
+                statsY -= lineHeight;
+            }
+
+            // Green ports
+            if (greenRequired > 0) {
+                String status = greenConnected >= greenRequired ? "[✓]" : "[✗]";
+                String color = greenConnected >= greenRequired ? "green-300" : "red-400";
+                GameApp.drawText("pixel_timer", status + " Green Ports: " + greenConnected + "/" + greenRequired,
+                        panelX + 100f, statsY, color);
+            }
+
+            // Button text
+            GameApp.drawTextCentered("levelSelectFont", "Retry",
+                    btnRetryX + btnRetryW / 2f, btnRetryY + btnRetryH / 2f, "white");
+            GameApp.drawTextCentered("levelSelectFont", "Menu",
+                    btnMenuX + btnMenuW / 2f, btnMenuY + btnMenuH / 2f, "white");
+
+            GameApp.endSpriteRendering();
+        }
+    }
+
+    private void renderEndScreenClick() {
+        if (!GameApp.isButtonJustPressed(Input.Buttons.LEFT)) return;
+
+        float mouseX = getMouseX();
+        float mouseY = getMouseY();
+
+        if (wonLevel) {
+            // Continue button
+            if (mouseX >= btnContinueX && mouseX <= btnContinueX + btnContinueW &&
+                    mouseY >= btnContinueY && mouseY <= btnContinueY + btnContinueH) {
+                System.out.println("Continue clicked - moving to level " + (LevelManager.currentLevel + 1));
+                LevelManager.currentLevel++;
+                GameApp.switchScreen("YourGameScreen");
+                return;
+            }
+
+            // Menu button (win)
+            if (mouseX >= btnMenuX && mouseX <= btnMenuX + btnMenuW &&
+                    mouseY >= btnMenuY && mouseY <= btnMenuY + btnMenuH) {
+                System.out.println("Menu clicked from win screen");
+                GameApp.switchScreen("MainMenuScreen");
+                return;
+            }
+        } else {
+            // Retry button
+            if (mouseX >= btnRetryX && mouseX <= btnRetryX + btnRetryW &&
+                    mouseY >= btnRetryY && mouseY <= btnRetryY + btnRetryH) {
+                System.out.println("Retry clicked");
+                GameApp.switchScreen("YourGameScreen");
+                return;
+            }
+
+            // Menu button (lose)
+            if (mouseX >= btnMenuX && mouseX <= btnMenuX + btnMenuW &&
+                    mouseY >= btnMenuY && mouseY <= btnMenuY + btnMenuH) {
+                System.out.println("Menu clicked from lose screen");
+                GameApp.switchScreen("MainMenuScreen");
+                return;
+            }
+        }
     }
 
     @Override
