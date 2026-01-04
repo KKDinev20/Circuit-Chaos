@@ -136,7 +136,7 @@ public class YourGameScreen extends ScalableGameScreen {
             timeLeft -= delta;
 
             // CHECK WIN CONDITION EVERY FRAME
-            winManager.checkConnections(connectionManager, levelManager.getPorts(), levelManager.getBulbs());
+            winManager.checkConnections(connectionManager, levelManager.getPorts(), levelManager.getBulbs(), levelManager.getExtensionCords(), levelManager.getPlugs());
 
             if (winManager.checkWinCondition()) {
                 // LEVEL COMPLETE!
@@ -235,6 +235,38 @@ public class YourGameScreen extends ScalableGameScreen {
                         } else {
                             // Start new connection - ADD GRID PARAMETERS
                             connectionManager.startBuilding(port, gridX, gridY, cellSize);
+                        }
+                        clickedElement = true;
+                        break;
+                    }
+                }
+            }
+
+            // Check extension cords
+            if (!clickedElement) {
+                for (ExtensionCord cord : levelManager.getExtensionCords()) {
+                    if (cord.contains(mouseX, mouseY)) {
+                        if (connectionManager.isBuilding()) {
+                            // Finish connection - NO GRID PARAMETERS
+                            connectionManager.finishBuilding(cord);
+                        } else {
+                            // Start new connection - ADD GRID PARAMETERS
+                            connectionManager.startBuilding(cord, gridX, gridY, cellSize);
+                        }
+                        clickedElement = true;
+                        break;
+                    }
+                }
+            }
+
+            // Check plugs
+            if (!clickedElement) {
+                for (PowerPlug plug : levelManager.getPlugs()) {
+                    if (plug.contains(mouseX, mouseY)) {
+                        if (connectionManager.isBuilding()) {
+                            connectionManager.finishBuilding(plug);
+                        } else {
+                            connectionManager.startBuilding(plug, gridX, gridY, cellSize);
                         }
                         clickedElement = true;
                         break;
@@ -512,6 +544,10 @@ public class YourGameScreen extends ScalableGameScreen {
         int blueRequired = winManager.getBlueRequired();
         int greenConnected = winManager.getGreenConnected();
         int greenRequired = winManager.getGreenRequired();
+        int extensionCordsConnected = winManager.getExtensionCordsConnected();
+        int extensionCordsRequired = winManager.getExtensionCordsRequired();
+        int plugsConnected = winManager.getPlugsConnected();
+        int plugsRequired = winManager.getPlugsRequired();
 
         if (wonLevel) {
             // === WIN SCREEN ===
@@ -612,6 +648,23 @@ public class YourGameScreen extends ScalableGameScreen {
                 String color = greenConnected >= greenRequired ? "green-300" : "red-400";
                 GameApp.drawText("pixel_timer", status + " Green Ports: " + greenConnected + "/" + greenRequired,
                         panelX + 100f, statsY, color);
+                statsY -= lineHeight;
+            }
+
+            if (extensionCordsRequired > 0) {
+                String status = extensionCordsConnected >= extensionCordsRequired ? "[✓]" : "[✗]";
+                String color = extensionCordsConnected >= extensionCordsRequired ? "green-300" : "red-400";
+                GameApp.drawText("pixel_timer", status + " Extension Cords: " + extensionCordsConnected + "/" + extensionCordsRequired,
+                        panelX + 100f, statsY, color);
+                statsY -= lineHeight;
+            }
+
+            if (plugsConnected > 0) {
+                String status = plugsConnected >= plugsRequired ? "[✓]" : "[✗]";
+                String color = plugsConnected >= plugsRequired ? "green-300" : "red-400";
+                GameApp.drawText("pixel_timer", status + " Plugs: " + plugsConnected + "/" + plugsRequired,
+                        panelX + 100f, statsY, color);
+                statsY -= lineHeight;
             }
 
             // Button text

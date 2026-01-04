@@ -4,17 +4,14 @@ import com.badlogic.gdx.graphics.Color;
 import nl.saxion.game.circuitchaos.entities.*;
 import nl.saxion.gameapp.GameApp;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 public class TileConnectionManager {
 
     private final ArrayList<WirePath> wirePaths = new ArrayList<>();
     private final ArrayList<GridCenterPoint> currentPath = new ArrayList<>();
     private final Set<String> occupiedTiles = new HashSet<>();
-    private final Set<CircuitElement> connectedElements = new HashSet<>();
+    private final Map<CircuitElement, Integer> connectedElements = new HashMap<>();
 
     private CircuitElement selectedElement = null;
     private boolean isBuilding = false;
@@ -29,9 +26,17 @@ public class TileConnectionManager {
     private float wireBreakTimer = 0f;
     private float wireBreakInterval = 5f; // Break a wire every 5 seconds
 
+    private int getConnections(CircuitElement e) {
+        return connectedElements.getOrDefault(e, 0);
+    }
+
+    private boolean canStartConnection(CircuitElement e) {
+        return getConnections(e) < e.getMaxConnections();
+    }
+
     public void startBuilding(CircuitElement element, float gridX, float gridY, float cellSize) {
         if (element == null) return;
-        if (connectedElements.contains(element)) return;
+        if (!canStartConnection(element)) return;
 
         // Dead bulbs cannot start connections
         if (element instanceof Bulb && !element.hasPower()) return;
@@ -85,7 +90,7 @@ public class TileConnectionManager {
     public void finishBuilding(CircuitElement endElement) {
         if (!isBuilding || endElement == null) return;
         if (endElement == selectedElement) return;
-        if (connectedElements.contains(endElement)) return;
+        if (!canStartConnection(endElement)) return;
         if (!canConnect(selectedElement, endElement)) return;
         if (!selectedElement.hasPower() && !endElement.hasPower()) return;
 
@@ -110,8 +115,15 @@ public class TileConnectionManager {
             occupiedTiles.add(key((int) tile.gridX, (int) tile.gridY));
         }
 
-        connectedElements.add(selectedElement);
-        connectedElements.add(endElement);
+        connectedElements.put(
+                selectedElement,
+                getConnections(selectedElement) + 1
+        );
+
+        connectedElements.put(
+                endElement,
+                getConnections(endElement) + 1
+        );
 
         wirePaths.add(new WirePath(selectedElement, endElement, completePath));
         cancelBuilding();
@@ -253,6 +265,11 @@ public class TileConnectionManager {
     }
 
     private boolean canConnect(CircuitElement a, CircuitElement b) {
+        if ((a instanceof ExtensionCord && b instanceof PowerPlug) ||
+                (a instanceof PowerPlug && b instanceof ExtensionCord)) {
+            return true;
+        }
+
         if (a.color == null || b.color == null) return false;
         return a.color == b.color;
     }

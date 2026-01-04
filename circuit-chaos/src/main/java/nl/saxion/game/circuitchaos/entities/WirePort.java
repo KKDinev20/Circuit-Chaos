@@ -5,6 +5,18 @@ import nl.saxion.game.circuitchaos.entities.enums.PortColor;
 import nl.saxion.gameapp.GameApp;
 
 public class WirePort extends CircuitElement {
+    public WirePort(float x, float y, float size) {
+        super(x, y, size, size);
+        hasPower = true;
+
+        // default: all ports open
+        for (int i = 0; i < 4; i++) {
+            ports[i] = true;
+        }
+
+        this.color = null;
+    }
+
     public WirePort(float x, float y, float size, PortColor color) {
         super(x, y, size, size);
         hasPower = true;

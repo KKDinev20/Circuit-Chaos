@@ -125,6 +125,9 @@ public class WirePath {
         String hTexture = useBrokenTexture ? horizontalBrokenTexture : horizontalTexture;
         String vTexture = useBrokenTexture ? verticalBrokenTexture : verticalTexture;
 
+        if (hTexture == null) hTexture = "black wire extension";
+        if (vTexture == null) vTexture = "black wire vertical";
+
         // Horizontal
         if (left) {
             GameApp.drawTexture(hTexture,

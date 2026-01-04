@@ -28,10 +28,13 @@ public abstract class CircuitElement {
         return px >= positionX && px <= positionX + positionWidth && py >= positionY && py <= positionY + positionHeight;
     }
 
+    public int getMaxConnections() {
+        return 1;
+    }
+
     public boolean hasPower() {
         return hasPower;
     }
-
 
     public abstract void draw();
     public abstract void update();

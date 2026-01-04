@@ -32,6 +32,8 @@ public class ElementManager {
         GameApp.addTexture("black wire extension", "textures/entities/wire extension black.png");
         GameApp.addTexture("black wire vertical", "textures/entities/wire extension black vertical.png");
 
+        GameApp.addTexture("extension cord", "textures/entities/extension cord.png");
+
         loaded = true;
     }
 }

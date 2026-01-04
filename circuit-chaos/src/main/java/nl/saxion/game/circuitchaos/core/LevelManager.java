@@ -9,12 +9,16 @@ import java.util.ArrayList;
 public class LevelManager {
     private ArrayList<Bulb> bulbs = new ArrayList<>();
     private ArrayList<WirePort> ports = new ArrayList<>();
+    private static ArrayList<ExtensionCord> extensionCords = new ArrayList<>();
+    private static ArrayList<PowerPlug> plugs = new ArrayList<>();
     public static int currentLevel = 1;
     private boolean initialized = false;
 
     public void generateLevelOne(float gridX, float gridY, float cellSize) {
         bulbs.clear();
         ports.clear();
+        extensionCords.clear();
+        plugs.clear();
 
         // Bulb 1: At grid position (2, 4) - powered (lit)
         Bulb bulb1 = new Bulb(gridX + (2 * cellSize), gridY + (4 * cellSize), cellSize);
@@ -55,6 +59,20 @@ public class LevelManager {
     public void generateLevelTwo(float gridX, float gridY, float cellSize) {
         bulbs.clear();
         ports.clear();
+        extensionCords.clear();
+        plugs.clear();
+
+        ExtensionCord extensionCord = new ExtensionCord(gridX + (2 * cellSize), gridY + (4 * cellSize), cellSize);
+        extensionCord.update();
+        extensionCords.add(extensionCord);
+
+        PowerPlug plug1 = new PowerPlug(gridX + (1 * cellSize), gridY + (3 * cellSize), cellSize);
+        plug1.update();
+        plugs.add(plug1);
+
+        PowerPlug plug2 = new PowerPlug(gridX + (4 * cellSize), gridY + (2 * cellSize), cellSize);
+        plug2.update();
+        plugs.add(plug2);
 
         // Port 1A
         WirePort port1A = new WirePort(gridX, gridY + (5 * cellSize), cellSize, PortColor.BLUE);
@@ -156,6 +174,12 @@ public class LevelManager {
         for (WirePort port : ports) {
             port.draw();
         }
+        for (ExtensionCord cord : extensionCords) {
+            cord.draw();
+        }
+        for (PowerPlug plug : plugs) {
+            plug.draw();
+        }
     }
 
     // For checking if cells are occupied
@@ -194,5 +218,13 @@ public class LevelManager {
 
     public ArrayList<WirePort> getPorts() {
         return ports;
+    }
+
+    public static ArrayList<ExtensionCord> getExtensionCords() {
+        return extensionCords;
+    }
+
+    public static ArrayList<PowerPlug> getPlugs() {
+        return plugs;
     }
 }

@@ -1,7 +1,6 @@
 package nl.saxion.game.circuitchaos.core;
 
-import nl.saxion.game.circuitchaos.entities.Bulb;
-import nl.saxion.game.circuitchaos.entities.WirePort;
+import nl.saxion.game.circuitchaos.entities.*;
 import nl.saxion.game.circuitchaos.entities.enums.PortColor;
 
 import java.util.ArrayList;
@@ -12,12 +11,16 @@ public class WinConditionManager {
     private int redConnected = 0;
     private int blueConnected = 0;
     private int greenConnected = 0;
+    private int extensionCordsConnected = 0;
+    private int plugsConnected = 0;
 
     // Required connections per level
     private int redRequired = 0;
     private int blueRequired = 0;
     private int greenRequired = 0;
     private int yellowRequired = 0;
+    private int extensionCordsRequired = 0;
+    private int plugsRequired = 0;
 
     private int heartsLost = 0;
     private boolean levelComplete = false;
@@ -30,6 +33,8 @@ public class WinConditionManager {
         redRequired = 1;
         blueRequired = 1;
         greenRequired = 0;
+        extensionCordsRequired = 0;
+        plugsRequired = 0;
     }
 
     public void setupLevelTwoConditions() {
@@ -38,47 +43,70 @@ public class WinConditionManager {
         redRequired = 1;
         blueRequired = 1;
         greenRequired = 1;
+        extensionCordsRequired = 1;
+        plugsRequired = 2;
     }
 
-    public void checkConnections(TileConnectionManager connectionManager,
-                                 ArrayList<WirePort> ports,
-                                 ArrayList<Bulb> bulbs) {
-        // Reset counters
+    public void checkConnections(
+            TileConnectionManager connectionManager,
+            ArrayList<WirePort> ports,
+            ArrayList<Bulb> bulbs,
+            ArrayList<ExtensionCord> extensionCords,
+            ArrayList<PowerPlug> plugs) {
+
+        // RESET EVERYTHING
         redConnected = 0;
         blueConnected = 0;
         greenConnected = 0;
         yellowConnected = 0;
+        extensionCordsConnected = 0;
+        plugsConnected = 0;
 
-        // Check PORT pairs
+        // PORT PAIRS
         for (int i = 0; i < ports.size(); i++) {
-            WirePort port1 = ports.get(i);
-
             for (int j = i + 1; j < ports.size(); j++) {
-                WirePort port2 = ports.get(j);
+                WirePort a = ports.get(i);
+                WirePort b = ports.get(j);
 
-                if (port1.color == port2.color &&
-                        connectionManager.areElementsConnected(port1, port2)) {
-
-                    if (port1.color == PortColor.RED) redConnected++;
-                    else if (port1.color == PortColor.BLUE) blueConnected++;
-                    else if (port1.color == PortColor.GREEN) greenConnected++;
-                    else if (port1.color == PortColor.YELLOW) yellowConnected++;
+                if (a.color == b.color && connectionManager.areElementsConnected(a, b)) {
+                    switch (a.color) {
+                        case RED -> redConnected++;
+                        case BLUE -> blueConnected++;
+                        case GREEN -> greenConnected++;
+                        case YELLOW -> yellowConnected++;
+                    }
                 }
             }
         }
 
-        // Check BULB pairs
+        // BULBS
         for (int i = 0; i < bulbs.size(); i++) {
-            Bulb bulb1 = bulbs.get(i);
-
             for (int j = i + 1; j < bulbs.size(); j++) {
-                Bulb bulb2 = bulbs.get(j);
-
-                if (connectionManager.areElementsConnected(bulb1, bulb2)) {
-
-                    if (bulb1.color == PortColor.YELLOW) yellowConnected++;
+                if (connectionManager.areElementsConnected(bulbs.get(i), bulbs.get(j))) {
+                    yellowConnected++;
                 }
             }
+        }
+
+        // PLUGS
+        for (PowerPlug plug : plugs) {
+            for (ExtensionCord cord : extensionCords) {
+                if (connectionManager.areElementsConnected(plug, cord)) {
+                    plugsConnected++;
+                    break;
+                }
+            }
+        }
+
+        // EXTENSION CORDS (needs 2 plugs)
+        for (ExtensionCord cord : extensionCords) {
+            int connected = 0;
+            for (PowerPlug plug : plugs) {
+                if (connectionManager.areElementsConnected(cord, plug)) {
+                    connected++;
+                }
+            }
+            if (connected >= 2) extensionCordsConnected++;
         }
     }
 
@@ -94,7 +122,9 @@ public class WinConditionManager {
         if (redConnected >= redRequired &&
                 blueConnected >= blueRequired &&
                 greenConnected >= greenRequired &&
-                yellowConnected >= yellowRequired) {
+                yellowConnected >= yellowRequired &&
+                extensionCordsConnected >= extensionCordsRequired &&
+                plugsConnected >= plugsRequired) {
 
             levelComplete = true;
             return true;
@@ -118,6 +148,12 @@ public class WinConditionManager {
         if (yellowRequired > 0) {
             status += "YELLOW: " + yellowConnected + "/" + yellowRequired;
         }
+        if (extensionCordsRequired > 0) {
+            status += "CORDS: " + extensionCordsConnected + "/" + extensionCordsRequired;
+        }
+        if (plugsRequired > 0) {
+            status += "PLUGS: " + plugsConnected + "/" + plugsRequired;
+        }
 
         return status;
     }
@@ -126,11 +162,15 @@ public class WinConditionManager {
     public int getRedConnected() { return redConnected; }
     public int getBlueConnected() { return blueConnected; }
     public int getGreenConnected() { return greenConnected; }
+    public int getExtensionCordsConnected() { return extensionCordsConnected; }
+    public int getPlugsConnected() { return plugsConnected; }
 
     public int getYellowRequired() { return yellowRequired; }
     public int getRedRequired() { return redRequired; }
     public int getBlueRequired() { return blueRequired; }
     public int getGreenRequired() { return greenRequired; }
+    public int getExtensionCordsRequired() { return extensionCordsRequired; }
+    public int getPlugsRequired() { return plugsRequired; }
 
     public int getHeartsLost() {
         return heartsLost;
@@ -154,5 +194,8 @@ public class WinConditionManager {
         blueRequired = 0;
         greenRequired = 0;
         yellowRequired = 0;
+    }
+
+    public void checkConnections(TileConnectionManager connectionManager, ArrayList<WirePort> ports, ArrayList<Bulb> bulbs) {
     }
 }
