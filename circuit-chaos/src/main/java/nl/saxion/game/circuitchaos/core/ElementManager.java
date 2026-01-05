@@ -17,22 +17,30 @@ public class ElementManager {
         GameApp.addTexture("red port", "textures/entities/red wireport.png");
         GameApp.addTexture("blue port", "textures/entities/blue wireport.png");
         GameApp.addTexture("green port", "textures/entities/green wireport.png");
+        GameApp.addTexture("orange port", "textures/entities/orange wireport.png");
+        GameApp.addTexture("pink port", "textures/entities/pink wireport.png");
+        GameApp.addTexture("purple port", "textures/entities/purple wireport.png");
 
         GameApp.addTexture("red wire extension", "textures/entities/wire extension red.png");
         GameApp.addTexture("blue wire extension", "textures/entities/wire extension blue.png");
         GameApp.addTexture("green wire extension", "textures/entities/wire extension green.png");
         GameApp.addTexture("yellow wire extension", "textures/entities/wire extension yellow.png");
+        GameApp.addTexture("orange wire extension", "textures/entities/wire extension orange.png");
+        GameApp.addTexture("black wire extension", "textures/entities/wire extension black.png");
+        GameApp.addTexture("pink wire extension", "textures/entities/wire extension pink.png");
+        GameApp.addTexture("purple wire extension", "textures/entities/wire extension purple.png");
 
         GameApp.addTexture("red wire vertical", "textures/entities/wire extension red vertical.png");
         GameApp.addTexture("blue wire vertical", "textures/entities/wire extension blue vertical.png");
         GameApp.addTexture("green wire vertical", "textures/entities/wire extension green vertical.png");
         GameApp.addTexture("yellow wire vertical", "textures/entities/wire extension yellow vertical.png");
-
-
-        GameApp.addTexture("black wire extension", "textures/entities/wire extension black.png");
+        GameApp.addTexture("orange wire vertical", "textures/entities/wire extension orange vertical.png");
         GameApp.addTexture("black wire vertical", "textures/entities/wire extension black vertical.png");
+        //GameApp.addTexture("pink wire vertical", "textures/entities/wire extension pink vertical.png");
+        //GameApp.addTexture("purple wire vertical", "textures/entities/wire extension purple vertical.png");
 
         GameApp.addTexture("extension cord", "textures/entities/extension cord.png");
+        GameApp.addTexture("plug", "textures/entities/plug.png");
 
         loaded = true;
     }

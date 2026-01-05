@@ -108,6 +108,38 @@ public class LevelManager {
     public void generateLevelThree(float gridX, float gridY, float cellSize) {
         bulbs.clear();
         ports.clear();
+        extensionCords.clear();
+        plugs.clear();
+
+        // Port 1A
+        WirePort port1A = new WirePort(gridX, gridY + (5 * cellSize), cellSize, PortColor.GREEN);
+        port1A.update();
+        ports.add(port1A);
+
+        // Port 1B
+        WirePort port1B = new WirePort(gridX + (3 * cellSize), gridY + (4 * cellSize), cellSize, PortColor.GREEN);
+        port1B.update();
+        ports.add(port1B);
+
+        // Port 2A
+        WirePort port2A = new WirePort(gridX, gridY + (2 * cellSize), cellSize, PortColor.RED);
+        port2A.update();
+        ports.add(port2A);
+
+        // Port 2B
+        WirePort port2B = new WirePort(gridX + cellSize, gridY + (4 * cellSize), cellSize, PortColor.RED);
+        port2B.update();
+        ports.add(port2B);
+
+        // Port 3A
+        WirePort port3A = new WirePort(gridX + cellSize, gridY + (2 * cellSize), cellSize, PortColor.ORANGE);
+        port3A.update();
+        ports.add(port3A);
+
+        // Port 3B
+        WirePort port3B = new WirePort(gridX + (3 * cellSize), gridY + cellSize, cellSize, PortColor.ORANGE);
+        port3B.update();
+        ports.add(port3B);
     }
 
     public void generateLevelFour(float gridX, float gridY, float cellSize) {

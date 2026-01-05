@@ -4,8 +4,10 @@ public enum PortColor {
     RED("red port"),
     BLUE("blue port"),
     GREEN("green port"),
-    YELLOW("yellow port");
-    //PURPLE("purple port");
+    YELLOW("yellow port"),
+    ORANGE("orange port"),
+    PURPLE("purple port"),
+    PINK("pink port");
 
     private final String textureName;
 

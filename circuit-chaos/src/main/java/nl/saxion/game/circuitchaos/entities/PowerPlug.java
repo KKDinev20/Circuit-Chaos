@@ -23,6 +23,6 @@ public class PowerPlug extends WirePort {
         float centerX = positionX + (positionWidth - plugSize) / 2;
         float centerY = positionY + (positionHeight - plugSize) / 2;
 
-        GameApp.drawTexture("bulb_off", centerX, centerY, plugSize, plugSize);
+        GameApp.drawTexture("plug", centerX, centerY, plugSize, plugSize);
     }
 }

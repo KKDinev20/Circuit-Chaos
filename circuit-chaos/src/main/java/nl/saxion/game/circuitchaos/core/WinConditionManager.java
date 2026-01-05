@@ -47,6 +47,16 @@ public class WinConditionManager {
         plugsRequired = 2;
     }
 
+    public void setupLevelThreeConditions() {
+        // Level 1: Need to connect 2 YELLOW bulbs, RED & BLUE ports
+        yellowRequired = 0;
+        redRequired = 1;
+        blueRequired = 1;
+        greenRequired = 1;
+        extensionCordsRequired = 1;
+        plugsRequired = 2;
+    }
+
     public void checkConnections(
             TileConnectionManager connectionManager,
             ArrayList<WirePort> ports,

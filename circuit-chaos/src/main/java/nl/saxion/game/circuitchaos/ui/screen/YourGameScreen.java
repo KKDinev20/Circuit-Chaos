@@ -76,6 +76,8 @@ public class YourGameScreen extends ScalableGameScreen {
             winManager.setupLevelOneConditions();
         } else if (LevelManager.currentLevel == 2) {
             winManager.setupLevelTwoConditions();
+        } else if (LevelManager.currentLevel == 3) {
+            winManager.setupLevelThreeConditions();
         } else {
             // Handle undefined levels - return to menu or show message
             System.out.println("Level " + LevelManager.currentLevel + " not yet implemented!");
@@ -188,8 +190,8 @@ public class YourGameScreen extends ScalableGameScreen {
         GameApp.startSpriteRendering();
         GameApp.drawTexture("level1", 0, 0, getWorldWidth(), getWorldHeight());
         GridManager.drawGrid(gridX, gridY, centeredBox.width);
-        levelManager.drawElements();
         connectionManager.drawWirePathsTextures();
+        levelManager.drawElements();
         drawHearts(gridX, gridY);
         drawTimer(gridX, gridY);
         drawHintsButton(gridX, gridY);
