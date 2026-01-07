@@ -1,7 +1,5 @@
 package nl.saxion.game.circuitchaos.util;
 
-import com.badlogic.gdx.graphics.Color;
-
 // All reusable values in the game into one file.
 public class GameConstants {
     // Grid dimensions
@@ -10,13 +8,14 @@ public class GameConstants {
     public static final int GRID_HEIGHT = 400;
 
     // Tools
-    public static final int TOOL_COUNT = 4;
-    public static final int[] MAX_PLACEMENTS = {3, 2, 1, 1}; // placeholder values
-    public static final Color[] TOOL_COLORS = {Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW}; // placeholder values
+    public static final int TOOL_COUNT = 1;
+    public static final int[] MAX_PLACEMENTS = {4}; // placeholder values
+
+    public static final float TOOL_BOX_SIZE = 64f;
 
     // UI
     public static final int HEARTS_COUNT = 3;
-    public static final float TOOL_SIZE = 66.67f; // size of one tile
+    public static final float TOOL_SIZE = 33.33f; // size of one tile
     public static final float TOOL_SPACING = 100f;
     public static final float HEARTS_SIZE = 35f;
     public static final float HEARTS_SPACING = 10f;

@@ -277,4 +277,34 @@ public class TileConnectionManager {
     private String key(int x, int y) {
         return x + "," + y;
     }
+
+    public boolean hasWireAtCell(int gridX, int gridY) {
+        String cellKey = key(gridX, gridY);
+
+        // Check if this cell is in any wire path
+        for (WirePath wire : wirePaths) {
+            for (GridCenterPoint point : wire.path) {
+                if ((int)point.gridX == gridX && (int)point.gridY == gridY) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    // Also check if wire at cell has power (for win condition)
+    public boolean isWirePoweredAtCell(int gridX, int gridY) {
+        for (WirePath wire : wirePaths) {
+            if (wire.isBroken()) continue; // Broken wires have no power
+
+            for (GridCenterPoint point : wire.path) {
+                if ((int)point.gridX == gridX && (int)point.gridY == gridY) {
+                    return wire.hasPower;
+                }
+            }
+        }
+
+        return false;
+    }
 }

@@ -11,6 +11,7 @@ public class WinConditionManager {
     private int redConnected = 0;
     private int blueConnected = 0;
     private int greenConnected = 0;
+    private int orangeConnected = 0;
     private int extensionCordsConnected = 0;
     private int plugsConnected = 0;
 
@@ -19,8 +20,11 @@ public class WinConditionManager {
     private int blueRequired = 0;
     private int greenRequired = 0;
     private int yellowRequired = 0;
+    private int orangeRequired = 0;
     private int extensionCordsRequired = 0;
     private int plugsRequired = 0;
+    private int blackPortsRequired = 0;
+    private int blackPortsPowered = 0;
 
     private int heartsLost = 0;
     private boolean levelComplete = false;
@@ -39,7 +43,6 @@ public class WinConditionManager {
 
     public void setupLevelTwoConditions() {
         // Level 1: Need to connect 2 YELLOW bulbs, RED & BLUE ports
-        yellowRequired = 0;
         redRequired = 1;
         blueRequired = 1;
         greenRequired = 1;
@@ -49,12 +52,11 @@ public class WinConditionManager {
 
     public void setupLevelThreeConditions() {
         // Level 1: Need to connect 2 YELLOW bulbs, RED & BLUE ports
-        yellowRequired = 0;
         redRequired = 1;
-        blueRequired = 1;
         greenRequired = 1;
-        extensionCordsRequired = 1;
-        plugsRequired = 2;
+        orangeRequired = 1;
+        blackPortsRequired = 3;
+
     }
 
     public void checkConnections(
@@ -62,13 +64,15 @@ public class WinConditionManager {
             ArrayList<WirePort> ports,
             ArrayList<Bulb> bulbs,
             ArrayList<ExtensionCord> extensionCords,
-            ArrayList<PowerPlug> plugs) {
+            ArrayList<PowerPlug> plugs,
+            ArrayList<Tool> placedTools) {
 
         // RESET EVERYTHING
         redConnected = 0;
         blueConnected = 0;
         greenConnected = 0;
         yellowConnected = 0;
+        orangeConnected = 0;
         extensionCordsConnected = 0;
         plugsConnected = 0;
 
@@ -84,6 +88,7 @@ public class WinConditionManager {
                         case BLUE -> blueConnected++;
                         case GREEN -> greenConnected++;
                         case YELLOW -> yellowConnected++;
+                        case ORANGE -> orangeConnected++;
                     }
                 }
             }
@@ -94,6 +99,16 @@ public class WinConditionManager {
             for (int j = i + 1; j < bulbs.size(); j++) {
                 if (connectionManager.areElementsConnected(bulbs.get(i), bulbs.get(j))) {
                     yellowConnected++;
+                }
+            }
+        }
+
+        blackPortsPowered = 0;
+        for (Tool tool : placedTools) {
+            if (tool.gridX >= 0 && tool.gridY >= 0) {
+                // Check if this tool is on a powered wire
+                if (connectionManager.isWirePoweredAtCell(tool.gridX, tool.gridY)) {
+                    blackPortsPowered++;
                 }
             }
         }
@@ -133,8 +148,10 @@ public class WinConditionManager {
                 blueConnected >= blueRequired &&
                 greenConnected >= greenRequired &&
                 yellowConnected >= yellowRequired &&
+                orangeConnected >= orangeRequired &&
                 extensionCordsConnected >= extensionCordsRequired &&
-                plugsConnected >= plugsRequired) {
+                plugsConnected >= plugsRequired &&
+                blackPortsPowered >= blackPortsRequired) {
 
             levelComplete = true;
             return true;
@@ -174,10 +191,12 @@ public class WinConditionManager {
     public int getGreenConnected() { return greenConnected; }
     public int getExtensionCordsConnected() { return extensionCordsConnected; }
     public int getPlugsConnected() { return plugsConnected; }
+    public int getOrangeConnected() {return  orangeConnected;}
 
     public int getYellowRequired() { return yellowRequired; }
     public int getRedRequired() { return redRequired; }
     public int getBlueRequired() { return blueRequired; }
+    public int getOrangeRequired() { return orangeRequired; }
     public int getGreenRequired() { return greenRequired; }
     public int getExtensionCordsRequired() { return extensionCordsRequired; }
     public int getPlugsRequired() { return plugsRequired; }
@@ -199,13 +218,15 @@ public class WinConditionManager {
         blueConnected = 0;
         greenConnected = 0;
         yellowConnected = 0;
+        orangeConnected = 0;
 
         redRequired = 0;
         blueRequired = 0;
+        orangeRequired = 0;
         greenRequired = 0;
         yellowRequired = 0;
     }
 
-    public void checkConnections(TileConnectionManager connectionManager, ArrayList<WirePort> ports, ArrayList<Bulb> bulbs) {
-    }
+    public int getBlackPortsPowered() { return blackPortsPowered; }
+    public int getBlackPortsRequired() { return blackPortsRequired; }
 }

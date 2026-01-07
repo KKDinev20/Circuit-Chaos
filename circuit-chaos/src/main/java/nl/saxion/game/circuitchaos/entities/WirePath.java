@@ -162,13 +162,24 @@ public class WirePath {
     }
 
     public void update() {
-        // Only transfer power if wire is not broken
-        if (!broken) {
+        boolean switchBlocking = start instanceof Switch && !((Switch) start).isOn();
+
+        // If start or end element is a switch that's OFF, block power
+        if (end instanceof Switch && !((Switch) end).isOn()) {
+            switchBlocking = true;
+        }
+
+        if (!broken && !switchBlocking) {
             hasPower = start.hasPower;
-            if (hasPower) end.hasPower = true;
+            if (hasPower) {
+                end.hasPower = true;
+            }
         } else {
-            // Broken wire doesn't transfer power
             hasPower = false;
+
+            if (end instanceof Bulb) {
+                end.hasPower = false;
+            }
         }
     }
 

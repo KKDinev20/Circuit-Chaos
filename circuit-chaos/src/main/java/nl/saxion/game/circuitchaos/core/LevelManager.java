@@ -11,6 +11,7 @@ public class LevelManager {
     private ArrayList<WirePort> ports = new ArrayList<>();
     private static ArrayList<ExtensionCord> extensionCords = new ArrayList<>();
     private static ArrayList<PowerPlug> plugs = new ArrayList<>();
+    private ArrayList<Switch> switches = new ArrayList<>();
     public static int currentLevel = 1;
     private boolean initialized = false;
 
@@ -18,6 +19,7 @@ public class LevelManager {
         bulbs.clear();
         ports.clear();
         extensionCords.clear();
+        switches.clear();
         plugs.clear();
 
         // Bulb 1: At grid position (2, 4) - powered (lit)
@@ -60,6 +62,7 @@ public class LevelManager {
         bulbs.clear();
         ports.clear();
         extensionCords.clear();
+        switches.clear();
         plugs.clear();
 
         ExtensionCord extensionCord = new ExtensionCord(gridX + (2 * cellSize), gridY + (4 * cellSize), cellSize);
@@ -109,6 +112,7 @@ public class LevelManager {
         bulbs.clear();
         ports.clear();
         extensionCords.clear();
+        switches.clear();
         plugs.clear();
 
         // Port 1A
@@ -140,6 +144,11 @@ public class LevelManager {
         WirePort port3B = new WirePort(gridX + (3 * cellSize), gridY + cellSize, cellSize, PortColor.ORANGE);
         port3B.update();
         ports.add(port3B);
+
+        Switch switch1 = new Switch(gridX + cellSize, gridY + (3 * cellSize), cellSize, PortColor.BLACK);
+        switch1.hasPower = true; // Switches are connected to power
+        switch1.update();
+        switches.add(switch1);
     }
 
     public void generateLevelFour(float gridX, float gridY, float cellSize) {
@@ -197,6 +206,9 @@ public class LevelManager {
         for (Bulb bulb : bulbs) {
             bulb.update();
         }
+        for (Switch sw : switches) {
+            sw.update();
+        }
     }
 
     public void drawElements() {
@@ -211,6 +223,9 @@ public class LevelManager {
         }
         for (PowerPlug plug : plugs) {
             plug.draw();
+        }
+        for (Switch sw : switches) {
+            sw.draw();
         }
     }
 
@@ -246,6 +261,9 @@ public class LevelManager {
 
     public ArrayList<Bulb> getBulbs() {
         return bulbs;
+    }
+    public ArrayList<Switch> getSwitches() {
+        return switches;
     }
 
     public ArrayList<WirePort> getPorts() {

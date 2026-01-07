@@ -20,6 +20,7 @@ public class ElementManager {
         GameApp.addTexture("orange port", "textures/entities/orange wireport.png");
         GameApp.addTexture("pink port", "textures/entities/pink wireport.png");
         GameApp.addTexture("purple port", "textures/entities/purple wireport.png");
+        GameApp.addTexture("black port", "textures/entities/black wireport.png");
 
         GameApp.addTexture("red wire extension", "textures/entities/wire extension red.png");
         GameApp.addTexture("blue wire extension", "textures/entities/wire extension blue.png");
@@ -39,8 +40,15 @@ public class ElementManager {
         //GameApp.addTexture("pink wire vertical", "textures/entities/wire extension pink vertical.png");
         //GameApp.addTexture("purple wire vertical", "textures/entities/wire extension purple vertical.png");
 
+
+        // Extension cord textures
         GameApp.addTexture("extension cord", "textures/entities/extension cord.png");
         GameApp.addTexture("plug", "textures/entities/plug.png");
+
+
+        // Switch textures
+        GameApp.addTexture("switch_on", "textures/entities/switch on.png");
+        GameApp.addTexture("switch_off", "textures/entities/switch off.png");
 
         loaded = true;
     }

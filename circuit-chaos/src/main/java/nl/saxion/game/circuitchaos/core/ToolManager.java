@@ -2,10 +2,13 @@ package nl.saxion.game.circuitchaos.core;
 
 import com.badlogic.gdx.graphics.Color;
 import nl.saxion.game.circuitchaos.entities.Tool;
+import nl.saxion.game.circuitchaos.entities.enums.PortColor;
 import nl.saxion.game.circuitchaos.util.GameConstants;
 import nl.saxion.gameapp.GameApp;
 
 import java.util.ArrayList;
+
+import static nl.saxion.game.circuitchaos.core.LevelManager.currentLevel;
 
 public class ToolManager {
     // Array of tools available in the toolbox
@@ -16,28 +19,36 @@ public class ToolManager {
     private float[] originalToolX;
     private float[] originalToolY;
 
+
     public ToolManager() {
         toolboxTools = new Tool[GameConstants.TOOL_COUNT];
         placedTools = new ArrayList<>();
         originalToolX = new float[GameConstants.TOOL_COUNT];
         originalToolY = new float[GameConstants.TOOL_COUNT];
+
     }
 
     // Draw the tools in the toolbox below the grid
     public void initializeTools(float gridX, float gridY) {
-        // Calculate Y position for tools (below the grid)
-        float toolY = gridY - GameConstants.GRID_TOOL_SPACING - GameConstants.TOOL_SIZE;
-        float startX = gridX + 15f;
-
-        // Create each tool with its specific properties
-        for (int i = 0; i < GameConstants.TOOL_COUNT; i++) {
-            float toolX = startX + (i * GameConstants.TOOL_SPACING);
-            toolboxTools[i] = new Tool(toolX, toolY, GameConstants.TOOL_SIZE, GameConstants.TOOL_SIZE,
-                    GameConstants.TOOL_COLORS[i], 0);
-            // Store original position for returning tools later
-            originalToolX[i] = toolX;
-            originalToolY[i] = toolY;
+        if (currentLevel != 3 && currentLevel != 6) {
+            return; // Exit early; no tools for this level
         }
+
+        // Calculate Y position for tools (below the grid)
+        float toolY = gridY - GameConstants.GRID_TOOL_SPACING - GameConstants.TOOL_BOX_SIZE;
+        float startX = gridX + (GameConstants.GRID_WIDTH - GameConstants.TOOL_BOX_SIZE) / 2f;
+
+        toolboxTools[0] = new Tool(
+                startX,
+                toolY,
+                GameConstants.TOOL_BOX_SIZE,
+                GameConstants.TOOL_BOX_SIZE,
+                PortColor.BLACK.getTextureName(),
+                0
+        );
+
+        originalToolX[0] = startX;
+        originalToolY[0] = toolY;
     }
 
     // Finds and returns a tool at the given screen coordinates
@@ -63,22 +74,45 @@ public class ToolManager {
         return false;
     }
 
-    // Places a tool from the toolbox onto the grid at the mouse position
-    public boolean placeTool(Tool tool, float gridX, float gridY, float mouseX, float mouseY) {
-        // Calculate the grid cell position to snap to
-        float[] cellPos = GridManager.getGridCellPosition(gridX, gridY, GameConstants.GRID_WIDTH, mouseX, mouseY);
+    public boolean placeTool(Tool tool, float gridX, float gridY, float mouseX, float mouseY,
+                             TileConnectionManager connectionManager) {
+        // Calculate the grid cell position
+        float[] cellPos = GridManager.getGridCellPosition(
+                gridX, gridY, GameConstants.GRID_WIDTH, mouseX, mouseY
+        );
 
-        // Check if this cell is already occupied
-        if (isCellOccupied(gridX, gridY, cellPos[0], cellPos[1])) {
-            return false; // Placement failed - cell is occupied
+        int gridCellX = (int) ((mouseX - gridX) / (GameConstants.GRID_WIDTH / GameConstants.GRID_SIZE));
+        int gridCellY = (int) ((mouseY - gridY) / (GameConstants.GRID_WIDTH / GameConstants.GRID_SIZE));
+
+        // CHECK: Must be placed on a wire path
+        if (!connectionManager.hasWireAtCell(gridCellX, gridCellY)) {
+            System.out.println("Cannot place port - no wire at this location!");
+            return false;
         }
 
-        // Create a new tool instance for the grid
+        // CHECK: Cell not already occupied by another tool
+        if (isCellOccupied(gridX, gridY, cellPos[0], cellPos[1])) {
+            System.out.println("Cannot place port - cell already occupied!");
+            return false;
+        }
+
+        // Place the tool
+        float placedSize = GameConstants.TOOL_SIZE;
+        float cellSize = (float) GameConstants.GRID_WIDTH / GameConstants.GRID_SIZE;
+
+        float centeredX = cellPos[0] + (cellSize / 2f) - (placedSize / 2f);
+        float centeredY = cellPos[1] + (cellSize / 2f) - (placedSize / 2f);
+
         Tool placedTool = new Tool(
-                cellPos[0], cellPos[1],
-                GameConstants.TOOL_SIZE, GameConstants.TOOL_SIZE,
-                tool.color, 0
+                centeredX,
+                centeredY,
+                placedSize,
+                placedSize,
+                tool.textureName,
+                gridCellX, // Store grid position
+                gridCellY
         );
+
         placedTools.add(placedTool);
 
         // Update the toolbox tool
@@ -90,8 +124,10 @@ public class ToolManager {
                 break;
             }
         }
+
         return true;
     }
+
 
     // Returns a tool to its original position in the toolbox
     public void returnToolToToolbox(Tool tool) {
@@ -103,23 +139,48 @@ public class ToolManager {
             }
         }
     }
-
     // Draws all tools - both in toolbox and placed on grid
     public void drawTools() {
-        // Draw toolbox tools - these may be grayed out if all placements are used
-        for (int i = 0; i < toolboxTools.length; i++) {
-            Tool tool = toolboxTools[i];
+        GameApp.addFont("basic", "fonts/basic.ttf", 24);
+
+        for (Tool tool : toolboxTools) {
             if (tool != null) {
-                // Gray out tool if it can no longer be placed
-                Color drawColor = tool.canBePlaced(GameConstants.MAX_PLACEMENTS[i], tool.usedPlacements)
-                        ? tool.color : Color.GRAY;
-                GameApp.drawRect(tool.x, tool.y, tool.width, tool.height, drawColor);
+                // Icon
+                float iconSize = tool.width * 0.85f;
+                float iconX = tool.x + (tool.width - iconSize) / 2f;
+                float iconY = tool.y + (tool.height - iconSize) / 2f + 6;
+
+                GameApp.drawTexture(
+                        tool.textureName,
+                        iconX,
+                        iconY,
+                        iconSize,
+                        iconSize
+                );
+
+                // Remaining uses
+                int remainingUses =
+                        GameConstants.MAX_PLACEMENTS[0] - tool.usedPlacements;
+
+                GameApp.drawText(
+                        "basic",
+                        String.valueOf(remainingUses),
+                        tool.x + tool.width / 2f,
+                        tool.y + 14,
+                        Color.WHITE
+                );
             }
         }
 
-        // Draw tools that have been placed on the grid - these are always colorful
+        // Placed tools (no UI box)
         for (Tool placedTool : placedTools) {
-            GameApp.drawRect(placedTool.x, placedTool.y, placedTool.width, placedTool.height, placedTool.color);
+            GameApp.drawTexture(
+                    placedTool.textureName,
+                    placedTool.x,
+                    placedTool.y,
+                    placedTool.width,
+                    placedTool.height
+            );
         }
     }
 
@@ -127,5 +188,7 @@ public class ToolManager {
     public Tool[] getToolboxTools() {
         return toolboxTools;
     }
-    //public List<Tool> getPlacedTools() { return placedTools; }
+    public ArrayList<Tool> getPlacedTools() {
+        return placedTools;
+    }
 }
