@@ -21,4 +21,29 @@ public class HelperMethods {
 
         return new float[]{worldX, worldY};
     }
+
+    public static void setBackground(int currentLevel) {
+        GameApp.startSpriteRendering();
+        switch (currentLevel) {
+            case 1:
+                GameApp.drawTexture("level1", 0, 0, getWorldWidth(), getWorldHeight());
+                break;
+            case 2:
+                GameApp.drawTexture("level2", 0, 0, getWorldWidth(), getWorldHeight());
+                break;
+            case 3:
+                GameApp.drawTexture("level3", 0, 0, getWorldWidth(), getWorldHeight());
+                break;
+            case 4:
+                GameApp.drawTexture("level4", 0, 0, getWorldWidth(), getWorldHeight());
+                break;
+            case 5:
+                GameApp.drawTexture("level5", 0, 0, getWorldWidth(), getWorldHeight());
+                break;
+            case 6:
+                GameApp.drawTexture("level6", 0, 0, getWorldWidth(), getWorldHeight());
+                break;
+        }
+        GameApp.endSpriteRendering();
+    }
 }

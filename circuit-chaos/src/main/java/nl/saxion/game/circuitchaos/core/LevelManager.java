@@ -3,8 +3,13 @@ package nl.saxion.game.circuitchaos.core;
 import nl.saxion.game.circuitchaos.entities.*;
 import nl.saxion.game.circuitchaos.entities.enums.PortColor;
 import nl.saxion.game.circuitchaos.util.GameConstants;
+import nl.saxion.game.circuitchaos.util.HelperMethods;
+import nl.saxion.gameapp.GameApp;
 
 import java.util.ArrayList;
+
+import static nl.saxion.gameapp.GameApp.getWorldHeight;
+import static nl.saxion.gameapp.GameApp.getWorldWidth;
 
 public class LevelManager {
     private ArrayList<Bulb> bulbs = new ArrayList<>();

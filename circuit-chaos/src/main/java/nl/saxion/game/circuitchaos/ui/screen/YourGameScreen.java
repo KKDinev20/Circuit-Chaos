@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 import nl.saxion.game.circuitchaos.core.*;
 import nl.saxion.game.circuitchaos.entities.*;
 import nl.saxion.game.circuitchaos.util.GameConstants;
+import nl.saxion.game.circuitchaos.util.HelperMethods;
 import nl.saxion.gameapp.GameApp;
 import nl.saxion.gameapp.screens.ScalableGameScreen;
 
@@ -66,7 +67,6 @@ public class YourGameScreen extends ScalableGameScreen {
 
         enableHUD((int) getWorldWidth(), (int) getWorldHeight());
         ElementManager.addTextures();
-        GameApp.addTexture("level1", "textures/backgrounds/house.png");
 
         centeredBox.width = GameConstants.GRID_WIDTH;
         centeredBox.height = GameConstants.GRID_HEIGHT;
@@ -107,6 +107,8 @@ public class YourGameScreen extends ScalableGameScreen {
 
     @Override
     public void render(float delta) {
+        GameApp.clearScreen();
+        HelperMethods.setBackground(LevelManager.currentLevel);
         super.render(delta);
 
         float centerX = getWorldWidth() / 2;
@@ -188,7 +190,6 @@ public class YourGameScreen extends ScalableGameScreen {
 
         // === RENDERING ===
         GameApp.startSpriteRendering();
-        GameApp.drawTexture("level1", 0, 0, getWorldWidth(), getWorldHeight());
         GridManager.drawGrid(gridX, gridY, centeredBox.width);
         connectionManager.drawWirePathsTextures();
         levelManager.drawElements();

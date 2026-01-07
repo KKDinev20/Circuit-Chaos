@@ -1,6 +1,7 @@
 package nl.saxion.game.circuitchaos.ui.screen;
 
 import com.badlogic.gdx.Input;
+import nl.saxion.game.circuitchaos.core.ElementManager;
 import nl.saxion.game.circuitchaos.core.LevelManager;
 import nl.saxion.game.circuitchaos.levels.Level;
 import nl.saxion.game.circuitchaos.util.HelperMethods;
@@ -29,12 +30,7 @@ public class LevelSelectScreen extends ScalableGameScreen {
 
         GameApp.addFont("levelSelectFont", "fonts/Cause-Medium.ttf", 50);
         GameApp.addFont("buttonFont", "fonts/Cause-Medium.ttf", 40);
-        GameApp.addTexture("background1", "textures/backgrounds/house.png");
-        GameApp.addTexture("background2", "textures/backgrounds/Supermarket.png");
-        GameApp.addTexture("background3", "textures/backgrounds/coffee bar.png");
-        GameApp.addTexture("background4", "textures/backgrounds/Mall.png");
-        GameApp.addTexture("background5", "textures/backgrounds/electronics repair.png");
-        GameApp.addTexture("background6", "textures/backgrounds/City power station.png");
+        ElementManager.addTextures();
 
         startX = getWorldWidth() / 2f - btnW / 2f;
         startY = getWorldHeight() / 2f - 150;
@@ -58,9 +54,7 @@ public class LevelSelectScreen extends ScalableGameScreen {
                 my >= backY && my <= backY + btnH);
 
         // Background
-        GameApp.startSpriteRendering();
-        setBackground(currentLevel);
-        GameApp.endSpriteRendering();
+        HelperMethods.setBackground(currentLevel);
 
         //-----------------------------
         // DRAW LEVEL TITLE IN CENTER
@@ -144,29 +138,6 @@ public class LevelSelectScreen extends ScalableGameScreen {
 
         return (mx >= x && mx <= x + textWidth &&
                 my >= y && my <= y + textHeight);
-    }
-
-    private void setBackground(int currentLevel) {
-        switch (currentLevel) {
-            case 1:
-                GameApp.drawTexture("background1", 0, 0, getWorldWidth(), getWorldHeight());
-                break;
-            case 2:
-                GameApp.drawTexture("background2", 0, 0, getWorldWidth(), getWorldHeight());
-                break;
-            case 3:
-                GameApp.drawTexture("background3", 0, 0, getWorldWidth(), getWorldHeight());
-                break;
-            case 4:
-                GameApp.drawTexture("background4", 0, 0, getWorldWidth(), getWorldHeight());
-                break;
-            case 5:
-                GameApp.drawTexture("background5", 0, 0, getWorldWidth(), getWorldHeight());
-                break;
-            case 6:
-                GameApp.drawTexture("background6", 0, 0, getWorldWidth(), getWorldHeight());
-                break;
-        }
     }
 
     private void handleInput() {
