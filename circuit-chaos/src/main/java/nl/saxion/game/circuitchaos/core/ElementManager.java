@@ -45,6 +45,14 @@ public class ElementManager {
         GameApp.addTexture("extension cord", "textures/entities/extension cord.png");
         GameApp.addTexture("plug", "textures/entities/plug.png");
 
+        // Add backgrounds
+        GameApp.addTexture("level1", "textures/backgrounds/house.png");
+        GameApp.addTexture("level2", "textures/backgrounds/Supermarket.png");
+        GameApp.addTexture("level3", "textures/backgrounds/coffee bar.png");
+        GameApp.addTexture("level4", "textures/backgrounds/Mall.png");
+        GameApp.addTexture("level5", "textures/backgrounds/electronics repair.png");
+        GameApp.addTexture("level6", "textures/backgrounds/City power station.png");
+
 
         // Switch textures
         GameApp.addTexture("switch_on", "textures/entities/switch on.png");
