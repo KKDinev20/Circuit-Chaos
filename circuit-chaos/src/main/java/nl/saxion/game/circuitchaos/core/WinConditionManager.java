@@ -12,6 +12,8 @@ public class WinConditionManager {
     private int blueConnected = 0;
     private int greenConnected = 0;
     private int orangeConnected = 0;
+    private int pinkConnected = 0;
+    private int purpleConnected = 0;
     private int extensionCordsConnected = 0;
     private int plugsConnected = 0;
 
@@ -21,6 +23,8 @@ public class WinConditionManager {
     private int greenRequired = 0;
     private int yellowRequired = 0;
     private int orangeRequired = 0;
+    private int pinkRequired = 0;
+    private int purpleRequired = 0;
     private int extensionCordsRequired = 0;
     private int plugsRequired = 0;
 
@@ -65,6 +69,20 @@ public class WinConditionManager {
         blackPortsRequiredToSwitch = 3;
         switchKey = keySwitch;
     }
+
+    public void setupLevelFourConditions() {
+        greenRequired = 1;
+        purpleRequired = 1;
+        pinkRequired = 1;
+        redRequired = 1;
+        extensionCordsRequired = 1;
+        plugsRequired = 2;
+        yellowRequired = 1;
+
+
+
+    }
+
     public void checkConnections(
             TileConnectionManager connectionManager,
             ArrayList<WirePort> ports,
@@ -79,6 +97,8 @@ public class WinConditionManager {
         greenConnected = 0;
         yellowConnected = 0;
         orangeConnected = 0;
+        pinkConnected = 0;
+        purpleConnected = 0;
         extensionCordsConnected = 0;
         plugsConnected = 0;
         blackPortsConnectedToSwitch = 0;
@@ -244,4 +264,6 @@ public class WinConditionManager {
         blackPortsConnectedToSwitch = 0;
         blackPortsRequiredToSwitch = 0;
     }
+
+
 }

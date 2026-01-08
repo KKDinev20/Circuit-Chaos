@@ -28,8 +28,8 @@ public class ElementManager {
         GameApp.addTexture("yellow wire extension", "textures/entities/wire extension yellow.png");
         GameApp.addTexture("orange wire extension", "textures/entities/wire extension orange.png");
         GameApp.addTexture("black wire extension", "textures/entities/wire extension black.png");
-        GameApp.addTexture("pink wire extension", "textures/entities/wire extension pink.png");
-        GameApp.addTexture("purple wire extension", "textures/entities/wire extension purple.png");
+        GameApp.addTexture("pink wire extension", "textures/entities/wire extension pink.png.jpeg");
+        GameApp.addTexture("purple wire extension", "textures/entities/wire extension purple.png.jpeg");
 
         GameApp.addTexture("red wire vertical", "textures/entities/wire extension red vertical.png");
         GameApp.addTexture("blue wire vertical", "textures/entities/wire extension blue vertical.png");
@@ -37,8 +37,8 @@ public class ElementManager {
         GameApp.addTexture("yellow wire vertical", "textures/entities/wire extension yellow vertical.png");
         GameApp.addTexture("orange wire vertical", "textures/entities/wire extension orange vertical.png");
         GameApp.addTexture("black wire vertical", "textures/entities/wire extension black vertical.png");
-        //GameApp.addTexture("pink wire vertical", "textures/entities/wire extension pink vertical.png");
-        //GameApp.addTexture("purple wire vertical", "textures/entities/wire extension purple vertical.png");
+        GameApp.addTexture("pink wire vertical", "textures/entities/wire extension pink vertical.png.jpeg");
+        GameApp.addTexture("purple wire vertical", "textures/entities/wire extension purple vertical.png.jpeg");
 
 
         // Extension cord textures

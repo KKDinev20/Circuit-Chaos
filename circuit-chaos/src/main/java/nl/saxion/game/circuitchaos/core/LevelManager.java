@@ -3,13 +3,8 @@ package nl.saxion.game.circuitchaos.core;
 import nl.saxion.game.circuitchaos.entities.*;
 import nl.saxion.game.circuitchaos.entities.enums.PortColor;
 import nl.saxion.game.circuitchaos.util.GameConstants;
-import nl.saxion.game.circuitchaos.util.HelperMethods;
-import nl.saxion.gameapp.GameApp;
 
 import java.util.ArrayList;
-
-import static nl.saxion.gameapp.GameApp.getWorldHeight;
-import static nl.saxion.gameapp.GameApp.getWorldWidth;
 
 public class LevelManager {
     private ArrayList<Bulb> bulbs = new ArrayList<>();
@@ -159,6 +154,78 @@ public class LevelManager {
     public void generateLevelFour(float gridX, float gridY, float cellSize) {
         bulbs.clear();
         ports.clear();
+        extensionCords.clear();
+        switches.clear();
+        plugs.clear();
+
+        // PORT 1A
+        WirePort port1A = new WirePort(gridX, gridY + (5 * cellSize), cellSize, PortColor.GREEN);
+        port1A.update();
+        ports.add(port1A);
+
+        // PORT 1B
+        WirePort port1B = new WirePort(gridX + (4 * cellSize), gridY + (4 * cellSize), cellSize, PortColor.GREEN);
+        port1B.update();
+        ports.add(port1B);
+
+        // PORT 2A
+        WirePort port2A = new WirePort(gridX, gridY + (4 * cellSize), cellSize, PortColor.PINK);
+        port2A.update();
+        ports.add(port2A);
+
+        // PORT 2B
+        WirePort port2B = new WirePort(gridX + (1* cellSize), gridY, cellSize, PortColor.PINK);
+        port2B.update();
+        ports.add(port2B);
+
+        // PORT 3A
+        WirePort port3A = new WirePort(gridX + (1 * cellSize), gridY + (1 * cellSize), cellSize, PortColor.RED);
+        port3A.update();
+        ports.add(port3A);
+
+        // PORT 3B
+        WirePort port3B = new WirePort(gridX + (2 * cellSize), gridY, cellSize, PortColor.RED);
+        port3B.update();
+        ports.add(port3B);
+
+        // PORT 4A
+        WirePort port4A = new WirePort(gridX + (1 * cellSize), gridY + (3 * cellSize), cellSize, PortColor.PURPLE);
+        port4A.update();
+        ports.add(port4A);
+
+        // PORT 4B
+        WirePort port4B = new WirePort(gridX + (3 * cellSize), gridY + (4 * cellSize), cellSize, PortColor.PURPLE);
+        port4B.update();
+        ports.add(port4B);
+
+        //BULB 1A
+        Bulb bulb1 = new Bulb(gridX + (1 * cellSize), gridY + (2 * cellSize), cellSize);
+        bulb1.color = PortColor.YELLOW;
+        bulb1.hasPower = true;
+        bulb1.update();
+
+        bulbs.add(bulb1);
+
+        // BULB 1B
+        Bulb bulb2 = new Bulb(gridX + (1 * cellSize) + (3 * cellSize), gridY, cellSize);
+        bulb2.color = PortColor.YELLOW;
+        bulb2.hasPower = false;
+        bulb2.update();
+
+        bulbs.add(bulb2);
+
+        ExtensionCord extensionCord = new ExtensionCord(gridX + (4 * cellSize), gridY + (2 * cellSize), cellSize);
+        extensionCord.update();
+        extensionCords.add(extensionCord);
+
+        PowerPlug plug1 = new PowerPlug(gridX + (5 * cellSize), gridY + (5 * cellSize), cellSize);
+        plug1.update();
+        plugs.add(plug1);
+
+        PowerPlug plug2 = new PowerPlug(gridX + (5 * cellSize), gridY + cellSize, cellSize);
+        plug2.update();
+        plugs.add(plug2);
+
     }
 
     public void generateLevelFive(float gridX, float gridY, float cellSize) {

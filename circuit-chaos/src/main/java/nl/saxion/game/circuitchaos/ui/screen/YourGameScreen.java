@@ -25,7 +25,7 @@ public class YourGameScreen extends ScalableGameScreen {
     private boolean levelEnded = false;
 
     // TIMER
-    private float timeLeft = 35f;   // 2 minutes
+    private float timeLeft = 65f;   // 2 minutes
 
     private boolean showEndScreen = false;
     private boolean wonLevel = false;
@@ -91,6 +91,8 @@ public class YourGameScreen extends ScalableGameScreen {
             // GET THE SWITCH AFTER IT EXISTS
             Switch keySwitch = levelManager.getSwitchKey();
             winManager.setupLevelThreeConditions(keySwitch);
+        } else if (LevelManager.currentLevel == 4) {
+            winManager.setupLevelFourConditions();
         } else {
             // Handle undefined levels - return to menu or show message
             System.out.println("Level " + LevelManager.currentLevel + " not yet implemented!");
