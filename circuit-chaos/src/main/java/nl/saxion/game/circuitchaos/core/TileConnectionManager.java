@@ -270,6 +270,16 @@ public class TileConnectionManager {
             return true;
         }
 
+        if ((a instanceof Switch && b instanceof Tool) ||
+                (a instanceof Tool && b instanceof Switch)) {
+            return true;
+        }
+
+        if ((a instanceof Tool && b instanceof WirePort) ||
+                (a instanceof WirePort && b instanceof Tool)) {
+            return a.color == b.color;
+        }
+
         if (a.color == null || b.color == null) return false;
         return a.color == b.color;
     }

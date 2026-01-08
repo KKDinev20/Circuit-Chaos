@@ -9,7 +9,7 @@ public class GameConstants {
 
     // Tools
     public static final int TOOL_COUNT = 1;
-    public static final int[] MAX_PLACEMENTS = {4}; // placeholder values
+    public static final int[] MAX_PLACEMENTS = {3}; // placeholder values
 
     public static final float TOOL_BOX_SIZE = 64f;
 

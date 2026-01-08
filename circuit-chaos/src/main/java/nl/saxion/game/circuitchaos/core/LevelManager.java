@@ -150,7 +150,7 @@ public class LevelManager {
         port3B.update();
         ports.add(port3B);
 
-        Switch switch1 = new Switch(gridX + cellSize, gridY + (3 * cellSize), cellSize, PortColor.BLACK);
+        Switch switch1 = new Switch(gridX + (2 * cellSize), gridY + (3 * cellSize), cellSize, PortColor.BLACK);
         switch1.hasPower = true; // Switches are connected to power
         switch1.update();
         switches.add(switch1);
@@ -205,7 +205,11 @@ public class LevelManager {
         initialized = false;
         bulbs.clear();
         ports.clear();
+        switches.clear();
+        extensionCords.clear();
+        plugs.clear();
     }
+
 
     public void updateElements() {
         for (Bulb bulb : bulbs) {
@@ -281,5 +285,15 @@ public class LevelManager {
 
     public static ArrayList<PowerPlug> getPlugs() {
         return plugs;
+    }
+
+    public Switch getSwitchKey() {
+        // If you only have one switch, return it
+        for (Switch sw : getSwitches()) {
+            if (sw.color == PortColor.BLACK) { // or some identifier for the key switch
+                return sw;
+            }
+        }
+        return null;
     }
 }

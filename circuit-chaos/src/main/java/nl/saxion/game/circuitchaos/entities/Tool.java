@@ -1,6 +1,9 @@
 package nl.saxion.game.circuitchaos.entities;
 
-public class Tool {
+import nl.saxion.game.circuitchaos.entities.enums.PortColor;
+import nl.saxion.gameapp.GameApp;
+
+public class Tool extends CircuitElement {
     public float x;
     public float y;
     public float width;
@@ -12,11 +15,13 @@ public class Tool {
 
     // Update constructor:
     public Tool(float x, float y, float width, float height, String textureName, int gridX, int gridY) {
+        super(x,y,width,height);
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
         this.textureName = textureName;
+        this.color = PortColor.BLACK;
         this.gridX = gridX;
         this.gridY = gridY;
     }
@@ -33,5 +38,26 @@ public class Tool {
 
     public boolean containsPoint(float pointX, float pointY) {
         return pointX >= x && pointX <= x + width && pointY >= y && pointY <= y + height;
+    }
+
+    @Override
+    public void draw() {
+        GameApp.drawTexture(
+                textureName,
+                positionX,
+                positionY,
+                positionWidth,
+                positionHeight
+        );
+    }
+
+    @Override
+    public void update() {
+
+    }
+
+    @Override
+    public int getMaxConnections() {
+        return 1;
     }
 }

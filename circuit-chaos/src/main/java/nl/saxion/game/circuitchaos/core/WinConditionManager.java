@@ -23,42 +23,48 @@ public class WinConditionManager {
     private int orangeRequired = 0;
     private int extensionCordsRequired = 0;
     private int plugsRequired = 0;
-    private int blackPortsRequired = 0;
-    private int blackPortsPowered = 0;
+
+    // Black ports and switch key
+    private Switch switchKey; // the switch that must be ON
+    private int blackPortsConnectedToSwitch = 0;
+    private int blackPortsRequiredToSwitch = 0;
 
     private int heartsLost = 0;
     private boolean levelComplete = false;
     private float timeLeft = 120f;   // 2 minutes
 
-
     public void setupLevelOneConditions() {
-        // Level 1: Need to connect 2 YELLOW bulbs, RED & BLUE ports
         yellowRequired = 1;
         redRequired = 1;
         blueRequired = 1;
         greenRequired = 0;
         extensionCordsRequired = 0;
         plugsRequired = 0;
+        switchKey = null;
+        blackPortsRequiredToSwitch = 0;
     }
 
     public void setupLevelTwoConditions() {
-        // Level 1: Need to connect 2 YELLOW bulbs, RED & BLUE ports
         redRequired = 1;
         blueRequired = 1;
         greenRequired = 1;
         extensionCordsRequired = 1;
         plugsRequired = 2;
+        switchKey = null;
+        blackPortsRequiredToSwitch = 0;
     }
 
-    public void setupLevelThreeConditions() {
-        // Level 1: Need to connect 2 YELLOW bulbs, RED & BLUE ports
+    public void setupLevelThreeConditions(Switch keySwitch) {
+        // Clear previous level requirements
+        reset();
+
+        // Set Level 3 requirements
         redRequired = 1;
         greenRequired = 1;
         orangeRequired = 1;
-        blackPortsRequired = 3;
-
+        blackPortsRequiredToSwitch = 3;
+        switchKey = keySwitch;
     }
-
     public void checkConnections(
             TileConnectionManager connectionManager,
             ArrayList<WirePort> ports,
@@ -75,6 +81,7 @@ public class WinConditionManager {
         orangeConnected = 0;
         extensionCordsConnected = 0;
         plugsConnected = 0;
+        blackPortsConnectedToSwitch = 0;
 
         // PORT PAIRS
         for (int i = 0; i < ports.size(); i++) {
@@ -103,17 +110,40 @@ public class WinConditionManager {
             }
         }
 
-        blackPortsPowered = 0;
-        for (Tool tool : placedTools) {
-            if (tool.gridX >= 0 && tool.gridY >= 0) {
-                // Check if this tool is on a powered wire
-                if (connectionManager.isWirePoweredAtCell(tool.gridX, tool.gridY)) {
-                    blackPortsPowered++;
+        // BLACK PORTS powered through tools
+        blackPortsConnectedToSwitch = 0;
+        System.out.println("=== DEBUG: Checking Switch Connections ===");
+        System.out.println("Switch exists: " + (switchKey != null));
+        if (switchKey != null) {
+            System.out.println("Switch is ON: " + switchKey.isOn());
+            System.out.println("Number of placed tools: " + placedTools.size());
+        }
+
+        if (switchKey != null && switchKey.isOn()) {
+            // Check WirePorts for black connections
+            for (WirePort port : ports) {
+                if (port.color == PortColor.BLACK) {
+                    boolean connected = connectionManager.areElementsConnected(port, switchKey);
+                    System.out.println("WirePort (BLACK) connected to switch: " + connected);
+                    if (connected) {
+                        blackPortsConnectedToSwitch++;
+                    }
+                }
+            }
+
+            // Check placed tools (they are the black ports!)
+            for (Tool tool : placedTools) {
+                boolean connected = connectionManager.areElementsConnected(tool, switchKey);
+                System.out.println("Tool at (" + tool.gridX + ", " + tool.gridY + ") connected to switch: " + connected);
+                if (connected) {
+                    blackPortsConnectedToSwitch++;
                 }
             }
         }
 
-        // PLUGS
+        System.out.println("Black ports connected: " + blackPortsConnectedToSwitch + " / " + blackPortsRequiredToSwitch);
+
+        // PLUGS connected to extension cords
         for (PowerPlug plug : plugs) {
             for (ExtensionCord cord : extensionCords) {
                 if (connectionManager.areElementsConnected(plug, cord)) {
@@ -133,6 +163,15 @@ public class WinConditionManager {
             }
             if (connected >= 2) extensionCordsConnected++;
         }
+
+        // DEBUG: Print final counts
+        System.out.println("=== Connection Summary ===");
+        System.out.println("Red: " + redConnected + "/" + redRequired);
+        System.out.println("Green: " + greenConnected + "/" + greenRequired);
+        System.out.println("Orange: " + orangeConnected + "/" + orangeRequired);
+        System.out.println("Yellow: " + yellowConnected + "/" + yellowRequired);
+        System.out.println("Blue: " + blueConnected + "/" + blueRequired);
+        System.out.println("Black (to switch): " + blackPortsConnectedToSwitch + "/" + blackPortsRequiredToSwitch);
     }
 
     public int calculateHeartsLost() {
@@ -151,7 +190,8 @@ public class WinConditionManager {
                 orangeConnected >= orangeRequired &&
                 extensionCordsConnected >= extensionCordsRequired &&
                 plugsConnected >= plugsRequired &&
-                blackPortsPowered >= blackPortsRequired) {
+                blackPortsConnectedToSwitch >= blackPortsRequiredToSwitch &&
+                (switchKey == null || switchKey.isOn())) {
 
             levelComplete = true;
             return true;
@@ -160,38 +200,14 @@ public class WinConditionManager {
         return false;
     }
 
-    public String getConnectionStatus() {
-        String status = "";
-
-        if (redRequired > 0) {
-            status += "RED: " + redConnected + "/" + redRequired + "  ";
-        }
-        if (blueRequired > 0) {
-            status += "BLUE: " + blueConnected + "/" + blueRequired + "  ";
-        }
-        if (greenRequired > 0) {
-            status += "GREEN: " + greenConnected + "/" + greenRequired + "  ";
-        }
-        if (yellowRequired > 0) {
-            status += "YELLOW: " + yellowConnected + "/" + yellowRequired;
-        }
-        if (extensionCordsRequired > 0) {
-            status += "CORDS: " + extensionCordsConnected + "/" + extensionCordsRequired;
-        }
-        if (plugsRequired > 0) {
-            status += "PLUGS: " + plugsConnected + "/" + plugsRequired;
-        }
-
-        return status;
-    }
-
+    // --- Getters ---
     public int getYellowConnected() { return yellowConnected; }
     public int getRedConnected() { return redConnected; }
     public int getBlueConnected() { return blueConnected; }
     public int getGreenConnected() { return greenConnected; }
+    public int getOrangeConnected() { return orangeConnected; }
     public int getExtensionCordsConnected() { return extensionCordsConnected; }
     public int getPlugsConnected() { return plugsConnected; }
-    public int getOrangeConnected() {return  orangeConnected;}
 
     public int getYellowRequired() { return yellowRequired; }
     public int getRedRequired() { return redRequired; }
@@ -201,13 +217,11 @@ public class WinConditionManager {
     public int getExtensionCordsRequired() { return extensionCordsRequired; }
     public int getPlugsRequired() { return plugsRequired; }
 
-    public int getHeartsLost() {
-        return heartsLost;
-    }
+    public int getBlackPortsConnectedToSwitch() { return blackPortsConnectedToSwitch; }
+    public int getBlackPortsRequiredToSwitch() { return blackPortsRequiredToSwitch; }
 
-    public boolean isLevelComplete() {
-        return levelComplete;
-    }
+    public int getHeartsLost() { return heartsLost; }
+    public boolean isLevelComplete() { return levelComplete; }
 
     public void reset() {
         heartsLost = 0;
@@ -225,8 +239,9 @@ public class WinConditionManager {
         orangeRequired = 0;
         greenRequired = 0;
         yellowRequired = 0;
-    }
 
-    public int getBlackPortsPowered() { return blackPortsPowered; }
-    public int getBlackPortsRequired() { return blackPortsRequired; }
+        switchKey = null;
+        blackPortsConnectedToSwitch = 0;
+        blackPortsRequiredToSwitch = 0;
+    }
 }

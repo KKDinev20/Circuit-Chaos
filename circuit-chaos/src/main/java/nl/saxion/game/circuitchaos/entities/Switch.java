@@ -48,4 +48,9 @@ public class Switch extends CircuitElement {
     public void setOn(boolean on) {
         this.isOn = on;
     }
+
+    @Override
+    public int getMaxConnections() {
+        return 3;
+    }
 }

@@ -74,20 +74,29 @@ public class YourGameScreen extends ScalableGameScreen {
         centeredBox.width = GameConstants.GRID_WIDTH;
         centeredBox.height = GameConstants.GRID_HEIGHT;
 
+        float centerX = getWorldWidth() / 2f;
+        float centerY = getWorldHeight() / 2f;
+        float gridX = centerX - centeredBox.width / 2f;
+        float gridY = centerY - centeredBox.height / 2f;
+
+        // Initialize level elements first (creates switches, bulbs, etc.)
+        levelManager.initializeLevel(gridX, gridY, centeredBox.width);
+
         // Setup win conditions based on current level
         if (LevelManager.currentLevel == 1) {
             winManager.setupLevelOneConditions();
         } else if (LevelManager.currentLevel == 2) {
             winManager.setupLevelTwoConditions();
         } else if (LevelManager.currentLevel == 3) {
-            winManager.setupLevelThreeConditions();
+            // GET THE SWITCH AFTER IT EXISTS
+            Switch keySwitch = levelManager.getSwitchKey();
+            winManager.setupLevelThreeConditions(keySwitch);
         } else {
             // Handle undefined levels - return to menu or show message
             System.out.println("Level " + LevelManager.currentLevel + " not yet implemented!");
             LevelManager.currentLevel = 1;
             GameApp.switchScreen("MainMenuScreen");
         }
-        // Add more levels here as needed
 
         // Quit menu positions
         panelW = 600;
@@ -107,6 +116,7 @@ public class YourGameScreen extends ScalableGameScreen {
 
         System.out.println("YourGameScreen.show() - Current level: " + LevelManager.currentLevel);
     }
+
 
     @Override
     public void render(float delta) {
@@ -237,12 +247,22 @@ public class YourGameScreen extends ScalableGameScreen {
                         if (connectionManager.isBuilding()) {
                             connectionManager.finishBuilding(sw);
                         } else {
-                            // Just clicking to toggle switch (not building wire)
-                            if (!GameApp.isButtonPressed(Input.Buttons.LEFT)) {
-                                sw.toggle();
-                            } else {
-                                connectionManager.startBuilding(sw, gridX, gridY, cellSize);
-                            }
+                            sw.toggle();
+                        }
+                        clickedElement = true;
+                        break;
+                    }
+                }
+            }
+
+
+            if (!clickedElement) {
+                for (Tool tool : toolManager.getPlacedTools()) {
+                    if (tool.contains(mouseX, mouseY)) {
+                        if (connectionManager.isBuilding()) {
+                            connectionManager.finishBuilding(tool);
+                        } else {
+                            connectionManager.startBuilding(tool, gridX, gridY, cellSize);
                         }
                         clickedElement = true;
                         break;
