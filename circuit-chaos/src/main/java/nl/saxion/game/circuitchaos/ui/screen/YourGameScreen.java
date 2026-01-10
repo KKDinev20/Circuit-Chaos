@@ -65,7 +65,7 @@ public class YourGameScreen extends ScalableGameScreen {
         showEndScreen = false;
         wonLevel = false;
         showQuitMenu = false;
-        timeLeft = 35f;
+        timeLeft = 65f;
         currentlyDragging = null;
 
         enableHUD((int) getWorldWidth(), (int) getWorldHeight());
@@ -225,12 +225,11 @@ public class YourGameScreen extends ScalableGameScreen {
         float mouseY = getMouseY();
         float cellSize = centeredBox.width / GameConstants.GRID_SIZE;
 
+        // ===== LEFT CLICK - WIRE DRAWING & TOOL DRAGGING =====
         if (GameApp.isButtonJustPressed(Input.Buttons.LEFT)) {
-
-            // 1. Check if clicked on circuit element
             boolean clickedElement = false;
 
-            // Check bulbs
+            // Check bulbs - can start/finish wire connections
             for (Bulb bulb : levelManager.getBulbs()) {
                 if (bulb.contains(mouseX, mouseY)) {
                     if (connectionManager.isBuilding()) {
@@ -243,13 +242,14 @@ public class YourGameScreen extends ScalableGameScreen {
                 }
             }
 
+            // Check switches - can start/finish wire connections (toggle moved to right-click)
             if (!clickedElement) {
                 for (Switch sw : levelManager.getSwitches()) {
                     if (sw.contains(mouseX, mouseY)) {
                         if (connectionManager.isBuilding()) {
                             connectionManager.finishBuilding(sw);
                         } else {
-                            sw.toggle();
+                            connectionManager.startBuilding(sw, gridX, gridY, cellSize);
                         }
                         clickedElement = true;
                         break;
@@ -257,7 +257,7 @@ public class YourGameScreen extends ScalableGameScreen {
                 }
             }
 
-
+            // Check placed tools - can start/finish wire connections
             if (!clickedElement) {
                 for (Tool tool : toolManager.getPlacedTools()) {
                     if (tool.contains(mouseX, mouseY)) {
@@ -272,15 +272,13 @@ public class YourGameScreen extends ScalableGameScreen {
                 }
             }
 
-            // Check ports
+            // Check ports - can start/finish wire connections
             if (!clickedElement) {
                 for (WirePort port : levelManager.getPorts()) {
                     if (port.contains(mouseX, mouseY)) {
                         if (connectionManager.isBuilding()) {
-                            // Finish connection - NO GRID PARAMETERS
                             connectionManager.finishBuilding(port);
                         } else {
-                            // Start new connection - ADD GRID PARAMETERS
                             connectionManager.startBuilding(port, gridX, gridY, cellSize);
                         }
                         clickedElement = true;
@@ -289,15 +287,13 @@ public class YourGameScreen extends ScalableGameScreen {
                 }
             }
 
-            // Check extension cords
+            // Check extension cords - can start/finish wire connections
             if (!clickedElement) {
                 for (ExtensionCord cord : levelManager.getExtensionCords()) {
                     if (cord.contains(mouseX, mouseY)) {
                         if (connectionManager.isBuilding()) {
-                            // Finish connection - NO GRID PARAMETERS
                             connectionManager.finishBuilding(cord);
                         } else {
-                            // Start new connection - ADD GRID PARAMETERS
                             connectionManager.startBuilding(cord, gridX, gridY, cellSize);
                         }
                         clickedElement = true;
@@ -306,7 +302,7 @@ public class YourGameScreen extends ScalableGameScreen {
                 }
             }
 
-            // Check plugs
+            // Check plugs - can start/finish wire connections
             if (!clickedElement) {
                 for (PowerPlug plug : levelManager.getPlugs()) {
                     if (plug.contains(mouseX, mouseY)) {
@@ -321,60 +317,66 @@ public class YourGameScreen extends ScalableGameScreen {
                 }
             }
 
-            // 2. If clicked on grid tile (and we're building)
+            // If clicked on grid tile while building wire
             if (!clickedElement && connectionManager.isBuilding() &&
                     mouseX > gridX && mouseX < gridX + centeredBox.width &&
                     mouseY > gridY && mouseY < gridY + centeredBox.height) {
 
-                // Get grid coordinates
                 int gridCellX = (int) ((mouseX - gridX) / cellSize);
                 int gridCellY = (int) ((mouseY - gridY) / cellSize);
 
-                // Get tile center
-                float tileCenterX = gridX + gridCellX * cellSize + cellSize / 2;
-                float tileCenterY = gridY + gridCellY * cellSize + cellSize / 2;
-
-                // Add to path (checks adjacency automatically)
                 boolean added = connectionManager.addTileToPath(gridCellX, gridCellY);
                 if (!added) {
                     System.out.println("Tile not adjacent to path!");
                 }
             }
 
-            // 3. If not wiring, check tools
+            // If not wiring and not clicking an element, check for tool dragging
             if (!clickedElement && !connectionManager.isBuilding()) {
                 currentlyDragging = toolManager.getToolAtPosition(mouseX, mouseY);
             }
         }
 
-        // Cancel with right click or ESC
+        // ===== RIGHT CLICK - TOGGLE SWITCHES & CANCEL WIRING =====
         if (GameApp.isButtonJustPressed(Input.Buttons.RIGHT)) {
-            if (connectionManager.isBuilding()) {
-                connectionManager.cancelBuilding();
-            } else {
-                // Try to repair broken wire
-                connectionManager.repairWireAt(mouseX, mouseY);
+            boolean clickedSwitch = false;
+
+            // Check if clicking on a switch to toggle it
+            if (!connectionManager.isBuilding()) {
+                for (Switch sw : levelManager.getSwitches()) {
+                    if (sw.contains(mouseX, mouseY)) {
+                        sw.toggle();
+                        clickedSwitch = true;
+                        System.out.println("Switch toggled!");
+                        break;
+                    }
+                }
+            }
+
+            // If not toggling a switch, handle other right-click actions
+            if (!clickedSwitch) {
+                if (connectionManager.isBuilding()) {
+                    // Cancel wire building
+                    connectionManager.cancelBuilding();
+                    System.out.println("Wire building cancelled");
+                } else {
+                    // Try to repair broken wire
+                    connectionManager.repairWireAt(mouseX, mouseY);
+                }
             }
         }
 
-        if (GameApp.isButtonJustPressed(Input.Buttons.RIGHT)) {
-            if (connectionManager.isBuilding()) {
-                connectionManager.cancelBuilding();
-            } else {
-                connectionManager.repairWireAt(mouseX, mouseY);
-            }
-        }
-
+        // ===== TOOL DRAGGING =====
         if (GameApp.isButtonPressed(Input.Buttons.LEFT) && currentlyDragging != null) {
             currentlyDragging.x = mouseX - currentlyDragging.width / 2;
             currentlyDragging.y = mouseY - currentlyDragging.height / 2;
         }
 
+        // ===== TOOL PLACEMENT =====
         if (!GameApp.isButtonPressed(Input.Buttons.LEFT) && currentlyDragging != null) {
             if (mouseX > gridX && mouseX < gridX + centeredBox.width &&
                     mouseY > gridY && mouseY < gridY + centeredBox.height) {
 
-                // Calculate grid cell
                 int gridCellX = (int) ((mouseX - gridX) / cellSize);
                 int gridCellY = (int) ((mouseY - gridY) / cellSize);
 
@@ -382,7 +384,7 @@ public class YourGameScreen extends ScalableGameScreen {
                 if (levelManager.isCellOccupied(gridCellX, gridCellY, gridX, gridY, cellSize)) {
                     toolManager.returnToolToToolbox(currentlyDragging);
                 } else {
-                    // Try to place tool - PASS connectionManager
+                    // Try to place tool
                     boolean placementSuccessful = toolManager.placeTool(
                             currentlyDragging, gridX, gridY, mouseX, mouseY, connectionManager);
                     if (!placementSuccessful) {
@@ -611,8 +613,8 @@ public class YourGameScreen extends ScalableGameScreen {
         renderDimmedBackground();
 
         // --- Panel ---
-        float panelW = 820;
-        float panelH = 520;
+        float panelW = 900;
+        float panelH = 580;
         float panelX = getWorldWidth() / 2f - panelW / 2f;
         float panelY = getWorldHeight() / 2f - panelH / 2f;
 
@@ -622,18 +624,22 @@ public class YourGameScreen extends ScalableGameScreen {
         float mouseY = getMouseY();
 
         // ================= TITLE =================
-        float titleY = panelY + panelH - 70;
+        float titleY = panelY + panelH - 60;
 
         GameApp.startSpriteRendering();
+
+        // Shadow effect for title
         GameApp.drawTextCentered(
-                "levelSelectFont",
+                "pixel_timer",
                 wonLevel ? "LEVEL COMPLETE!" : "TIME'S UP!",
-                panelX + panelW / 2f,
+                panelX + panelW / 2f + 3,
                 titleY - 3,
                 "black"
         );
+
+        // Main title
         GameApp.drawTextCentered(
-                "levelSelectFont",
+                "pixel_timer",
                 wonLevel ? "LEVEL COMPLETE!" : "TIME'S UP!",
                 panelX + panelW / 2f,
                 titleY,
@@ -641,48 +647,58 @@ public class YourGameScreen extends ScalableGameScreen {
         );
         GameApp.endSpriteRendering();
 
-        // ================= INFO ROW =================
-        float infoY = titleY - 70;
+        // ================= DIVIDER LINE =================
+        float dividerY = titleY - 50;
+        GameApp.startShapeRenderingFilled();
+        GameApp.drawRect(panelX + 80, dividerY, panelW - 160, 2, wonLevel ? "green-400" : "red-400");
+        GameApp.endShapeRendering();
 
+        // ================= INFO ROW =================
+        float infoY = dividerY - 45;
         float lineSpacing = 40f;
 
         int heartsLost = winManager.calculateHeartsLost();
         int seconds = (int) timeLeft;
 
         GameApp.startSpriteRendering();
+
+        // Time display
         GameApp.drawText(
                 "pixel_timer",
-                "Time Remaining: " + String.format("%02d:%02d", seconds / 60, seconds % 60),
+                "Time: " + String.format("%02d:%02d", seconds / 60, seconds % 60),
                 panelX + 100,
                 infoY,
-                "white"
+                seconds > 30 ? "green-400" : "orange-400"
         );
 
+        // Hearts display
+        String heartsText = "Hearts Lost: " + heartsLost + " / 3";
+        String heartsColor = heartsLost == 0 ? "green-400" : (heartsLost >= 2 ? "red-400" : "orange-400");
         GameApp.drawText(
                 "pixel_timer",
-                "Hearts Lost: " + heartsLost + " / 3",
+                heartsText,
                 panelX + 100,
                 infoY - lineSpacing,
-                heartsLost == 0 ? "green-400" : "orange-400"
+                heartsColor
         );
 
         GameApp.endSpriteRendering();
 
-        // ================= STATS =================
-        float statsY = infoY - lineSpacing - 40f;
-        float lineH = 34;
+        // ================= STATS SECTION =================
+        float statsY = infoY - lineSpacing - 50f;
+        float lineH = 36;
 
         GameApp.startSpriteRendering();
         GameApp.drawText(
                 "pixel_timer",
-                wonLevel ? "Connections" : "Missing Connections",
+                wonLevel ? "Connections:" : "Missing:",
                 panelX + 100,
                 statsY,
                 wonLevel ? "yellow-400" : "red-400"
         );
         GameApp.endSpriteRendering();
 
-        statsY -= 40;
+        statsY -= 45;
 
         Stat[] stats = {
                 new Stat("Yellow Bulbs", winManager.getYellowConnected(), winManager.getYellowRequired()),
@@ -700,20 +716,34 @@ public class YourGameScreen extends ScalableGameScreen {
 
             boolean ok = s.connected() >= s.required();
             String color = ok ? "green-400" : "red-400";
-            String icon = ok ? "✔" : "✖";
 
+            // Use simple ASCII characters that are guaranteed to work
+            String icon = ok ? "[OK]" : "[X]";
+
+            // Draw icon
             GameApp.drawText(
                     "pixel_timer",
-                    icon + " " + s.label(),
-                    panelX + 120,
+                    icon,
+                    panelX + 75,
                     statsY,
                     color
             );
 
+            // Draw label
             GameApp.drawText(
                     "pixel_timer",
-                    s.connected() + " / " + s.required(),
-                    panelX + panelW - 200,
+                    s.label(),
+                    panelX + 200,
+                    statsY,
+                    "white"
+            );
+
+            // Draw progress with better spacing
+            String progress = s.connected() + "/" + s.required();
+            GameApp.drawText(
+                    "pixel_timer",
+                    progress,
+                    panelX + panelW - 180,
                     statsY,
                     color
             );
@@ -723,31 +753,63 @@ public class YourGameScreen extends ScalableGameScreen {
         GameApp.endSpriteRendering();
 
         // ================= BUTTONS =================
-        float btnY = panelY + 50;
+        float btnY = panelY + 55;
 
         primaryBtn = new UIButton(
-                panelX + panelW / 2f - 260 - 20,
+                panelX + panelW / 2f - 280 - 15,
                 btnY,
-                260,
-                80,
-                wonLevel ? "CONTINUE" : "RETRY",
-                wonLevel ? "green-600" : "yellow-600",
-                wonLevel ? "green-400" : "yellow-400"
+                280,
+                85,
+                wonLevel ? "NEXT LEVEL" : "TRY AGAIN",
+                wonLevel ? "green-700" : "yellow-700",
+                wonLevel ? "green-500" : "yellow-500"
         );
 
         secondaryBtn = new UIButton(
-                panelX + panelW / 2f + 20,
-                btnY + 10,
-                200,
-                60,
-                "MENU",
+                panelX + panelW / 2f + 15,
+                btnY,
+                220,
+                70,
+                "MAIN MENU",
                 "gray-700",
-                "gray-600"
+                "gray-500"
         );
 
         primaryBtn.render(mouseX, mouseY);
         secondaryBtn.render(mouseX, mouseY);
+
+        // ================= PERFORMANCE RATING (if won) =================
+        if (wonLevel) {
+            float ratingY = btnY + 100;
+            String rating = "";
+            String ratingColor = "";
+
+            if (heartsLost == 0 && seconds > 40) {
+                rating = "*** PERFECT! ***";
+                ratingColor = "yellow-400";
+            } else if (heartsLost <= 1 && seconds > 20) {
+                rating = "** EXCELLENT! **";
+                ratingColor = "green-400";
+            } else if (heartsLost <= 2) {
+                rating = "* GOOD JOB! *";
+                ratingColor = "blue-400";
+            } else {
+                rating = "COMPLETED";
+                ratingColor = "white";
+            }
+
+            GameApp.startSpriteRendering();
+            GameApp.drawTextCentered(
+                    "pixel_timer",
+                    rating,
+                    panelX + panelW / 2f,
+                    ratingY,
+                    ratingColor
+            );
+            GameApp.endSpriteRendering();
+        }
     }
+
 
 
     private void renderEndScreenClick() {

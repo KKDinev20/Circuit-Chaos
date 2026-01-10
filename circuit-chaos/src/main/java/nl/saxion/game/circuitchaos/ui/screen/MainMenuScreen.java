@@ -3,12 +3,14 @@ package nl.saxion.game.circuitchaos.ui.screen;
 import com.badlogic.gdx.Input;
 import nl.saxion.gameapp.GameApp;
 import nl.saxion.gameapp.screens.ScalableGameScreen;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 
 public class MainMenuScreen extends ScalableGameScreen {
 
     private boolean startHovered = false, levelHovered = false, quitHovered = false;
     private float playY, levelSelectY, quitY;
+
+    // Keyboard navigation
+    private int selectedOption = 0; // 0 = Play, 1 = Level Select, 2 = Quit
 
     public MainMenuScreen() {
         super(1280, 720);
@@ -24,6 +26,8 @@ public class MainMenuScreen extends ScalableGameScreen {
         playY = getWorldHeight() / 2f;
         levelSelectY = playY - 100;
         quitY = levelSelectY - 100;
+
+        selectedOption = 0; // Reset to first option
     }
 
     @Override
@@ -33,14 +37,29 @@ public class MainMenuScreen extends ScalableGameScreen {
         // Clear background
         GameApp.clearScreen("black");
 
+        // Handle keyboard navigation
+        handleKeyboardNavigation();
 
         GameApp.startSpriteRendering();
 
         GameApp.drawTexture("background", 0, 0, getWorldWidth(), getWorldHeight());
 
+        // Check mouse hover
         startHovered = isTextHovered("Play", playY);
         levelHovered = isTextHovered("Level Select", levelSelectY);
         quitHovered = isTextHovered("Quit", quitY);
+
+        // Override with keyboard selection if no mouse hover
+        if (!startHovered && !levelHovered && !quitHovered) {
+            if (selectedOption == 0) startHovered = true;
+            else if (selectedOption == 1) levelHovered = true;
+            else if (selectedOption == 2) quitHovered = true;
+        } else {
+            // Update selectedOption based on mouse hover
+            if (startHovered) selectedOption = 0;
+            else if (levelHovered) selectedOption = 1;
+            else if (quitHovered) selectedOption = 2;
+        }
 
         drawMenuText("Play", playY, startHovered);
         drawMenuText("Level Select", levelSelectY, levelHovered);
@@ -48,10 +67,8 @@ public class MainMenuScreen extends ScalableGameScreen {
 
         GameApp.endSpriteRendering();
 
-        GameApp.startSpriteRendering();
-        GameApp.endSpriteRendering();
-
-        if (GameApp.isButtonJustPressed(Input.Buttons.LEFT)) {
+        // Handle click/enter
+        if (GameApp.isButtonJustPressed(Input.Buttons.LEFT) || GameApp.isKeyJustPressed(Input.Keys.ENTER)) {
             if (startHovered) {
                 GameApp.switchScreen("YourGameScreen");
             }
@@ -64,6 +81,19 @@ public class MainMenuScreen extends ScalableGameScreen {
         }
 
         renderUI();
+    }
+
+    private void handleKeyboardNavigation() {
+        int OPTION_COUNT = 3;
+        if (GameApp.isKeyJustPressed(Input.Keys.UP) || GameApp.isKeyJustPressed(Input.Keys.W)) {
+            selectedOption--;
+            if (selectedOption < 0) selectedOption = OPTION_COUNT - 1;
+        }
+
+        if (GameApp.isKeyJustPressed(Input.Keys.DOWN) || GameApp.isKeyJustPressed(Input.Keys.S)) {
+            selectedOption++;
+            if (selectedOption >= OPTION_COUNT) selectedOption = 0;
+        }
     }
 
     private float[] windowToWorldMouse() {
@@ -124,12 +154,6 @@ public class MainMenuScreen extends ScalableGameScreen {
             GameApp.startSpriteRendering();
         }
     }
-
-    /**
-     * Called by the UI system when a UI element is interacted with.
-     * key = the name passed to addButton / addCheckBox / etc.
-     * value = the new value (not used for buttons).
-     */
 
     @Override
     public void hide() {
