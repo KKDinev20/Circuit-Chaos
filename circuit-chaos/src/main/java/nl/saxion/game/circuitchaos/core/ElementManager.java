@@ -20,6 +20,7 @@ public class ElementManager {
         GameApp.addTexture("pink port", "textures/entities/pink wireport.png");
         GameApp.addTexture("purple port", "textures/entities/purple wireport.png");
         GameApp.addTexture("black port", "textures/entities/black wireport.png");
+        GameApp.addTexture("white port", "textures/entities/white wireport.png");
 
         // Horizontal wire textures
         GameApp.addTexture("red wire extension", "textures/entities/wire extension red.png");
