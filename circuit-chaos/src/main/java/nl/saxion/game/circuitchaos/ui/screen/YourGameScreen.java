@@ -30,6 +30,10 @@ public class YourGameScreen extends ScalableGameScreen {
     private boolean showEndScreen = false;
     private boolean wonLevel = false;
 
+    private DialogueManager dialogueManager;
+    private boolean showingPreDialogue = false;
+    private boolean showingPostDialogue = false;
+
 
     // UI positions for quit menu
     private float btnYesX, btnYesY, btnYesW, btnYesH;
@@ -47,6 +51,7 @@ public class YourGameScreen extends ScalableGameScreen {
         levelManager = new LevelManager();
         connectionManager = new TileConnectionManager();
         winManager = new WinConditionManager();
+        dialogueManager = new DialogueManager();
     }
 
     @Override
@@ -103,6 +108,10 @@ public class YourGameScreen extends ScalableGameScreen {
             GameApp.switchScreen("MainMenuScreen");
         }
 
+        dialogueManager.initialize(getWorldWidth(), getWorldHeight());
+        dialogueManager.startDialogue(LevelManager.currentLevel, DialogueType.PRE_LEVEL);
+        showingPreDialogue = true;
+
         // Quit menu positions
         panelW = 600;
         panelH = 300;
@@ -134,42 +143,74 @@ public class YourGameScreen extends ScalableGameScreen {
         float gridX = centerX - centeredBox.width / 2;
         float gridY = centerY - centeredBox.height / 2;
 
-        // Handle ESC key for quit menu (only if not showing end screen)
-        if (GameApp.isKeyJustPressed(Input.Keys.ESCAPE) && !showEndScreen) {
-            showQuitMenu = !showQuitMenu;
+        // =================================================================
+        // PRIORITY 1: HANDLE PRE-LEVEL DIALOGUE
+        // =================================================================
+        if (showingPreDialogue) {
+            renderGameBackground(gridX, gridY);
+            handlePreDialogue();
+            return;
         }
 
-        // PRIORITY 1: SHOW END SCREEN (win or lose)
+        // =================================================================
+        // PRIORITY 2: HANDLE POST-LEVEL DIALOGUE
+        // =================================================================
+        if (showingPostDialogue) {
+            renderGameBackground(gridX, gridY);
+            handlePostDialogue();
+            return;
+        }
+
+        // =================================================================
+        // PRIORITY 3: SHOW END SCREEN (win or lose stats)
+        // =================================================================
         if (showEndScreen) {
             renderEndScreen();
             renderEndScreenClick();
             return;
         }
 
-        // PRIORITY 2: SHOW QUIT MENU
+        // =================================================================
+        // PRIORITY 4: SHOW QUIT MENU
+        // =================================================================
         if (showQuitMenu) {
             renderQuitMenu();
             renderQuitMenuClick();
-            return; // Stop here
+            return;
         }
+
+        // Handle ESC key for quit menu
+        if (GameApp.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            showQuitMenu = true;
+            return;
+        }
+
+        // =================================================================
+        // NORMAL GAMEPLAY
+        // =================================================================
 
         // GAME IS RUNNING - update timer and check conditions
         if (!levelEnded) {
             timeLeft -= delta;
 
             // CHECK WIN CONDITION EVERY FRAME
-            winManager.checkConnections(connectionManager, levelManager.getPorts(), levelManager.getBulbs(), levelManager.getExtensionCords(), levelManager.getPlugs(), levelManager.getRegulators(), levelManager.getVoltagePorts(), toolManager.getPlacedTools());
+            winManager.checkConnections(connectionManager, levelManager.getPorts(),
+                    levelManager.getBulbs(), levelManager.getExtensionCords(),
+                    levelManager.getPlugs(), levelManager.getRegulators(),
+                    levelManager.getVoltagePorts(), toolManager.getPlacedTools());
 
             if (winManager.checkWinCondition()) {
                 // LEVEL COMPLETE!
                 levelEnded = true;
                 wonLevel = true;
-                showEndScreen = true;
+
+                // Start post-level WIN dialogue
+                dialogueManager.startDialogue(LevelManager.currentLevel, DialogueType.POST_LEVEL_WIN);
+                showingPostDialogue = true;
 
                 System.out.println("=== LEVEL COMPLETE! ===");
                 System.out.println("Time remaining: " + timeLeft + " seconds");
-                System.out.println("Hearts lost: " + winManager.calculateHeartsLost());
-                return; // Stop this frame
+                return;
             }
 
             // Check if time ran out (LOSE condition)
@@ -177,10 +218,13 @@ public class YourGameScreen extends ScalableGameScreen {
                 timeLeft = 0;
                 levelEnded = true;
                 wonLevel = false;
-                showEndScreen = true;
+
+                // Start post-level LOSE dialogue
+                dialogueManager.startDialogue(LevelManager.currentLevel, DialogueType.POST_LEVEL_LOSE);
+                showingPostDialogue = true;
 
                 System.out.println("=== TIME UP! ===");
-                return; // Stop this frame
+                return;
             }
 
             // Start breaking wires when 30 seconds left
@@ -222,6 +266,7 @@ public class YourGameScreen extends ScalableGameScreen {
         connectionManager.drawWirePathsPreview();
         GameApp.endShapeRendering();
     }
+
 
     private void handleInput(float gridX, float gridY) {
         float mouseX = getMouseX();
@@ -439,6 +484,82 @@ public class YourGameScreen extends ScalableGameScreen {
 
             GameApp.drawAtlasRegion("heart", "hearts", heartX, heartsY, GameConstants.HEARTS_SIZE, GameConstants.HEARTS_SIZE);
         }
+    }
+
+    private void handlePreDialogue() {
+        float mouseX = getMouseX();
+        float mouseY = getMouseY();
+
+        dialogueManager.updateSkipButton(mouseX, mouseY);
+
+        // IMMEDIATELY start level on skip click
+        if (GameApp.isButtonJustPressed(Input.Buttons.LEFT) &&
+                dialogueManager.isSkipButtonClicked(mouseX, mouseY)) {
+
+            dialogueManager.skipDialogue();
+            showingPreDialogue = false;
+            return;
+        }
+
+        if (GameApp.isKeyJustPressed(Input.Keys.SPACE)) {
+            if (dialogueManager.isComplete()) {
+                dialogueManager.close();
+                showingPreDialogue = false;
+            } else {
+                dialogueManager.advance();
+            }
+        }
+
+        dialogueManager.draw(getWorldWidth(), getWorldHeight());
+    }
+
+    private void handlePostDialogue() {
+        float mouseX = getMouseX();
+        float mouseY = getMouseY();
+
+        dialogueManager.updateSkipButton(mouseX, mouseY);
+
+        // IMMEDIATELY show end screen on skip click
+        if (GameApp.isButtonJustPressed(Input.Buttons.LEFT) &&
+                dialogueManager.isSkipButtonClicked(mouseX, mouseY)) {
+
+            dialogueManager.skipDialogue();
+            showingPostDialogue = false;
+            showEndScreen = true;
+            return;
+        }
+
+        if (GameApp.isKeyJustPressed(Input.Keys.SPACE)) {
+            if (dialogueManager.isComplete()) {
+                dialogueManager.close();
+                showingPostDialogue = false;
+                showEndScreen = true;
+            } else {
+                dialogueManager.advance();
+            }
+        }
+
+        dialogueManager.draw(getWorldWidth(), getWorldHeight());
+    }
+
+    private void renderGameBackground(float gridX, float gridY) {
+        // Render the game in the background
+        GameApp.startSpriteRendering();
+        GridManager.drawGrid(gridX, gridY, centeredBox.width);
+        connectionManager.drawWirePathsTextures();
+        levelManager.drawElements();
+        toolManager.drawTools();
+        GameApp.endSpriteRendering();
+
+        GameApp.startShapeRenderingFilled();
+        drawToolBoxes(gridX, gridY);
+        connectionManager.drawWirePathsPreview();
+        GameApp.endShapeRendering();
+
+        // Dim the background
+        GameApp.startShapeRenderingFilled();
+        GameApp.drawRect(0, 0, getWorldWidth(), getWorldHeight(), new Color(0, 0, 0, 0.6f));
+        GameApp.endShapeRendering();
     }
 
     private void drawHintsButton(float gridX, float gridY) {

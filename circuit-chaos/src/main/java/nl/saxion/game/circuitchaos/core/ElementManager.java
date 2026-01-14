@@ -64,6 +64,15 @@ public class ElementManager {
 
         GameApp.addTexture("voltage regulator", "textures/entities/voltage regulator.png");
 
+        // Character textures
+        GameApp.addTexture("char_lumen", "textures/characters/lumen.png");
+        GameApp.addTexture("char_konstantin", "textures/characters/konstantin.png");
+
+
+        // UI textures
+        GameApp.addTexture("dialogue_box", "textures/ui/dialog_box.png");
+        GameApp.addTexture("skip_button", "textures/ui/skip_button.png");
+
         loaded = true;
     }
 }
