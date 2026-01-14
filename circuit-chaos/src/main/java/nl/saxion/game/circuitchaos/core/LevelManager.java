@@ -10,15 +10,31 @@ import java.util.ArrayList;
 import static nl.saxion.game.circuitchaos.util.GameConstants.TOOL_SIZE;
 
 public class LevelManager {
-    private ArrayList<Bulb> bulbs = new ArrayList<>();
-    private ArrayList<WirePort> ports = new ArrayList<>();
+    public static int currentLevel = 1;
     private static ArrayList<ExtensionCord> extensionCords = new ArrayList<>();
     private static ArrayList<PowerPlug> plugs = new ArrayList<>();
-    private ArrayList<Switch> switches = new ArrayList<>();
     private static ArrayList<VoltageRegulator> regulators = new ArrayList<>();
     private static ArrayList<VoltagePort> voltagePorts = new ArrayList<>();
-    public static int currentLevel = 1;
+    private ArrayList<Bulb> bulbs = new ArrayList<>();
+    private ArrayList<WirePort> ports = new ArrayList<>();
+    private ArrayList<Switch> switches = new ArrayList<>();
     private boolean initialized = false;
+
+    public static ArrayList<ExtensionCord> getExtensionCords() {
+        return extensionCords;
+    }
+
+    public static ArrayList<PowerPlug> getPlugs() {
+        return plugs;
+    }
+
+    public static ArrayList<VoltageRegulator> getRegulators() {
+        return regulators;
+    }
+
+    public static ArrayList<VoltagePort> getVoltagePorts() {
+        return voltagePorts;
+    }
 
     public void generateLevelOne(float gridX, float gridY, float cellSize) {
         clearElements();
@@ -163,7 +179,7 @@ public class LevelManager {
         ports.add(port2A);
 
         // PORT 2B
-        WirePort port2B = new WirePort(gridX + (1* cellSize), gridY, cellSize, PortColor.PINK);
+        WirePort port2B = new WirePort(gridX + (1 * cellSize), gridY, cellSize, PortColor.PINK);
         port2B.update();
         ports.add(port2B);
 
@@ -220,7 +236,7 @@ public class LevelManager {
     public void generateLevelFive(float gridX, float gridY, float cellSize) {
         clearElements();
 
-        float offset = cellSize * 0.25f;
+        float centerOffset = (cellSize * 0.5f) / 2f;
 
         // Port 1A
         WirePort port1A = new WirePort(gridX, gridY + (5 * cellSize), cellSize, PortColor.RED);
@@ -259,22 +275,22 @@ public class LevelManager {
         regulators.add(voltageRegulator);
 
         // Port 1 Voltage regulator
-        VoltagePort voltagePort1 = new VoltagePort(gridX + (5 * cellSize), gridY + (5 * cellSize), cellSize, PortColor.WHITE);
+        VoltagePort voltagePort1 = new VoltagePort(gridX + (5 * cellSize) + centerOffset, gridY + (5 * cellSize) + centerOffset, cellSize * 0.5f, PortColor.WHITE);
         voltagePort1.update();
         voltagePorts.add(voltagePort1);
 
         // Port 2 Voltage regulator
-        VoltagePort voltagePort2 = new VoltagePort(gridX + (2 * cellSize), gridY + (3 * cellSize), cellSize, PortColor.WHITE);
+        VoltagePort voltagePort2 = new VoltagePort(gridX + (2 * cellSize) + centerOffset, gridY + (3 * cellSize) + centerOffset, cellSize * 0.5f, PortColor.WHITE);
         voltagePort2.update();
         voltagePorts.add(voltagePort2);
 
         // Port 3 Voltage regulator
-        VoltagePort voltagePort3 = new VoltagePort(gridX + (3 * cellSize), gridY, cellSize, PortColor.WHITE);
+        VoltagePort voltagePort3 = new VoltagePort(gridX + (3 * cellSize) + centerOffset, gridY + centerOffset, cellSize * 0.5f, PortColor.WHITE);
         voltagePort3.update();
         voltagePorts.add(voltagePort3);
 
         // Port 4 Voltage regulator
-        VoltagePort voltagePort4 = new VoltagePort(gridX, gridY + (1 * cellSize), cellSize, PortColor.WHITE);
+        VoltagePort voltagePort4 = new VoltagePort(gridX + centerOffset, gridY + (1 * cellSize) + centerOffset, cellSize * 0.5f, PortColor.WHITE);
         voltagePort4.update();
         voltagePorts.add(voltagePort4);
 
@@ -288,7 +304,7 @@ public class LevelManager {
         if (!initialized) {
             float cellSize = gridWidth / GameConstants.GRID_SIZE;
 
-            switch(currentLevel) {
+            switch (currentLevel) {
                 case 1:
                     generateLevelOne(gridX, gridY, cellSize);
                     break;
@@ -296,16 +312,16 @@ public class LevelManager {
                     generateLevelTwo(gridX, gridY, cellSize);
                     break;
                 case 3:
-                    generateLevelThree(gridX, gridY,cellSize);
+                    generateLevelThree(gridX, gridY, cellSize);
                     break;
                 case 4:
-                    generateLevelFour(gridX, gridY,cellSize);
+                    generateLevelFour(gridX, gridY, cellSize);
                     break;
                 case 5:
-                    generateLevelFive(gridX, gridY,cellSize);
+                    generateLevelFive(gridX, gridY, cellSize);
                     break;
                 case 6:
-                    generateLevelSix(gridX, gridY,cellSize);
+                    generateLevelSix(gridX, gridY, cellSize);
                     break;
                 default:
                     generateLevelOne(gridX, gridY, cellSize); // Default
@@ -318,7 +334,6 @@ public class LevelManager {
         initialized = false;
         clearElements();
     }
-
 
     public void updateElements() {
         for (Bulb bulb : bulbs) {
@@ -395,28 +410,13 @@ public class LevelManager {
     public ArrayList<Bulb> getBulbs() {
         return bulbs;
     }
+
     public ArrayList<Switch> getSwitches() {
         return switches;
     }
 
     public ArrayList<WirePort> getPorts() {
         return ports;
-    }
-
-    public static ArrayList<ExtensionCord> getExtensionCords() {
-        return extensionCords;
-    }
-
-    public static ArrayList<PowerPlug> getPlugs() {
-        return plugs;
-    }
-
-    public static ArrayList<VoltageRegulator> getRegulators() {
-        return regulators;
-    }
-
-    public static ArrayList<VoltagePort> getVoltagePorts() {
-        return voltagePorts;
     }
 
     public Switch getSwitchKey() {
