@@ -16,6 +16,8 @@ public class WinConditionManager {
     private int purpleConnected = 0;
     private int extensionCordsConnected = 0;
     private int plugsConnected = 0;
+    private int regulatorsConnected = 0;
+    private int whiteConnected = 0;
 
     // Required connections per level
     private int redRequired = 0;
@@ -27,6 +29,8 @@ public class WinConditionManager {
     private int purpleRequired = 0;
     private int extensionCordsRequired = 0;
     private int plugsRequired = 0;
+    private int regulatorsRequired = 0;
+    private int whiteRequired = 0;
 
     // Black ports and switch key
     private Switch switchKey; // the switch that must be ON
@@ -78,9 +82,14 @@ public class WinConditionManager {
         extensionCordsRequired = 1;
         plugsRequired = 2;
         yellowRequired = 1;
+    }
 
-
-
+    public void setupLevelFiveConditions() {
+        greenRequired = 1;
+        blueRequired = 1;
+        redRequired = 1;
+        regulatorsRequired = 1;
+        whiteRequired = 4;
     }
 
     public void checkConnections(
@@ -89,6 +98,8 @@ public class WinConditionManager {
             ArrayList<Bulb> bulbs,
             ArrayList<ExtensionCord> extensionCords,
             ArrayList<PowerPlug> plugs,
+            ArrayList<VoltageRegulator> regulators,
+            ArrayList<VoltagePort> voltagePorts,
             ArrayList<Tool> placedTools) {
 
         // RESET EVERYTHING
@@ -102,6 +113,8 @@ public class WinConditionManager {
         extensionCordsConnected = 0;
         plugsConnected = 0;
         blackPortsConnectedToSwitch = 0;
+        regulatorsConnected = 0;
+        whiteConnected = 0;
 
         // PORT PAIRS
         for (int i = 0; i < ports.size(); i++) {
@@ -184,6 +197,25 @@ public class WinConditionManager {
             if (connected >= 2) extensionCordsConnected++;
         }
 
+        for (VoltagePort vPort : voltagePorts) {
+            for (VoltageRegulator regulator : regulators) {
+                if (connectionManager.areElementsConnected(vPort, regulator)) {
+                    whiteConnected++;
+                    break;
+                }
+            }
+        }
+
+        for (VoltageRegulator regulator : regulators) {
+            int connected = 0;
+            for (VoltagePort vPort : voltagePorts) {
+                if (connectionManager.areElementsConnected(regulator, vPort)) {
+                    connected++;
+                }
+            }
+            if (connected >= 4) regulatorsConnected++;
+        }
+
         // DEBUG: Print final counts
         System.out.println("=== Connection Summary ===");
         System.out.println("Red: " + redConnected + "/" + redRequired);
@@ -192,6 +224,8 @@ public class WinConditionManager {
         System.out.println("Yellow: " + yellowConnected + "/" + yellowRequired);
         System.out.println("Blue: " + blueConnected + "/" + blueRequired);
         System.out.println("Black (to switch): " + blackPortsConnectedToSwitch + "/" + blackPortsRequiredToSwitch);
+        System.out.println("Regulators: " + regulatorsConnected + "/" + regulatorsRequired);
+        System.out.println("White: " + whiteConnected + "/" + whiteRequired);
     }
 
     public int calculateHeartsLost() {
@@ -211,6 +245,8 @@ public class WinConditionManager {
                 extensionCordsConnected >= extensionCordsRequired &&
                 plugsConnected >= plugsRequired &&
                 blackPortsConnectedToSwitch >= blackPortsRequiredToSwitch &&
+                regulatorsConnected >= regulatorsRequired &&
+                whiteConnected >= whiteRequired &&
                 (switchKey == null || switchKey.isOn())) {
 
             levelComplete = true;
@@ -228,6 +264,8 @@ public class WinConditionManager {
     public int getOrangeConnected() { return orangeConnected; }
     public int getExtensionCordsConnected() { return extensionCordsConnected; }
     public int getPlugsConnected() { return plugsConnected; }
+    public int getRegulatorsConnected() { return regulatorsConnected; }
+    public int getWhiteConnected() { return whiteConnected; }
 
     public int getYellowRequired() { return yellowRequired; }
     public int getRedRequired() { return redRequired; }
@@ -236,6 +274,8 @@ public class WinConditionManager {
     public int getGreenRequired() { return greenRequired; }
     public int getExtensionCordsRequired() { return extensionCordsRequired; }
     public int getPlugsRequired() { return plugsRequired; }
+    public int getRegulatorsRequired() { return regulatorsRequired; }
+    public int getWhiteRequired() { return whiteRequired; }
 
     public int getBlackPortsConnectedToSwitch() { return blackPortsConnectedToSwitch; }
     public int getBlackPortsRequiredToSwitch() { return blackPortsRequiredToSwitch; }
@@ -253,12 +293,24 @@ public class WinConditionManager {
         greenConnected = 0;
         yellowConnected = 0;
         orangeConnected = 0;
+        pinkConnected = 0;
+        purpleConnected = 0;
+        extensionCordsConnected = 0;
+        plugsConnected = 0;
+        regulatorsConnected = 0;
+        whiteConnected = 0;
 
         redRequired = 0;
         blueRequired = 0;
         orangeRequired = 0;
         greenRequired = 0;
         yellowRequired = 0;
+        pinkRequired = 0;
+        purpleRequired = 0;
+        extensionCordsRequired = 0;
+        plugsRequired = 0;
+        regulatorsRequired = 0;
+        whiteRequired = 0;
 
         switchKey = null;
         blackPortsConnectedToSwitch = 0;

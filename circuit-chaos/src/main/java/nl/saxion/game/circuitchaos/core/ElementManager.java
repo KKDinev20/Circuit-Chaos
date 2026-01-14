@@ -31,6 +31,7 @@ public class ElementManager {
         GameApp.addTexture("black wire extension", "textures/entities/wire extension black.png");
         GameApp.addTexture("pink wire extension", "textures/entities/wire extension pink.png");
         GameApp.addTexture("purple wire extension", "textures/entities/wire extension purple.png");
+        GameApp.addTexture("white wire extension", "textures/entities/wire extension white.png");
 
         // Vertical wire textures
         GameApp.addTexture("red wire vertical", "textures/entities/wire extension red vertical.png");
@@ -41,6 +42,7 @@ public class ElementManager {
         GameApp.addTexture("black wire vertical", "textures/entities/wire extension black vertical.png");
         GameApp.addTexture("pink wire vertical", "textures/entities/wire extension pink vertical.png");
         GameApp.addTexture("purple wire vertical", "textures/entities/wire extension purple vertical.png");
+        GameApp.addTexture("white wire vertical", "textures/entities/wire extension white vertical.png");
 
 
         // Extension cord textures
@@ -59,6 +61,8 @@ public class ElementManager {
         // Switch textures
         GameApp.addTexture("switch_on", "textures/entities/switch on.png");
         GameApp.addTexture("switch_off", "textures/entities/switch off.png");
+
+        GameApp.addTexture("voltage regulator", "textures/entities/voltage regulator.png");
 
         loaded = true;
     }

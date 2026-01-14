@@ -4,7 +4,10 @@ import nl.saxion.game.circuitchaos.entities.*;
 import nl.saxion.game.circuitchaos.entities.enums.PortColor;
 import nl.saxion.game.circuitchaos.util.GameConstants;
 
+import javax.sound.sampled.Port;
 import java.util.ArrayList;
+
+import static nl.saxion.game.circuitchaos.util.GameConstants.TOOL_SIZE;
 
 public class LevelManager {
     private ArrayList<Bulb> bulbs = new ArrayList<>();
@@ -12,15 +15,13 @@ public class LevelManager {
     private static ArrayList<ExtensionCord> extensionCords = new ArrayList<>();
     private static ArrayList<PowerPlug> plugs = new ArrayList<>();
     private ArrayList<Switch> switches = new ArrayList<>();
+    private static ArrayList<VoltageRegulator> regulators = new ArrayList<>();
+    private static ArrayList<VoltagePort> voltagePorts = new ArrayList<>();
     public static int currentLevel = 1;
     private boolean initialized = false;
 
     public void generateLevelOne(float gridX, float gridY, float cellSize) {
-        bulbs.clear();
-        ports.clear();
-        extensionCords.clear();
-        switches.clear();
-        plugs.clear();
+        clearElements();
 
         // Bulb 1: At grid position (2, 4) - powered (lit)
         Bulb bulb1 = new Bulb(gridX + (2 * cellSize), gridY + (4 * cellSize), cellSize);
@@ -59,11 +60,7 @@ public class LevelManager {
     }
 
     public void generateLevelTwo(float gridX, float gridY, float cellSize) {
-        bulbs.clear();
-        ports.clear();
-        extensionCords.clear();
-        switches.clear();
-        plugs.clear();
+        clearElements();
 
         ExtensionCord extensionCord = new ExtensionCord(gridX + (2 * cellSize), gridY + (4 * cellSize), cellSize);
         extensionCord.update();
@@ -109,11 +106,7 @@ public class LevelManager {
     }
 
     public void generateLevelThree(float gridX, float gridY, float cellSize) {
-        bulbs.clear();
-        ports.clear();
-        extensionCords.clear();
-        switches.clear();
-        plugs.clear();
+        clearElements();
 
         // Port 1A
         WirePort port1A = new WirePort(gridX, gridY + (5 * cellSize), cellSize, PortColor.GREEN);
@@ -152,11 +145,7 @@ public class LevelManager {
     }
 
     public void generateLevelFour(float gridX, float gridY, float cellSize) {
-        bulbs.clear();
-        ports.clear();
-        extensionCords.clear();
-        switches.clear();
-        plugs.clear();
+        clearElements();
 
         // PORT 1A
         WirePort port1A = new WirePort(gridX, gridY + (5 * cellSize), cellSize, PortColor.GREEN);
@@ -229,13 +218,70 @@ public class LevelManager {
     }
 
     public void generateLevelFive(float gridX, float gridY, float cellSize) {
-        bulbs.clear();
-        ports.clear();
+        clearElements();
+
+        float offset = cellSize * 0.25f;
+
+        // Port 1A
+        WirePort port1A = new WirePort(gridX, gridY + (5 * cellSize), cellSize, PortColor.RED);
+        port1A.update();
+        ports.add(port1A);
+
+        // Port 1B
+        WirePort port1B = new WirePort(gridX + (1 * cellSize), gridY + (3 * cellSize), cellSize, PortColor.RED);
+        port1B.update();
+        ports.add(port1B);
+
+        // Port 2A
+        WirePort port2A = new WirePort(gridX + (1 * cellSize), gridY + (4 * cellSize), cellSize, PortColor.BLUE);
+        port2A.update();
+        ports.add(port2A);
+
+        // Port 2B
+        WirePort port2B = new WirePort(gridX + (4 * cellSize), gridY + (5 * cellSize), cellSize, PortColor.BLUE);
+        port2B.update();
+        ports.add(port2B);
+
+        // Port 3A
+        WirePort port3A = new WirePort(gridX, gridY, cellSize, PortColor.GREEN);
+        port3A.update();
+        ports.add(port3A);
+
+        // Port 3B
+        WirePort port3B = new WirePort(gridX + (2 * cellSize), gridY + (1 * cellSize), cellSize, PortColor.GREEN);
+        port3B.update();
+        ports.add(port3B);
+
+        // Voltage regulator
+        VoltageRegulator voltageRegulator = new VoltageRegulator(gridX + (4 * cellSize), gridY + (2 * cellSize), cellSize, PortColor.WHITE);
+        System.out.println("Placed VoltageRegulator at " + voltageRegulator.positionX + "," + voltageRegulator.positionY);
+        voltageRegulator.update();
+        regulators.add(voltageRegulator);
+
+        // Port 1 Voltage regulator
+        VoltagePort voltagePort1 = new VoltagePort(gridX + (5 * cellSize), gridY + (5 * cellSize), cellSize, PortColor.WHITE);
+        voltagePort1.update();
+        voltagePorts.add(voltagePort1);
+
+        // Port 2 Voltage regulator
+        VoltagePort voltagePort2 = new VoltagePort(gridX + (2 * cellSize), gridY + (3 * cellSize), cellSize, PortColor.WHITE);
+        voltagePort2.update();
+        voltagePorts.add(voltagePort2);
+
+        // Port 3 Voltage regulator
+        VoltagePort voltagePort3 = new VoltagePort(gridX + (3 * cellSize), gridY, cellSize, PortColor.WHITE);
+        voltagePort3.update();
+        voltagePorts.add(voltagePort3);
+
+        // Port 4 Voltage regulator
+        VoltagePort voltagePort4 = new VoltagePort(gridX, gridY + (1 * cellSize), cellSize, PortColor.WHITE);
+        voltagePort4.update();
+        voltagePorts.add(voltagePort4);
+
     }
 
     public void generateLevelSix(float gridX, float gridY, float cellSize) {
-        bulbs.clear();
-        ports.clear();
+        clearElements();
     }
 
     public void initializeLevel(float gridX, float gridY, float gridWidth) {
@@ -270,11 +316,7 @@ public class LevelManager {
 
     public void resetLevel() {
         initialized = false;
-        bulbs.clear();
-        ports.clear();
-        switches.clear();
-        extensionCords.clear();
-        plugs.clear();
+        clearElements();
     }
 
 
@@ -303,6 +345,21 @@ public class LevelManager {
         for (Switch sw : switches) {
             sw.draw();
         }
+        for (VoltageRegulator regulator : regulators) {
+            regulator.draw();
+        }
+        for (VoltagePort vPort : voltagePorts) {
+            vPort.draw();
+        }
+    }
+
+    public void clearElements() {
+        bulbs.clear();
+        ports.clear();
+        switches.clear();
+        extensionCords.clear();
+        plugs.clear();
+        regulators.clear();
     }
 
     // For checking if cells are occupied
@@ -352,6 +409,14 @@ public class LevelManager {
 
     public static ArrayList<PowerPlug> getPlugs() {
         return plugs;
+    }
+
+    public static ArrayList<VoltageRegulator> getRegulators() {
+        return regulators;
+    }
+
+    public static ArrayList<VoltagePort> getVoltagePorts() {
+        return voltagePorts;
     }
 
     public Switch getSwitchKey() {

@@ -93,7 +93,10 @@ public class YourGameScreen extends ScalableGameScreen {
             winManager.setupLevelThreeConditions(keySwitch);
         } else if (LevelManager.currentLevel == 4) {
             winManager.setupLevelFourConditions();
-        } else {
+        } else if (LevelManager.currentLevel == 5) {
+            winManager.setupLevelFiveConditions();
+        }
+        else {
             // Handle undefined levels - return to menu or show message
             System.out.println("Level " + LevelManager.currentLevel + " not yet implemented!");
             LevelManager.currentLevel = 1;
@@ -155,7 +158,7 @@ public class YourGameScreen extends ScalableGameScreen {
             timeLeft -= delta;
 
             // CHECK WIN CONDITION EVERY FRAME
-            winManager.checkConnections(connectionManager, levelManager.getPorts(), levelManager.getBulbs(), levelManager.getExtensionCords(), levelManager.getPlugs(), toolManager.getPlacedTools());
+            winManager.checkConnections(connectionManager, levelManager.getPorts(), levelManager.getBulbs(), levelManager.getExtensionCords(), levelManager.getPlugs(), levelManager.getRegulators(), levelManager.getVoltagePorts(), toolManager.getPlacedTools());
 
             if (winManager.checkWinCondition()) {
                 // LEVEL COMPLETE!
@@ -310,6 +313,34 @@ public class YourGameScreen extends ScalableGameScreen {
                             connectionManager.finishBuilding(plug);
                         } else {
                             connectionManager.startBuilding(plug, gridX, gridY, cellSize);
+                        }
+                        clickedElement = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!clickedElement) {
+                for (VoltageRegulator regulator : levelManager.getRegulators()) {
+                    if (regulator.contains(mouseX, mouseY)) {
+                        if (connectionManager.isBuilding()) {
+                            connectionManager.finishBuilding(regulator);
+                        } else {
+                            connectionManager.startBuilding(regulator, gridX, gridY, cellSize);
+                        }
+                        clickedElement = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!clickedElement) {
+                for (VoltagePort vPort : levelManager.getVoltagePorts()) {
+                    if (vPort.contains(mouseX, mouseY)) {
+                        if (connectionManager.isBuilding()) {
+                            connectionManager.finishBuilding(vPort);
+                        } else {
+                            connectionManager.startBuilding(vPort, gridX, gridY, cellSize);
                         }
                         clickedElement = true;
                         break;
@@ -707,7 +738,9 @@ public class YourGameScreen extends ScalableGameScreen {
                 new Stat("Green Ports", winManager.getGreenConnected(), winManager.getGreenRequired()),
                 new Stat("Orange Ports", winManager.getOrangeConnected(), winManager.getOrangeRequired()),
                 new Stat("Extension Cords", winManager.getExtensionCordsConnected(), winManager.getExtensionCordsRequired()),
-                new Stat("Plugs", winManager.getPlugsConnected(), winManager.getPlugsRequired())
+                new Stat("Plugs", winManager.getPlugsConnected(), winManager.getPlugsRequired()),
+                new Stat("Regulators", winManager.getRegulatorsConnected(), winManager.getRegulatorsRequired()),
+                new Stat("Voltage Ports", winManager.getWhiteConnected(), winManager.getWhiteRequired())
         };
 
         GameApp.startSpriteRendering();

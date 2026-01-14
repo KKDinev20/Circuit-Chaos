@@ -8,7 +8,8 @@ public enum PortColor {
     ORANGE("orange port"),
     PURPLE("purple port"),
     PINK("pink port"),
-    BLACK("black port");
+    BLACK("black port"),
+    WHITE("white port");
 
     private final String textureName;
 

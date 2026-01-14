@@ -1,5 +1,6 @@
 package nl.saxion.game.circuitchaos.entities;
 
+import nl.saxion.game.circuitchaos.entities.enums.PortColor;
 import nl.saxion.gameapp.GameApp;
 
 import java.util.ArrayList;

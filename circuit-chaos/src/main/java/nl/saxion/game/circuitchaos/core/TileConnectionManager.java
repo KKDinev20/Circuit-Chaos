@@ -2,6 +2,7 @@ package nl.saxion.game.circuitchaos.core;
 
 import com.badlogic.gdx.graphics.Color;
 import nl.saxion.game.circuitchaos.entities.*;
+import nl.saxion.game.circuitchaos.entities.enums.PortColor;
 import nl.saxion.gameapp.GameApp;
 
 import java.util.*;
@@ -265,6 +266,11 @@ public class TileConnectionManager {
     }
 
     private boolean canConnect(CircuitElement a, CircuitElement b) {
+        if ((a instanceof VoltageRegulator && b instanceof VoltagePort && b.color == PortColor.WHITE) ||
+                (a instanceof VoltagePort && b instanceof VoltageRegulator && a.color == PortColor.WHITE)) {
+            return true;
+        }
+
         if ((a instanceof ExtensionCord && b instanceof PowerPlug) ||
                 (a instanceof PowerPlug && b instanceof ExtensionCord)) {
             return true;
@@ -279,6 +285,17 @@ public class TileConnectionManager {
                 (a instanceof WirePort && b instanceof Tool)) {
             return a.color == b.color;
         }
+
+        // White ports must NOT connect to each other
+        if (a instanceof VoltagePort && b instanceof VoltagePort) {
+            return false;
+        }
+
+        if (a instanceof VoltagePort && b instanceof VoltageRegulator ||
+            a instanceof VoltageRegulator && b instanceof VoltagePort) {
+            return true;
+        }
+
 
         if (a.color == null || b.color == null) return false;
         return a.color == b.color;
