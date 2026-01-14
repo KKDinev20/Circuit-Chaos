@@ -2,11 +2,7 @@ package nl.saxion.game.circuitchaos.core;
 
 import nl.saxion.game.circuitchaos.entities.enums.DialogueType;
 import nl.saxion.gameapp.GameApp;
-
 import java.util.ArrayList;
-
-import static nl.saxion.gameapp.GameApp.*;
-
 import nl.saxion.game.circuitchaos.entities.DialogueLine;
 
 public class DialogueManager {
@@ -98,12 +94,83 @@ public class DialogueManager {
                     currentDialogue.add(new DialogueLine("Lumen", "I need to think more carefully about the connections!", true));
                 }
                 break;
-
             case 3:
+                currentBackgroundTexture = "level3";
+
+                if (type == DialogueType.PRE_LEVEL) {
+                    leftCharacterTexture = "char_lumen";
+                    rightCharacterTexture = "char_georgi";
+
+                    currentDialogue.add(new DialogueLine(
+                            "Georgi",
+                            "Lumen! My coffee bar is a disaster right now!",
+                            false
+                    ));
+                    currentDialogue.add(new DialogueLine(
+                            "Georgi",
+                            "The lights went out, the espresso machine shut down, even the Wi-Fi is gone!",
+                            false
+                    ));
+                    currentDialogue.add(new DialogueLine(
+                            "Georgi",
+                            "People can’t work, can’t study—some can’t even order coffee!",
+                            false
+                    ));
+                    currentDialogue.add(new DialogueLine(
+                            "Lumen",
+                            "Alright, Georgi. Sounds like the circuits are broken.",
+                            true
+                    ));
+                    currentDialogue.add(new DialogueLine(
+                            "Lumen",
+                            "I’ll fix it using the switches. Just don’t touch the wiring.",
+                            true
+                    ));
+                } else if (type == DialogueType.POST_LEVEL_WIN) {
+
+                    currentDialogue.add(new DialogueLine(
+                            "Lumen",
+                            "All switches are set correctly. Power is flowing again.",
+                            true
+                    ));
+                    currentDialogue.add(new DialogueLine(
+                            "Lumen",
+                            "Lights, espresso machine, and Wi-Fi are fully operational.",
+                            true
+                    ));
+                    currentDialogue.add(new DialogueLine(
+                            "Georgi",
+                            "You did it! The bar is alive again!",
+                            false
+                    ));
+                    currentDialogue.add(new DialogueLine(
+                            "Georgi",
+                            "You’re the best, Lumen! Free cappuccinos forever!",
+                            false
+                    ));
+                } else {
+                    currentDialogue.add(new DialogueLine(
+                            "Georgi",
+                            "Nothing’s working yet! The customers are getting restless!",
+                            false
+                    ));
+                    currentDialogue.add(new DialogueLine(
+                            "Lumen",
+                            "Some switches must still be wrong. I need to redirect the current.",
+                            true
+                    ));
+                }
                 break;
             case 4:
+                currentBackgroundTexture = "level4";
+
                 break;
             case 5:
+                currentBackgroundTexture = "level5";
+
+                break;
+            case 6:
+                currentBackgroundTexture = "level6";
                 break;
             default:
                 currentDialogue.add(new DialogueLine("Lumen", "Time to get to work!", true));
@@ -224,7 +291,6 @@ public class DialogueManager {
         float y = startY;
 
         for (String line : lines) {
-            // STOP if we reach bottom padding
             if (y < dialogueBoxY + 40) break;
 
             GameApp.drawText("dialogueFont", line, x, y, "black");
@@ -251,7 +317,4 @@ public class DialogueManager {
     public void close() {
         dialogueActive = false;
     }
-
-    // Inner class for dialogue lines
-
 }

@@ -493,8 +493,8 @@ public class YourGameScreen extends ScalableGameScreen {
         dialogueManager.updateSkipButton(mouseX, mouseY);
 
         // IMMEDIATELY start level on skip click
-        if (GameApp.isButtonJustPressed(Input.Buttons.LEFT) &&
-                dialogueManager.isSkipButtonClicked(mouseX, mouseY)) {
+        if ((GameApp.isButtonJustPressed(Input.Buttons.LEFT) &&
+                dialogueManager.isSkipButtonClicked(mouseX, mouseY)) || GameApp.isKeyJustPressed(Input.Keys.S)) {
 
             dialogueManager.skipDialogue();
             showingPreDialogue = false;
@@ -520,8 +520,8 @@ public class YourGameScreen extends ScalableGameScreen {
         dialogueManager.updateSkipButton(mouseX, mouseY);
 
         // IMMEDIATELY show end screen on skip click
-        if (GameApp.isButtonJustPressed(Input.Buttons.LEFT) &&
-                dialogueManager.isSkipButtonClicked(mouseX, mouseY)) {
+        if ((GameApp.isButtonJustPressed(Input.Buttons.LEFT) &&
+                dialogueManager.isSkipButtonClicked(mouseX, mouseY)) || GameApp.isKeyJustPressed(Input.Keys.S)){
 
             dialogueManager.skipDialogue();
             showingPostDialogue = false;
