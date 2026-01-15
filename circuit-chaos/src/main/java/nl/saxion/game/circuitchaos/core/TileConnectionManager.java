@@ -25,7 +25,11 @@ public class TileConnectionManager {
     // Wire breaking system
     private Random random = new Random();
     private float wireBreakTimer = 0f;
-    private float wireBreakInterval = 5f; // Break a wire every 5 seconds
+    private float wireBreakInterval = 3f; // Break a wire every 5 seconds
+
+    private float lastClickTime = 0f;
+    private final float doubleClickThreshold = 0.25f; // 0.25 seconds for double click
+
 
     private int getConnections(CircuitElement e) {
         return connectedElements.getOrDefault(e, 0);
@@ -86,6 +90,29 @@ public class TileConnectionManager {
 
         currentPath.add(newTile);
         return true;
+    }
+
+    public boolean removeWireAt(float mouseX, float mouseY) {
+        Iterator<WirePath> iterator = wirePaths.iterator();
+        while (iterator.hasNext()) {
+            WirePath wire = iterator.next();
+            if (wire.containsPoint(mouseX, mouseY, 20f)) { // reuse hitbox check
+                // Free up occupied tiles
+                for (int i = 1; i < wire.path.size() - 1; i++) {
+                    GridCenterPoint tile = wire.path.get(i);
+                    occupiedTiles.remove(key((int) tile.gridX, (int) tile.gridY));
+                }
+
+                // Decrement connection counts
+                connectedElements.put(wire.start, getConnections(wire.start) - 1);
+                connectedElements.put(wire.end, getConnections(wire.end) - 1);
+
+                iterator.remove(); // remove the wire
+                System.out.println("Wire connection removed!");
+                return true;
+            }
+        }
+        return false;
     }
 
     public void finishBuilding(CircuitElement endElement) {
@@ -158,6 +185,10 @@ public class TileConnectionManager {
         for (WirePath wire : wirePaths) {
             wire.update();
         }
+    }
+
+    public ArrayList<WirePath> getWirePaths() {
+        return wirePaths;
     }
 
     // Wire breaking system - call this with delta time when timer is low

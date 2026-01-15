@@ -2,13 +2,16 @@ package nl.saxion.game.circuitchaos.core;
 
 import nl.saxion.game.circuitchaos.entities.*;
 import nl.saxion.game.circuitchaos.entities.enums.PortColor;
-import java.util.ArrayList;
+import java.util.*;
 
 public class HintManager {
     private boolean hintUsed = false;
+    private Random random = new Random();
+    private LevelManager levelManager;
 
-    public HintManager() {
+    public HintManager(LevelManager levelManager) {
         this.hintUsed = false;
+        this.levelManager = levelManager;
     }
 
     public void reset() {
@@ -26,254 +29,359 @@ public class HintManager {
             return false;
         }
 
-        boolean success = false;
-
-        switch (level) {
-            case 1:
-                success = connectLevelOneHint(levelManager, connectionManager, gridX, gridY, cellSize);
-                break;
-            case 2:
-                success = connectLevelTwoHint(levelManager, connectionManager, gridX, gridY, cellSize);
-                break;
-            case 3:
-                success = connectLevelThreeHint(levelManager, connectionManager, gridX, gridY, cellSize);
-                break;
-            case 4:
-                success = connectLevelFourHint(levelManager, connectionManager, gridX, gridY, cellSize);
-                break;
-            case 5:
-                success = connectLevelFiveHint(levelManager, connectionManager, gridX, gridY, cellSize);
-                break;
-            case 6:
-                success = connectLevelSixHint(levelManager, connectionManager, gridX, gridY, cellSize);
-            default:
-                System.out.println("No hint available for this level");
-                return false;
-        }
+        boolean success = solveOneConnection(levelManager, connectionManager, gridX, gridY, cellSize);
 
         if (success) {
             hintUsed = true;
             System.out.println("Hint used! Connection created automatically.");
+        } else {
+            System.out.println("No available hint connection found.");
         }
 
         return success;
     }
 
-    private boolean connectLevelOneHint(LevelManager levelManager, TileConnectionManager connectionManager,
-                                        float gridX, float gridY, float cellSize) {
+    /**
+     * Attempts to solve one incomplete connection on the current level
+     * Randomly selects from ALL available connection types
+     */
+    private boolean solveOneConnection(LevelManager levelManager, TileConnectionManager connectionManager,
+                                       float gridX, float gridY, float cellSize) {
+
+        // Collect ALL possible connections
+        List<ConnectionOption> allOptions = new ArrayList<>();
+
+        // Find all WirePort pairs
+        allOptions.addAll(findWirePortConnections(levelManager));
+
+        // Find all Bulb connections
+        allOptions.addAll(findBulbConnections(levelManager));
+
+        // Find all PowerPlug to ExtensionCord connections
+        allOptions.addAll(findPlugToExtensionConnections(levelManager));
+
+        // Find all VoltagePort connections
+        allOptions.addAll(findVoltagePortConnections(levelManager));
+
+        if (allOptions.isEmpty()) {
+            System.out.println("No available connections found!");
+            return false;
+        }
+
+        // Randomly pick one connection to complete
+        ConnectionOption chosen = allOptions.get(random.nextInt(allOptions.size()));
+
+        System.out.println("Hint connecting: " + chosen.description);
+
+        return findAndCreatePath(chosen.start, chosen.end, connectionManager, gridX, gridY, cellSize);
+    }
+
+    /**
+     * Find all possible WirePort connections grouped by color
+     */
+    private List<ConnectionOption> findWirePortConnections(LevelManager levelManager) {
+        List<ConnectionOption> options = new ArrayList<>();
         ArrayList<WirePort> ports = levelManager.getPorts();
 
-        // Find RED ports
-        WirePort redPort1 = null; // (0, 2)
-        WirePort redPort2 = null; // (2, 0)
-
+        // Group ports by color
+        Map<PortColor, List<WirePort>> portsByColor = new HashMap<>();
         for (WirePort port : ports) {
-            if (port.color == PortColor.RED) {
-                // Check position to identify which red port
-                int gridPosX = Math.round((port.positionX - gridX) / cellSize);
-                int gridPosY = Math.round((port.positionY - gridY) / cellSize);
-
-                if (gridPosX == 0 && gridPosY == 2) {
-                    redPort1 = port;
-                } else if (gridPosX == 2 && gridPosY == 0) {
-                    redPort2 = port;
-                }
+            if (!port.connected) {
+                portsByColor.computeIfAbsent(port.color, k -> new ArrayList<>()).add(port);
             }
         }
 
-        if (redPort1 != null && redPort2 != null) {
-            // Start building from first port
-            connectionManager.startBuilding(redPort1, gridX, gridY, cellSize);
-
-            // Add path: (0,2) -> (1,2) -> (2,2) -> (2,1) -> (2,0)
-            connectionManager.addTileToPath(1, 2);
-            connectionManager.addTileToPath(2, 2);
-            connectionManager.addTileToPath(2, 1);
-
-            // Finish at second port
-            connectionManager.finishBuilding(redPort2);
-
-            return true;
-        }
-
-        return false;
-    }
-
-    private boolean connectLevelTwoHint(LevelManager levelManager, TileConnectionManager connectionManager,
-                                        float gridX, float gridY, float cellSize) {
-        ArrayList<WirePort> ports = levelManager.getPorts();
-
-        WirePort bluePort1 = null; // (0, 5)
-        WirePort bluePort2 = null; // (2, 2)
-
-        for (WirePort port : ports) {
-            if (port.color == PortColor.BLUE) {
-                int gridPosX = Math.round((port.positionX - gridX) / cellSize);
-                int gridPosY = Math.round((port.positionY - gridY) / cellSize);
-
-                if (gridPosX == 0 && gridPosY == 5) {
-                    bluePort1 = port;
-                } else if (gridPosX == 2 && gridPosY == 2) {
-                    bluePort2 = port;
-                }
+        // For each color with 2+ unconnected ports, add connection options
+        for (Map.Entry<PortColor, List<WirePort>> entry : portsByColor.entrySet()) {
+            List<WirePort> colorPorts = entry.getValue();
+            if (colorPorts.size() >= 2) {
+                WirePort port1 = colorPorts.get(0);
+                WirePort port2 = colorPorts.get(1);
+                options.add(new ConnectionOption(
+                        port1, port2,
+                        "WirePort (" + entry.getKey() + ")"
+                ));
             }
         }
 
-        if (bluePort1 != null && bluePort2 != null) {
-            connectionManager.startBuilding(bluePort1, gridX, gridY, cellSize);
-
-            // Path: (0,5) -> (1,5) -> (2,5) -> (2,4) -> (2,3) -> (2,2)
-            connectionManager.addTileToPath(0, 4);
-            connectionManager.addTileToPath(0, 3);
-            connectionManager.addTileToPath(0, 2);
-            connectionManager.addTileToPath(1, 2);
-
-            connectionManager.finishBuilding(bluePort2);
-            return true;
-        }
-
-        return false;
+        return options;
     }
 
-    private boolean connectLevelThreeHint(LevelManager levelManager, TileConnectionManager connectionManager,
-                                          float gridX, float gridY, float cellSize) {
-        ArrayList<WirePort> ports = levelManager.getPorts();
-
-        WirePort greenPort1 = null; // (0, 5)
-        WirePort greenPort2 = null; // (3, 4)
-
-        for (WirePort port : ports) {
-            if (port.color == PortColor.GREEN) {
-                int gridPosX = Math.round((port.positionX - gridX) / cellSize);
-                int gridPosY = Math.round((port.positionY - gridY) / cellSize);
-
-                if (gridPosX == 0 && gridPosY == 5) {
-                    greenPort1 = port;
-                } else if (gridPosX == 3 && gridPosY == 4) {
-                    greenPort2 = port;
-                }
-            }
-        }
-
-        if (greenPort1 != null && greenPort2 != null) {
-            connectionManager.startBuilding(greenPort1, gridX, gridY, cellSize);
-
-            // Path: (0,5) -> (1,5) -> (2,5) -> (3,5) -> (3,4)
-            connectionManager.addTileToPath(1, 5);
-            connectionManager.addTileToPath(2, 5);
-            connectionManager.addTileToPath(3, 5);
-
-            connectionManager.finishBuilding(greenPort2);
-            return true;
-        }
-
-        return false;
-    }
-
-    private boolean connectLevelFourHint(LevelManager levelManager, TileConnectionManager connectionManager,
-                                         float gridX, float gridY, float cellSize) {
-        ArrayList<WirePort> ports = levelManager.getPorts();
-
-        WirePort greenPort1 = null; // (0, 5)
-        WirePort greenPort2 = null; // (4, 4)
-
-        for (WirePort port : ports) {
-            if (port.color == PortColor.GREEN) {
-                int gridPosX = Math.round((port.positionX - gridX) / cellSize);
-                int gridPosY = Math.round((port.positionY - gridY) / cellSize);
-
-                if (gridPosX == 0 && gridPosY == 5) {
-                    greenPort1 = port;
-                } else if (gridPosX == 4 && gridPosY == 4) {
-                    greenPort2 = port;
-                }
-            }
-        }
-
-        if (greenPort1 != null && greenPort2 != null) {
-            connectionManager.startBuilding(greenPort1, gridX, gridY, cellSize);
-
-            // Path: (0,5) -> (1,5) -> (2,5) -> (3,5) -> (4,5) -> (4,4)
-            connectionManager.addTileToPath(1, 5);
-            connectionManager.addTileToPath(2, 5);
-            connectionManager.addTileToPath(3, 5);
-            connectionManager.addTileToPath(4, 5);
-
-            connectionManager.finishBuilding(greenPort2);
-            return true;
-        }
-
-        return false;
-    }
-
-    private boolean connectLevelFiveHint(LevelManager levelManager, TileConnectionManager connectionManager,
-                                         float gridX, float gridY, float cellSize) {
-        ArrayList<WirePort> ports = levelManager.getPorts();
-
-        WirePort redPort1 = null; // (0, 5)
-        WirePort redPort2 = null; // (1, 3)
-
-        for (WirePort port : ports) {
-            if (port.color == PortColor.RED) {
-                int gridPosX = Math.round((port.positionX - gridX) / cellSize);
-                int gridPosY = Math.round((port.positionY - gridY) / cellSize);
-
-                if (gridPosX == 0 && gridPosY == 5) {
-                    redPort1 = port;
-                } else if (gridPosX == 1 && gridPosY == 3) {
-                    redPort2 = port;
-                }
-            }
-        }
-
-        if (redPort1 != null && redPort2 != null) {
-            connectionManager.startBuilding(redPort1, gridX, gridY, cellSize);
-
-            // Path: (0,5) -> (0,4) -> (0,3) -> (1,3)
-            connectionManager.addTileToPath(0, 4);
-            connectionManager.addTileToPath(0, 3);
-
-            connectionManager.finishBuilding(redPort2);
-            return true;
-        }
-
-        return false;
-    }
-
-    private boolean connectLevelSixHint(LevelManager levelManager,
-                                        TileConnectionManager connectionManager,
-                                        float gridX, float gridY, float cellSize) {
-
+    /**
+     * Find all possible Bulb connections
+     */
+    private List<ConnectionOption> findBulbConnections(LevelManager levelManager) {
+        List<ConnectionOption> options = new ArrayList<>();
         ArrayList<Bulb> bulbs = levelManager.getBulbs();
 
-        Bulb bulb1 = null; // (5,5)
-        Bulb bulb2 = null; // (3,4)
+        Bulb litBulb = null;
+        Bulb unlitBulb = null;
 
+        // Find pairs of lit and unlit bulbs
         for (Bulb bulb : bulbs) {
-            if (bulb.color == PortColor.YELLOW) {
-                int gridPosX = Math.round((bulb.positionX - gridX) / cellSize);
-                int gridPosY = Math.round((bulb.positionY - gridY) / cellSize);
+            if (bulb.hasPower && !bulb.connected) {
+                litBulb = bulb;
+                break;
+            }
+        }
 
-                if (gridPosX == 5 && gridPosY == 5) {
-                    bulb1 = bulb;
-                } else if (gridPosX == 3 && gridPosY == 4) {
-                    bulb2 = bulb;
+        if (litBulb != null) {
+            for (Bulb bulb : bulbs) {
+                if (!bulb.hasPower && !bulb.connected && bulb.color == litBulb.color) {
+                    unlitBulb = bulb;
+                    break;
                 }
             }
         }
 
-        if (bulb1 != null && bulb2 != null) {
-            connectionManager.startBuilding(bulb1, gridX, gridY, cellSize);
-
-            // Path: (5,5) → (4,5) → (3,5) → (3,4)
-            connectionManager.addTileToPath(4, 5);
-            connectionManager.addTileToPath(3, 5);
-
-            connectionManager.finishBuilding(bulb2);
-            return true;
+        if (litBulb != null && unlitBulb != null) {
+            options.add(new ConnectionOption(
+                    litBulb, unlitBulb,
+                    "Bulb (YELLOW)"
+            ));
         }
 
-        return false;
+        return options;
     }
 
+    /**
+     * Find all PowerPlug to ExtensionCord connections
+     */
+    private List<ConnectionOption> findPlugToExtensionConnections(LevelManager levelManager) {
+        List<ConnectionOption> options = new ArrayList<>();
+        ArrayList<PowerPlug> plugs = levelManager.getPlugs();
+        ArrayList<ExtensionCord> cords = levelManager.getExtensionCords();
+
+        // Find all unconnected plug-cord pairs
+        for (PowerPlug plug : plugs) {
+            if (!plug.connected) {
+                for (ExtensionCord cord : cords) {
+                    if (!cord.connected) {
+                        options.add(new ConnectionOption(
+                                plug, cord,
+                                "PowerPlug to ExtensionCord"
+                        ));
+                        // Only return first valid pair to avoid duplicate hints
+                        return options;
+                    }
+                }
+            }
+        }
+
+        return options;
+    }
+
+    /**
+     * Find all VoltagePort connections
+     */
+    private List<ConnectionOption> findVoltagePortConnections(LevelManager levelManager) {
+        List<ConnectionOption> options = new ArrayList<>();
+        ArrayList<VoltagePort> voltagePorts = levelManager.getVoltagePorts();
+
+        // Find pairs of unconnected voltage ports
+        List<VoltagePort> unconnected = new ArrayList<>();
+        for (VoltagePort port : voltagePorts) {
+            if (!port.connected) {
+                unconnected.add(port);
+            }
+        }
+
+        // Create connection options for pairs
+        if (unconnected.size() >= 2) {
+            VoltagePort port1 = unconnected.get(0);
+            VoltagePort port2 = unconnected.get(1);
+            options.add(new ConnectionOption(
+                    port1, port2,
+                    "VoltagePort"
+            ));
+        }
+
+        return options;
+    }
+
+    /**
+     * Uses simple pathfinding to create a connection between two entities
+     */
+    private boolean findAndCreatePath(CircuitElement start, CircuitElement end, TileConnectionManager connectionManager,
+                                      float gridX, float gridY, float cellSize) {
+
+        float startX = getPositionX(start);
+        float startY = getPositionY(start);
+        float endX = getPositionX(end);
+        float endY = getPositionY(end);
+
+        int startGridX = Math.round((startX - gridX) / cellSize);
+        int startGridY = Math.round((startY - gridY) / cellSize);
+        int endGridX = Math.round((endX - gridX) / cellSize);
+        int endGridY = Math.round((endY - gridY) / cellSize);
+
+        List<GridPoint> path = findPath(startGridX, startGridY, endGridX, endGridY, gridX, gridY, cellSize);
+
+        if (path == null || path.isEmpty()) {
+            return false;
+        }
+
+        connectionManager.startBuilding(start, gridX, gridY, cellSize);
+
+        for (int i = 1; i < path.size() - 1; i++) {
+            GridPoint point = path.get(i);
+            connectionManager.addTileToPath(point.x, point.y);
+        }
+
+        connectionManager.finishBuilding(end);
+
+        return true;
+    }
+
+    /**
+     * A* pathfinding that avoids occupied cells
+     */
+    private List<GridPoint> findPath(int startX, int startY, int endX, int endY,
+                                     float gridX, float gridY, float cellSize) {
+
+        PriorityQueue<PathNode> openSet = new PriorityQueue<>();
+        Set<String> closedSet = new HashSet<>();
+        Map<String, PathNode> allNodes = new HashMap<>();
+
+        PathNode startNode = new PathNode(startX, startY, null, 0, manhattanDistance(startX, startY, endX, endY));
+        openSet.add(startNode);
+        allNodes.put(startX + "," + startY, startNode);
+
+        while (!openSet.isEmpty()) {
+            PathNode current = openSet.poll();
+            String currentKey = current.x + "," + current.y;
+
+            if (current.x == endX && current.y == endY) {
+                return reconstructPath(current);
+            }
+
+            closedSet.add(currentKey);
+
+            // Check all 4 directions (up, down, left, right)
+            int[][] directions = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+
+            for (int[] dir : directions) {
+                int newX = current.x + dir[0];
+                int newY = current.y + dir[1];
+                String neighborKey = newX + "," + newY;
+
+                // Skip if already evaluated
+                if (closedSet.contains(neighborKey)) {
+                    continue;
+                }
+
+                // Skip if occupied (but allow start and end positions)
+                boolean isStartOrEnd = (newX == startX && newY == startY) || (newX == endX && newY == endY);
+                if (!isStartOrEnd && levelManager.isCellOccupied(newX, newY, gridX, gridY, cellSize)) {
+                    continue;
+                }
+
+                float newG = current.g + 1;
+                float newH = manhattanDistance(newX, newY, endX, endY);
+                float newF = newG + newH;
+
+                PathNode neighbor = allNodes.get(neighborKey);
+                if (neighbor == null) {
+                    neighbor = new PathNode(newX, newY, current, newG, newH);
+                    allNodes.put(neighborKey, neighbor);
+                    openSet.add(neighbor);
+                } else if (newG < neighbor.g) {
+                    neighbor.g = newG;
+                    neighbor.f = newF;
+                    neighbor.parent = current;
+                    openSet.remove(neighbor);
+                    openSet.add(neighbor);
+                }
+            }
+        }
+
+        // No path found, return null
+        return null;
+    }
+
+    private int manhattanDistance(int x1, int y1, int x2, int y2) {
+        return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+    }
+
+    private List<GridPoint> reconstructPath(PathNode endNode) {
+        List<GridPoint> path = new ArrayList<>();
+        PathNode current = endNode;
+
+        while (current != null) {
+            path.add(0, new GridPoint(current.x, current.y));
+            current = current.parent;
+        }
+
+        return path;
+    }
+
+    private float getPositionX(Object entity) {
+        if (entity instanceof WirePort) return ((WirePort) entity).positionX;
+        if (entity instanceof Bulb) return ((Bulb) entity).positionX;
+        if (entity instanceof PowerPlug) return ((PowerPlug) entity).positionX;
+        if (entity instanceof ExtensionCord) return ((ExtensionCord) entity).positionX;
+        if (entity instanceof VoltagePort) return ((VoltagePort) entity).positionX;
+        return 0;
+    }
+
+    private float getPositionY(Object entity) {
+        if (entity instanceof WirePort) return ((WirePort) entity).positionY;
+        if (entity instanceof Bulb) return ((Bulb) entity).positionY;
+        if (entity instanceof PowerPlug) return ((PowerPlug) entity).positionY;
+        if (entity instanceof ExtensionCord) return ((ExtensionCord) entity).positionY;
+        if (entity instanceof VoltagePort) return ((VoltagePort) entity).positionY;
+        return 0;
+    }
+
+    /**
+     * Represents a possible connection between two entities
+     */
+    private static class ConnectionOption {
+        CircuitElement start;
+        CircuitElement end;
+        String description;
+
+        ConnectionOption(CircuitElement start, CircuitElement end, String description) {
+            this.start = start;
+            this.end = end;
+            this.description = description;
+        }
+    }
+
+    /**
+     * Simple grid coordinate class
+     */
+    private static class GridPoint {
+        int x, y;
+
+        GridPoint(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    /**
+     * Node used for A* pathfinding
+     */
+    private static class PathNode implements Comparable<PathNode> {
+        int x, y;
+        PathNode parent;
+        float g; // Cost from start
+        float h; // Heuristic to end
+        float f; // Total cost (g + h)
+
+        PathNode(int x, int y, PathNode parent, float g, float h) {
+            this.x = x;
+            this.y = y;
+            this.parent = parent;
+            this.g = g;
+            this.h = h;
+            this.f = g + h;
+        }
+
+        @Override
+        public int compareTo(PathNode other) {
+            return Float.compare(this.f, other.f);
+        }
+    }
 }

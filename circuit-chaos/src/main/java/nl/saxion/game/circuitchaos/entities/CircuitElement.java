@@ -14,6 +14,7 @@ public abstract class CircuitElement {
     public boolean isSelected = false;
 
     public PortColor color;
+    public boolean connected;
 
 
     public CircuitElement(float x, float y, float width, float height) {

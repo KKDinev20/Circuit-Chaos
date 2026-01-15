@@ -4,10 +4,8 @@ import nl.saxion.game.circuitchaos.entities.*;
 import nl.saxion.game.circuitchaos.entities.enums.PortColor;
 import nl.saxion.game.circuitchaos.util.GameConstants;
 
-import javax.sound.sampled.Port;
 import java.util.ArrayList;
 
-import static nl.saxion.game.circuitchaos.util.GameConstants.TOOL_SIZE;
 
 public class LevelManager {
     public static int currentLevel = 1;
