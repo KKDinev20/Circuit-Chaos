@@ -18,6 +18,7 @@ public class YourGameScreen extends ScalableGameScreen {
     private Box centeredBox = new Box();
     private ToolManager toolManager;
     private LevelManager levelManager;
+    private HintManager hintManager;
     private TileConnectionManager connectionManager;
     private Tool currentlyDragging = null;
     private boolean showQuitMenu = false;
@@ -52,6 +53,7 @@ public class YourGameScreen extends ScalableGameScreen {
         connectionManager = new TileConnectionManager();
         winManager = new WinConditionManager();
         dialogueManager = new DialogueManager();
+        hintManager = new HintManager();
     }
 
     @Override
@@ -64,6 +66,7 @@ public class YourGameScreen extends ScalableGameScreen {
         connectionManager.reset();
         toolManager = new ToolManager();
         winManager.reset();
+        hintManager.reset();
 
         // Reset game state flags
         levelEnded = false;
@@ -568,8 +571,43 @@ public class YourGameScreen extends ScalableGameScreen {
         float buttonX = gridX + centeredBox.width - buttonWidth;
         float buttonY = gridY + 10f + centeredBox.height;
 
-        GameApp.addTexture("hint", "textures/hint.png");
+        // Check if mouse is hovering over button
+        float mouseX = getMouseX();
+        float mouseY = getMouseY();
+        boolean isHovering = mouseX >= buttonX && mouseX <= buttonX + buttonWidth &&
+                mouseY >= buttonY && mouseY <= buttonY + buttonHeight;
+
+        // Draw hint button with hover effect
+        if (hintManager.isHintUsed()) {
+            // Greyed out if hint already used
+            GameApp.setColor(100, 100, 100, 150);
+        } else if (isHovering) {
+            // Highlight if hovering
+            GameApp.setColor(255, 255, 200, 255);
+        } else {
+            // Normal state
+            GameApp.setColor(255, 255, 255, 255);
+        }
+
         GameApp.drawTexture("hint", buttonX, buttonY, buttonWidth, buttonHeight);
+
+        // Handle click
+        if ((!levelEnded && !hintManager.isHintUsed() && isHovering &&
+                GameApp.isButtonJustPressed(com.badlogic.gdx.Input.Buttons.LEFT) )|| GameApp.isKeyJustPressed(Input.Keys.H) ) {
+
+            float centerX = getWorldWidth() / 2;
+            float centerY = getWorldHeight() / 2;
+            float gridStartX = centerX - centeredBox.width / 2;
+            float gridStartY = centerY - centeredBox.height / 2;
+            float cellSize = centeredBox.width / GameConstants.GRID_SIZE;
+
+            boolean success = hintManager.useHint(LevelManager.currentLevel, levelManager,
+                    connectionManager, gridStartX, gridStartY, cellSize);
+
+            if (success) {
+                System.out.println("Hint activated! One connection created.");
+            }
+        }
     }
 
     private void drawTimer(float gridX, float gridY) {

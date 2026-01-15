@@ -73,6 +73,8 @@ public class ElementManager {
         // UI textures
         GameApp.addTexture("dialogue_box", "textures/ui/dialog_box.png");
         GameApp.addTexture("skip_button", "textures/ui/skip_button.png");
+        GameApp.addTexture("hint", "textures/hint.png");
+
 
         loaded = true;
     }
