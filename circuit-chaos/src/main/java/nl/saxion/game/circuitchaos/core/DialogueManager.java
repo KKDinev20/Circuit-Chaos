@@ -163,10 +163,75 @@ public class DialogueManager {
                 break;
             case 4:
                 currentBackgroundTexture = "level4";
+                if (type == DialogueType.PRE_LEVEL) {
+                    leftCharacterTexture = "char_lumen";
+                    rightCharacterTexture = "char_andrea";
+
+                    currentDialogue.add(new DialogueLine(
+                            "Andrea",
+                            "Hi Lumen, sorry to bother you, but the mall’s entire east wing just shut down!",
+                            false
+                    ));
+                    currentDialogue.add(new DialogueLine(
+                            "Andrea",
+                            "The elevators stopped, the shops can’t open their registers, and people are stuck!",
+                            false
+                    ));
+                    currentDialogue.add(new DialogueLine(
+                            "Lumen",
+                            "I’m on my way. Keep everyone calm and away from the panels.",
+                            true
+                    ));
+                } else if (type == DialogueType.POST_LEVEL_WIN) {
+                    currentDialogue.add(new DialogueLine(
+                            "Lumen",
+                            "The extender is working now and the light bulb are replaced and stabilized. The mall is back online.",
+                            true
+                    ));
+                    currentDialogue.add(new DialogueLine(
+                            "Andrea",
+                            "You saved us! Thank you so much, Lumen!",
+                            false
+                    ));
+                    }
 
                 break;
             case 5:
                 currentBackgroundTexture = "level5";
+                if (type == DialogueType.PRE_LEVEL) {
+                    leftCharacterTexture = "char_lumen";
+                    rightCharacterTexture = "char_melany";
+
+                    currentDialogue.add(new DialogueLine(
+                            "Melany",
+                            "Lumen! My shop is full of sensitive equipment, and the blackout caused voltage spikes everywhere!",
+                            false
+                    ));
+                    currentDialogue.add(new DialogueLine(
+                            "Melany",
+                            "Nothing turns on without shorting out. I need your help!",
+                            false
+                    ));
+                    currentDialogue.add(new DialogueLine(
+                            "Lumen",
+                            "I’m on my way. Don’t run any devices until I fix the circuits.",
+                            true
+                    ));
+                }else if (type == DialogueType.POST_LEVEL_WIN) {
+
+                    currentDialogue.add(new DialogueLine(
+                            "Lumen",
+                            "Voltage is stable. Your equipment is safe again.",
+                            true
+                    ));
+
+                    currentDialogue.add(new DialogueLine(
+                            "Melany",
+                            "You saved me a fortune! Thank you, Lumen!",
+                            false
+                    ));
+                }
+
 
                 break;
             case 6:

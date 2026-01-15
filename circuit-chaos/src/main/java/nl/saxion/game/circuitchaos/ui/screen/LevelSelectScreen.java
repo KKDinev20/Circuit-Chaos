@@ -27,7 +27,7 @@ public class LevelSelectScreen extends ScalableGameScreen {
         enableHUD((int)getWorldWidth(), (int)getWorldHeight());
 
         GameApp.addFont("levelSelectFont", "fonts/Cause-Medium.ttf", 50);
-        GameApp.addFont("buttonFont", "fonts/Cause-Medium.ttf", 40);
+        GameApp.addFont("buttonFont", "fonts/Cause-Medium.ttf", 25);
         ElementManager.addTextures();
 
         float startX = getWorldWidth() / 2f - btnW / 2f;

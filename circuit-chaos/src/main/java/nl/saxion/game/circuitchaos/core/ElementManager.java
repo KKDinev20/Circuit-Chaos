@@ -68,6 +68,8 @@ public class ElementManager {
         GameApp.addTexture("char_lumen", "textures/characters/lumen.png");
         GameApp.addTexture("char_konstantin", "textures/characters/konstantin.png");
         GameApp.addTexture("char_georgi", "textures/characters/georgi.png");
+        GameApp.addTexture("char_andrea", "textures/characters/Andrea.png");
+        GameApp.addTexture("char_melany", "textures/characters/melany.png");
 
 
         // UI textures

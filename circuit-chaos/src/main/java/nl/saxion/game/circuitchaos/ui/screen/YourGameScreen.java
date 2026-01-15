@@ -966,7 +966,7 @@ public class YourGameScreen extends ScalableGameScreen {
         primaryBtn = new UIButton(
                 panelX + panelW / 2f - 280 - 15,
                 btnY,
-                280,
+                200,
                 85,
                 wonLevel ? "NEXT LEVEL" : "TRY AGAIN",
                 wonLevel ? "green-700" : "yellow-700",
@@ -976,8 +976,8 @@ public class YourGameScreen extends ScalableGameScreen {
         secondaryBtn = new UIButton(
                 panelX + panelW / 2f + 15,
                 btnY,
-                220,
-                70,
+                200,
+                85,
                 "MAIN MENU",
                 "gray-700",
                 "gray-500"

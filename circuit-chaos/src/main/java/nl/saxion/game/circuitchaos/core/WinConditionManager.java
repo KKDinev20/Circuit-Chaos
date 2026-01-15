@@ -261,6 +261,8 @@ public class WinConditionManager {
                 blackPortsConnectedToSwitch >= blackPortsRequiredToSwitch &&
                 regulatorsConnected >= regulatorsRequired &&
                 whiteConnected >= whiteRequired &&
+                pinkConnected>= pinkRequired &&
+                purpleConnected>= pinkRequired &&
                 (switchKey == null || switchKey.isOn())) {
 
             levelComplete = true;
