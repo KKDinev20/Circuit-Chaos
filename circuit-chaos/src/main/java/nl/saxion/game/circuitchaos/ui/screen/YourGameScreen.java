@@ -103,8 +103,10 @@ public class YourGameScreen extends ScalableGameScreen {
             winManager.setupLevelFourConditions();
         } else if (LevelManager.currentLevel == 5) {
             winManager.setupLevelFiveConditions();
-        }
-        else {
+        } else if (LevelManager.currentLevel == 6) {
+            Switch keySwitch = levelManager.getSwitchKey();
+            winManager.setupLevelSixConditions(keySwitch);
+        } else {
             // Handle undefined levels - return to menu or show message
             System.out.println("Level " + LevelManager.currentLevel + " not yet implemented!");
             LevelManager.currentLevel = 1;

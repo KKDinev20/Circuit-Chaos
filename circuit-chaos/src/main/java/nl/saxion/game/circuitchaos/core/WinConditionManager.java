@@ -92,6 +92,18 @@ public class WinConditionManager {
         whiteRequired = 4;
     }
 
+    public void setupLevelSixConditions(Switch keySwitch){
+        redRequired = 1;
+        yellowRequired = 1;
+        regulatorsRequired = 1;
+        whiteRequired = 4;
+        blackPortsRequiredToSwitch = 3;
+        switchKey = keySwitch;
+        extensionCordsRequired = 1;
+        plugsRequired = 2;
+
+    }
+
     public void checkConnections(
             TileConnectionManager connectionManager,
             ArrayList<WirePort> ports,

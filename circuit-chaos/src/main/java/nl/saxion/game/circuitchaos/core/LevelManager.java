@@ -298,6 +298,85 @@ public class LevelManager {
 
     public void generateLevelSix(float gridX, float gridY, float cellSize) {
         clearElements();
+
+        float centerOffset = (cellSize * 0.5f) / 2f;
+
+        // Port 1A
+        WirePort port1A = new WirePort(gridX, gridY, cellSize, PortColor.RED);
+        port1A.update();
+        ports.add(port1A);
+
+        // Port 1B
+        WirePort port1B = new WirePort(gridX + (3 * cellSize), gridY + (1 * cellSize), cellSize, PortColor.RED);
+        port1B.update();
+        ports.add(port1B);
+
+        //BULB 1A
+        Bulb bulb1 = new Bulb(gridX + (5 * cellSize), gridY + (5 * cellSize), cellSize);
+        bulb1.color = PortColor.YELLOW;
+        bulb1.hasPower = true;
+        bulb1.update();
+
+        bulbs.add(bulb1);
+
+        // BULB 1B
+        Bulb bulb2 = new Bulb(gridX + (1 * cellSize) , gridY+ (3 * cellSize), cellSize);
+        bulb2.color = PortColor.YELLOW;
+        bulb2.hasPower = false;
+        bulb2.update();
+
+        bulbs.add(bulb2);
+
+        // EXTENSION CORD
+        ExtensionCord extensionCord = new ExtensionCord(gridX, gridY + (3 * cellSize), cellSize);
+        extensionCord.update();
+        extensionCords.add(extensionCord);
+
+        // PLUG 1A
+        PowerPlug plug1 = new PowerPlug(gridX + (1 * cellSize), gridY + (5 * cellSize), cellSize);
+        plug1.update();
+        plugs.add(plug1);
+
+        // PLUG 1B
+        PowerPlug plug2 = new PowerPlug(gridX + (1 * cellSize), gridY + (1 * cellSize), cellSize);
+        plug2.update();
+        plugs.add(plug2);
+
+        // Voltage regulator
+        VoltageRegulator voltageRegulator = new VoltageRegulator(gridX + (4 * cellSize), gridY + (2 * cellSize), cellSize, PortColor.WHITE);
+        System.out.println("Placed VoltageRegulator at " + voltageRegulator.positionX + "," + voltageRegulator.positionY);
+        voltageRegulator.update();
+        regulators.add(voltageRegulator);
+
+        // Port 1 Voltage regulator
+        VoltagePort voltagePort1 = new VoltagePort(gridX + (5 * cellSize) + centerOffset, gridY + (3 * cellSize) + centerOffset, cellSize * 0.5f, PortColor.WHITE);
+        voltagePort1.update();
+        voltagePorts.add(voltagePort1);
+
+        // Port 2 Voltage regulator
+        VoltagePort voltagePort2 = new VoltagePort(gridX + (5 * cellSize) + centerOffset, gridY + (1 * cellSize) + centerOffset, cellSize * 0.5f, PortColor.WHITE);
+        voltagePort2.update();
+        voltagePorts.add(voltagePort2);
+
+        // Port 3 Voltage regulator
+        VoltagePort voltagePort3 = new VoltagePort(gridX + (4 * cellSize) + centerOffset, gridY + centerOffset, cellSize * 0.5f, PortColor.WHITE);
+        voltagePort3.update();
+        voltagePorts.add(voltagePort3);
+
+        // Port 4 Voltage regulator
+        VoltagePort voltagePort4 = new VoltagePort(gridX + (1 * cellSize) + centerOffset, gridY + (2 * cellSize) + centerOffset, cellSize * 0.5f, PortColor.WHITE);
+        voltagePort4.update();
+        voltagePorts.add(voltagePort4);
+
+        // SWITCH
+        Switch switch1 = new Switch(gridX + (2 * cellSize), gridY + (5 * cellSize), cellSize, PortColor.BLACK);
+        switch1.hasPower = true; // Switches are connected to power
+        switch1.update();
+        switches.add(switch1);
+
+
+
+
     }
 
     public void initializeLevel(float gridX, float gridY, float gridWidth) {
