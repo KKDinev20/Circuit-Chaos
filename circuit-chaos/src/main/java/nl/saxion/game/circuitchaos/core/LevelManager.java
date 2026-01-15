@@ -349,7 +349,7 @@ public class LevelManager {
         regulators.add(voltageRegulator);
 
         // Port 1 Voltage regulator
-        VoltagePort voltagePort1 = new VoltagePort(gridX + (5 * cellSize) + centerOffset, gridY + (3 * cellSize) + centerOffset, cellSize * 0.5f, PortColor.WHITE);
+        VoltagePort voltagePort1 = new VoltagePort(gridX + (4 * cellSize) + centerOffset, gridY + (4 * cellSize) + centerOffset, cellSize * 0.5f, PortColor.WHITE);
         voltagePort1.update();
         voltagePorts.add(voltagePort1);
 

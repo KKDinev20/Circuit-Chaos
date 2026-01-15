@@ -44,6 +44,8 @@ public class HintManager {
             case 5:
                 success = connectLevelFiveHint(levelManager, connectionManager, gridX, gridY, cellSize);
                 break;
+            case 6:
+                success = connectLevelSixHint(levelManager, connectionManager, gridX, gridY, cellSize);
             default:
                 System.out.println("No hint available for this level");
                 return false;
@@ -237,4 +239,41 @@ public class HintManager {
 
         return false;
     }
+
+    private boolean connectLevelSixHint(LevelManager levelManager,
+                                        TileConnectionManager connectionManager,
+                                        float gridX, float gridY, float cellSize) {
+
+        ArrayList<Bulb> bulbs = levelManager.getBulbs();
+
+        Bulb bulb1 = null; // (5,5)
+        Bulb bulb2 = null; // (3,4)
+
+        for (Bulb bulb : bulbs) {
+            if (bulb.color == PortColor.YELLOW) {
+                int gridPosX = Math.round((bulb.positionX - gridX) / cellSize);
+                int gridPosY = Math.round((bulb.positionY - gridY) / cellSize);
+
+                if (gridPosX == 5 && gridPosY == 5) {
+                    bulb1 = bulb;
+                } else if (gridPosX == 3 && gridPosY == 4) {
+                    bulb2 = bulb;
+                }
+            }
+        }
+
+        if (bulb1 != null && bulb2 != null) {
+            connectionManager.startBuilding(bulb1, gridX, gridY, cellSize);
+
+            // Path: (5,5) → (4,5) → (3,5) → (3,4)
+            connectionManager.addTileToPath(4, 5);
+            connectionManager.addTileToPath(3, 5);
+
+            connectionManager.finishBuilding(bulb2);
+            return true;
+        }
+
+        return false;
+    }
+
 }
