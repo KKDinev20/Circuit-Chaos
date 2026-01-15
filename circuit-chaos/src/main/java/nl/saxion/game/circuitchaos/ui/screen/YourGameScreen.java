@@ -26,7 +26,9 @@ public class YourGameScreen extends ScalableGameScreen {
     private boolean levelEnded = false;
 
     // TIMER
-    private float timeLeft = 65f;   // 2 minutes
+    private float totalTime = 0;
+    private float timeLeft = 0;
+    // 2 minutes
 
     private boolean showEndScreen = false;
     private boolean wonLevel = false;
@@ -73,7 +75,9 @@ public class YourGameScreen extends ScalableGameScreen {
         showEndScreen = false;
         wonLevel = false;
         showQuitMenu = false;
-        timeLeft = 65f;
+
+        totalTime = levelManager.getTimeLimitForLevel(LevelManager.currentLevel);
+        timeLeft = totalTime;
         currentlyDragging = null;
 
         enableHUD((int) getWorldWidth(), (int) getWorldHeight());
@@ -232,10 +236,10 @@ public class YourGameScreen extends ScalableGameScreen {
                 return;
             }
 
-            // Start breaking wires when 30 seconds left
-            if (timeLeft < 30f && timeLeft > 0) {
+            if (timeLeft <= totalTime / 2f) {
                 connectionManager.updateWireBreaking(delta, true);
             }
+
         }
 
         // Initialize tools if not done
@@ -893,16 +897,26 @@ public class YourGameScreen extends ScalableGameScreen {
         statsY -= 45;
 
         Stat[] stats = {
+                // Bulbs
                 new Stat("Yellow Bulbs", winManager.getYellowConnected(), winManager.getYellowRequired()),
+
+                // Ports by color
                 new Stat("Red Ports", winManager.getRedConnected(), winManager.getRedRequired()),
                 new Stat("Blue Ports", winManager.getBlueConnected(), winManager.getBlueRequired()),
                 new Stat("Green Ports", winManager.getGreenConnected(), winManager.getGreenRequired()),
                 new Stat("Orange Ports", winManager.getOrangeConnected(), winManager.getOrangeRequired()),
+                new Stat("Pink Ports", winManager.getPinkConnected(), winManager.getPinkRequired()),      // ⭐ level 4
+                new Stat("Purple Ports", winManager.getPurpleConnected(), winManager.getPurpleRequired()),// ⭐ level 4
+
+                // Tools
                 new Stat("Extension Cords", winManager.getExtensionCordsConnected(), winManager.getExtensionCordsRequired()),
                 new Stat("Plugs", winManager.getPlugsConnected(), winManager.getPlugsRequired()),
                 new Stat("Regulators", winManager.getRegulatorsConnected(), winManager.getRegulatorsRequired()),
-                new Stat("Voltage Ports", winManager.getWhiteConnected(), winManager.getWhiteRequired())
+                new Stat("Voltage Ports", winManager.getWhiteConnected(), winManager.getWhiteRequired()),
+
+
         };
+
 
         GameApp.startSpriteRendering();
         for (Stat s : stats) {
@@ -1025,6 +1039,8 @@ public class YourGameScreen extends ScalableGameScreen {
             GameApp.switchScreen("MainMenuScreen");
         }
     }
+
+
 
 
     @Override

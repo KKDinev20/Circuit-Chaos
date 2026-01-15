@@ -141,6 +141,8 @@ public class WinConditionManager {
                         case GREEN -> greenConnected++;
                         case YELLOW -> yellowConnected++;
                         case ORANGE -> orangeConnected++;
+                        case PINK ->  pinkConnected++;
+                        case PURPLE -> purpleConnected++;
                     }
                 }
             }
@@ -278,6 +280,12 @@ public class WinConditionManager {
     public int getPlugsConnected() { return plugsConnected; }
     public int getRegulatorsConnected() { return regulatorsConnected; }
     public int getWhiteConnected() { return whiteConnected; }
+    public int getPinkConnected() { return pinkConnected; }
+    public int getPinkRequired() { return pinkRequired; }
+
+    public int getPurpleConnected() { return purpleConnected; }
+    public int getPurpleRequired() { return purpleRequired; }
+
 
     public int getYellowRequired() { return yellowRequired; }
     public int getRedRequired() { return redRequired; }

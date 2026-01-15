@@ -504,4 +504,17 @@ public class LevelManager {
         }
         return null;
     }
+
+    public int getTimeLimitForLevel(int level) {
+        switch (level) {
+            case 1: return 60; // 2 minutes
+            case 2: return 90;
+            case 3: return 90;
+            case 4: return 120;
+            case 5: return 150;
+            case 6: return 180;
+            default: return 120;
+        }
+    }
+
 }
