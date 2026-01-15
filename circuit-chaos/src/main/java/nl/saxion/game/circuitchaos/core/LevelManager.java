@@ -320,7 +320,7 @@ public class LevelManager {
         bulbs.add(bulb1);
 
         // BULB 1B
-        Bulb bulb2 = new Bulb(gridX + (1 * cellSize) , gridY+ (3 * cellSize), cellSize);
+        Bulb bulb2 = new Bulb(gridX + (3 * cellSize) , gridY+ (4 * cellSize), cellSize);
         bulb2.color = PortColor.YELLOW;
         bulb2.hasPower = false;
         bulb2.update();
@@ -364,19 +364,15 @@ public class LevelManager {
         voltagePorts.add(voltagePort3);
 
         // Port 4 Voltage regulator
-        VoltagePort voltagePort4 = new VoltagePort(gridX + (1 * cellSize) + centerOffset, gridY + (2 * cellSize) + centerOffset, cellSize * 0.5f, PortColor.WHITE);
+        VoltagePort voltagePort4 = new VoltagePort(gridX + (3 * cellSize) + centerOffset, gridY + (3 * cellSize) + centerOffset, cellSize * 0.5f, PortColor.WHITE);
         voltagePort4.update();
         voltagePorts.add(voltagePort4);
 
         // SWITCH
-        Switch switch1 = new Switch(gridX + (2 * cellSize), gridY + (5 * cellSize), cellSize, PortColor.BLACK);
+        Switch switch1 = new Switch(gridX + (2 * cellSize), gridY + (4 * cellSize), cellSize, PortColor.BLACK);
         switch1.hasPower = true; // Switches are connected to power
         switch1.update();
         switches.add(switch1);
-
-
-
-
     }
 
     public void initializeLevel(float gridX, float gridY, float gridWidth) {
@@ -454,6 +450,7 @@ public class LevelManager {
         extensionCords.clear();
         plugs.clear();
         regulators.clear();
+        voltagePorts.clear();
     }
 
     // For checking if cells are occupied
