@@ -723,9 +723,9 @@ public class YourGameScreen extends ScalableGameScreen {
 
         // Text
         GameApp.startSpriteRendering();
-        GameApp.drawTextCentered("levelSelectFont", "Need a break?", getWorldWidth()/2f, panelY + panelH - 60, "white");
-        GameApp.drawTextCentered("quitFont", "RESTART", btnRestartX + btnW/2f, btnY + btnH/2f, "white");
-        GameApp.drawTextCentered("quitFont", "QUIT", btnQuitX + btnW/2f, btnY + btnH/2f, "white");
+        GameApp.drawTextCentered("quitFont", "Reboot or Power down?", getWorldWidth()/2f, panelY + panelH - 60, "white");
+        GameApp.drawTextCentered("quitFont", "Restart", btnRestartX + btnW/2f, btnY + btnH/2f, "white");
+        GameApp.drawTextCentered("quitFont", "Quit", btnQuitX + btnW/2f, btnY + btnH/2f, "white");
         GameApp.endSpriteRendering();
 
         if (GameApp.isButtonJustPressed(Input.Buttons.LEFT)) {

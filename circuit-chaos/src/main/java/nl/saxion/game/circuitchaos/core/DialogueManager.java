@@ -12,7 +12,6 @@ public class DialogueManager {
     private boolean dialogueActive;
     private boolean dialogueComplete;
     private DialogueType currentType;
-    private IntroType introPhase = IntroType.LUMEN_INTRO;
     private String currentBackgroundTexture;
 
     // Character positions
@@ -185,7 +184,7 @@ public class DialogueManager {
                     currentDialogue.add(new DialogueLine("Konstantin", "Hello? Lumen? You must come quickly! The entire supermarket is dark!", false));
                     currentDialogue.add(new DialogueLine("Konstantin", "The freezers stopped, alarms are silent, customers are confused!", false));
                     currentDialogue.add(new DialogueLine("Konstantin", "If the cold storage fails, we lose everything!", false));
-                    currentDialogue.add(new DialogueLine("Lumen", "Konstantin, stay calm. I'm on my way.", true));
+                    currentDialogue.add(new DialogueLine("Lumen", "Konstantin, stay calm. I am on my way.", true));
                     currentDialogue.add(new DialogueLine("Lumen", "Just keep people away from the cables.", true));
                 } else if (type == DialogueType.POST_LEVEL_WIN) {
                     currentDialogue.add(new DialogueLine("Lumen", "Everything is connected again.", true));
@@ -215,7 +214,7 @@ public class DialogueManager {
                     ));
                     currentDialogue.add(new DialogueLine(
                             "Georgi",
-                            "People can’t work, can’t study—some can’t even order coffee!",
+                            "People can not work, can not study — some can not even order coffee!",
                             false
                     ));
                     currentDialogue.add(new DialogueLine(
@@ -225,7 +224,7 @@ public class DialogueManager {
                     ));
                     currentDialogue.add(new DialogueLine(
                             "Lumen",
-                            "I’ll fix it using the switches. Just don’t touch the wiring.",
+                            "I will fix it using the switches. Just do not touch the wiring.",
                             true
                     ));
                 } else if (type == DialogueType.POST_LEVEL_WIN) {
@@ -295,8 +294,19 @@ public class DialogueManager {
                             "You saved us! Thank you so much, Lumen!",
                             false
                     ));
-                    }
-
+                }
+                else {
+                    currentDialogue.add(new DialogueLine(
+                            "Andrea",
+                            "Nothing’s working yet! People are confused and panicking.",
+                            false
+                    ));
+                    currentDialogue.add(new DialogueLine(
+                            "Lumen",
+                            "I must have done something wrong. Let me check again.",
+                            true
+                    ));
+                }
                 break;
             case 5:
                 currentBackgroundTexture = "level5";
@@ -319,7 +329,8 @@ public class DialogueManager {
                             "I’m on my way. Don’t run any devices until I fix the circuits.",
                             true
                     ));
-                }else if (type == DialogueType.POST_LEVEL_WIN) {
+                }
+                else if (type == DialogueType.POST_LEVEL_WIN) {
 
                     currentDialogue.add(new DialogueLine(
                             "Lumen",
@@ -333,9 +344,71 @@ public class DialogueManager {
                             false
                     ));
                 }
+                else {
+                    currentDialogue.add(new DialogueLine(
+                            "Melany",
+                            "It's not working, the devices will get fried if this goes on for long.",
+                            false
+                    ));
+                    currentDialogue.add(new DialogueLine(
+                            "Lumen",
+                            "Something must be wrong. Let me take a look once more.",
+                            true
+                    ));
+                }
                 break;
             case 6:
                 currentBackgroundTexture = "level6";
+                if (type == DialogueType.PRE_LEVEL) {
+                    leftCharacterTexture = "char_lumen";
+                    rightCharacterTexture = "char_technician";
+
+                    currentDialogue.add(new DialogueLine(
+                            "Technician",
+                            "Lumen! You got to come back to the station! Everything just went off!",
+                            false
+                    ));
+                    currentDialogue.add(new DialogueLine(
+                            "Technician",
+                            "All the employees are working hard, but we can not cover everything. We need your help!",
+                            false
+                    ));
+                    currentDialogue.add(new DialogueLine(
+                            "Lumen",
+                            "Oh no, that's bad. I will be there as fast as I can!",
+                            true
+                    ));
+                    currentDialogue.add(new DialogueLine(
+                            "Lumen",
+                            "Try to get rid of as many problems as you can.",
+                            true
+                    ));
+                }
+                else if (type == DialogueType.POST_LEVEL_WIN) {
+                    currentDialogue.add(new DialogueLine(
+                            "Lumen",
+                            "Oh, just in time. The station is saved, now everyone should have power.",
+                            true
+                    ));
+
+                    currentDialogue.add(new DialogueLine(
+                            "Technician",
+                            "Thank you for your service, Lumen! We couldn't have done this without you!",
+                            false
+                    ));
+                }
+                else {
+                    currentDialogue.add(new DialogueLine(
+                            "Technician",
+                            "The station is still off! I don't think we will be able to handle it!",
+                            false
+                    ));
+                    currentDialogue.add(new DialogueLine(
+                            "Lumen",
+                            "Just give me one more try, I think I found the problem.",
+                            true
+                    ));
+                }
                 break;
             default:
                 currentDialogue.add(new DialogueLine("Lumen", "Time to get to work!", true));
