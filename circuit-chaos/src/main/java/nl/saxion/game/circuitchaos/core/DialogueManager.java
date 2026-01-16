@@ -1,6 +1,7 @@
 package nl.saxion.game.circuitchaos.core;
 
 import nl.saxion.game.circuitchaos.entities.enums.DialogueType;
+import nl.saxion.game.circuitchaos.entities.enums.IntroType;
 import nl.saxion.gameapp.GameApp;
 import java.util.ArrayList;
 import nl.saxion.game.circuitchaos.entities.DialogueLine;
@@ -11,6 +12,7 @@ public class DialogueManager {
     private boolean dialogueActive;
     private boolean dialogueComplete;
     private DialogueType currentType;
+    private IntroType introPhase = IntroType.LUMEN_INTRO;
     private String currentBackgroundTexture;
 
     // Character positions
@@ -68,10 +70,110 @@ public class DialogueManager {
         loadDialogueForLevel(level, type);
     }
 
+    public void startIntro(IntroType introType) {
+        currentDialogue.clear();
+        currentLineIndex = 0;
+        dialogueActive = true;
+        dialogueComplete = false;
+
+        loadIntroDialogue(introType);
+    }
+
+    private void loadIntroDialogue(IntroType introType) {
+        switch (introType) {
+            case LUMEN_INTRO:
+                currentBackgroundTexture = "level6";
+                leftCharacterTexture = "char_lumen";
+                rightCharacterTexture = null;
+
+                currentDialogue.add(new DialogueLine("Lumen", "Hello! I am Lumen.", true));
+                currentDialogue.add(new DialogueLine("Lumen", "Today is my first day at BrightSpark Repairs.", true));
+                currentDialogue.add(new DialogueLine("Lumen", "Hopefully nothing goes wrong.", true));
+                break;
+            case NEXT_DAY:
+                currentBackgroundTexture = "level6";
+                leftCharacterTexture = null;
+                rightCharacterTexture = null;
+
+                currentDialogue.add(new DialogueLine("", "The next day...", true));
+                break;
+
+            case NEWS:
+                currentBackgroundTexture = "news_background";
+                leftCharacterTexture = null;
+                rightCharacterTexture = "char_barbara";
+
+                currentDialogue.add(new DialogueLine(
+                        "Barbara (news)",
+                        "Breaking news! Large parts of the city lost power overnight.",
+                        false
+                ));
+                currentDialogue.add(new DialogueLine(
+                        "Barbara (news)",
+                        "Authorities are still investigating the cause.",
+                        false
+                ));
+                currentDialogue.add(new DialogueLine(
+                        "Barbara (news)",
+                        "If your place was affected, please call the BrightSpark company, they will help you.",
+                        false
+                ));
+                break;
+        }
+    }
+
     private void loadDialogueForLevel(int level, DialogueType type) {
         switch (level) {
             case 1:
                 currentBackgroundTexture = "level1";
+                if (type == DialogueType.PRE_LEVEL) {
+                    leftCharacterTexture = "char_lumen";
+                    rightCharacterTexture = "char_sabrina";
+                    currentBackgroundTexture = "level1";
+
+                    currentDialogue.add(new DialogueLine(
+                            "Sabrina",
+                            "H-Hello? Is this BrightSpark Repairs? There is no power at my house!",
+                            false
+                    ));
+
+                    currentDialogue.add(new DialogueLine(
+                            "Sabrina",
+                            "I...I need help...urgently! Please come as quick as possible!",
+                            false
+                    ));
+
+                    currentDialogue.add(new DialogueLine(
+                            "Lumen",
+                            "Sabrina! Stay calm and do not do anything dangerous!",
+                            true
+                    ));
+                    currentDialogue.add(new DialogueLine(
+                            "Lumen",
+                            "I am coming to your house right now! I will be as fast as I can!",
+                            true
+                    ));
+                }
+                else if (type == DialogueType.POST_LEVEL_WIN) {
+                    currentDialogue.add(new DialogueLine(
+                            "Lumen",
+                            "I fixed your wires and connected the bulbs, everything should be working now.",
+                            true
+                    ));
+                    currentDialogue.add(new DialogueLine(
+                            "Sabrina",
+                            "Ah, thank you Lumen! You are a real life saver!",
+                            true
+                    ));
+                    currentDialogue.add(new DialogueLine(
+                            "Lumen",
+                            "No problem, Sabrina! Uh oh, I am getting another call...",
+                            true
+                    ));
+                } else {
+                    currentDialogue.add(new DialogueLine("Sabrina", "The whole house is still powered off! I have assignments to submit!", false));
+                    currentDialogue.add(new DialogueLine("Lumen", "I need to think more carefully about the connections!", true));
+                }
                 break;
             case 2:
                 currentBackgroundTexture = "level2";
@@ -231,8 +333,6 @@ public class DialogueManager {
                             false
                     ));
                 }
-
-
                 break;
             case 6:
                 currentBackgroundTexture = "level6";
@@ -282,19 +382,44 @@ public class DialogueManager {
         }
 
         // 2. Draw Characters (Dim the one not speaking)
-        if (currentLine.isLeftSpeaking) {
-            GameApp.setColor(255, 255, 255, 255);
-            GameApp.drawTexture(leftCharacterTexture, leftCharX, leftCharY, 250, 300, 0, true, false);
+        // LEFT character
+        if (leftCharacterTexture != null) {
+            if (currentLine.isLeftSpeaking) {
+                GameApp.setColor(255, 255, 255, 255);
+            } else {
+                GameApp.setColor(100, 100, 100, 255);
+            }
 
-            GameApp.setColor(100, 100, 100, 255);
-            GameApp.drawTexture(rightCharacterTexture, rightCharX, rightCharY, 250, 300, 0, false, false);
-        } else {
-            GameApp.setColor(100, 100, 100, 255);
-            GameApp.drawTexture(leftCharacterTexture, leftCharX, leftCharY, 250, 300, 0, true, false);
-
-            GameApp.setColor(255, 255, 255, 255);
-            GameApp.drawTexture(rightCharacterTexture, rightCharX, rightCharY, 250, 300, 0, false, false);
+            GameApp.drawTexture(
+                    leftCharacterTexture,
+                    leftCharX,
+                    leftCharY,
+                    250,
+                    375,
+                    0,
+                    true,
+                    false
+            );
         }
+        if (rightCharacterTexture != null) {
+            if (!currentLine.isLeftSpeaking) {
+                GameApp.setColor(255, 255, 255, 255);
+            } else {
+                GameApp.setColor(100, 100, 100, 255);
+            }
+
+            GameApp.drawTexture(
+                    rightCharacterTexture,
+                    rightCharX,
+                    rightCharY,
+                    250,
+                    375,
+                    0,
+                    false,
+                    false
+            );
+        }
+
 
         // 3. Draw Dialogue Box Texture
         GameApp.setColor(255, 255, 255, 255);
@@ -316,11 +441,6 @@ public class DialogueManager {
                 28
         );
 
-        if (skipHovered) {
-            GameApp.setColor(200, 255, 200, 255); // Slight tint on hover
-        } else {
-            GameApp.setColor(255, 255, 255, 255);
-        }
         GameApp.drawTexture("skip_button", skipButtonX, skipButtonY, skipButtonW, skipButtonH);
 
         GameApp.setColor(0, 0, 0, 255);
@@ -328,6 +448,13 @@ public class DialogueManager {
         GameApp.drawText("dialogueFont", prompt, dialogueBoxX + dialogueBoxW - 300, dialogueBoxY + 35, "black");
 
         GameApp.endSpriteRendering();
+
+        if (skipHovered) {
+            GameApp.startShapeRenderingOutlined();
+            GameApp.setColor(0, 255, 0, 255);
+            GameApp.drawRect(skipButtonX, skipButtonY, skipButtonW, skipButtonH);
+            GameApp.endShapeRendering();
+        }
     }
 
     private void drawWrappedText(String text, float x, float startY, int maxWidth, int lineHeight) {

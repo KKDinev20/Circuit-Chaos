@@ -40,7 +40,7 @@ public class UIButton {
 
         GameApp.startSpriteRendering();
         GameApp.drawTextCentered(
-                "buttonFont",
+                "quitFont",
                 text,
                 x + w / 2f,
                 y + h / 2f,

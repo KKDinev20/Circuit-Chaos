@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 import nl.saxion.game.circuitchaos.core.*;
 import nl.saxion.game.circuitchaos.entities.*;
 import nl.saxion.game.circuitchaos.entities.enums.*;
+import nl.saxion.game.circuitchaos.levels.Level;
 import nl.saxion.game.circuitchaos.ui.UIButton;
 import nl.saxion.game.circuitchaos.util.GameConstants;
 import nl.saxion.game.circuitchaos.util.HelperMethods;
@@ -38,7 +39,7 @@ public class YourGameScreen extends ScalableGameScreen {
     private DialogueManager dialogueManager;
     private boolean showingPreDialogue = false;
     private boolean showingPostDialogue = false;
-
+    private IntroType currentIntro = IntroType.LUMEN_INTRO;
 
     // UI positions for quit menu
     private float btnYesX, btnYesY, btnYesW, btnYesH;
@@ -64,6 +65,7 @@ public class YourGameScreen extends ScalableGameScreen {
     public void show() {
         GameApp.addFont("pixel_timer", "fonts/PressStart2P-Regular.ttf", 20);
         GameApp.addFont("levelSelectFont", "fonts/Cause-Medium.ttf", 40);
+        GameApp.addFont("quitFont", "fonts/Cause-Medium.ttf", 25);
 
         // RESET ALL STATE
         levelManager.resetLevel();
@@ -120,8 +122,24 @@ public class YourGameScreen extends ScalableGameScreen {
         }
 
         dialogueManager.initialize(getWorldWidth(), getWorldHeight());
-        dialogueManager.startDialogue(LevelManager.currentLevel, DialogueType.PRE_LEVEL);
-        showingPreDialogue = true;
+
+        if (LevelManager.currentLevel == 1 && !LevelManager.introPlayed) {
+
+            currentIntro = IntroType.LUMEN_INTRO;
+            dialogueManager.startIntro(currentIntro);
+            showingPreDialogue = true;
+
+            LevelManager.introPlayed = true;
+
+        } else {
+            // Normal pre-level dialogue
+            currentIntro = null;
+            dialogueManager.startDialogue(
+                    LevelManager.currentLevel,
+                    DialogueType.PRE_LEVEL
+            );
+            showingPreDialogue = true;
+        }
 
         // Quit menu positions
         panelW = 600;
@@ -523,14 +541,45 @@ public class YourGameScreen extends ScalableGameScreen {
 
         if (GameApp.isKeyJustPressed(Input.Keys.SPACE)) {
             if (dialogueManager.isComplete()) {
-                dialogueManager.close();
-                showingPreDialogue = false;
-            } else {
+               dialogueManager.close();
+
+               if (currentIntro != null) {
+                   advanceIntro();
+               }
+               else {
+                   showingPreDialogue = false;
+               }
+            }
+            else {
                 dialogueManager.advance();
             }
         }
 
         dialogueManager.draw(getWorldWidth(), getWorldHeight());
+    }
+
+    private void advanceIntro() {
+        switch (currentIntro) {
+            case LUMEN_INTRO:
+                currentIntro = IntroType.NEXT_DAY;
+                dialogueManager.startIntro(currentIntro);
+                break;
+
+            case NEXT_DAY:
+                currentIntro = IntroType.NEWS;
+                dialogueManager.startIntro(currentIntro);
+                break;
+
+            case NEWS:
+                currentIntro = null; // Intro finished
+                dialogueManager.startDialogue(
+                        LevelManager.currentLevel,
+                        DialogueType.PRE_LEVEL
+                );
+                break;
+        }
+
+        showingPreDialogue = true;
     }
 
     private void handlePostDialogue() {
@@ -702,9 +751,9 @@ public class YourGameScreen extends ScalableGameScreen {
 
         GameApp.drawTextCentered("levelSelectFont", "want to quit?", panelX + panelW / 2f, panelY + panelH - 130f, "white");
 
-        GameApp.drawTextCentered("buttonFont", "Yes", btnYesX + btnYesW / 2f, btnYesY + btnYesH / 2f, "white");
+        GameApp.drawTextCentered("quitFont", "Yes", btnYesX + btnYesW / 2f, btnYesY + btnYesH / 2f, "white");
 
-        GameApp.drawTextCentered("buttonFont", "No", btnNoX + btnNoW / 2f, btnNoY + btnNoH / 2f, "white");
+        GameApp.drawTextCentered("quitFont", "No", btnNoX + btnNoW / 2f, btnNoY + btnNoH / 2f, "white");
 
         GameApp.endSpriteRendering();
     }

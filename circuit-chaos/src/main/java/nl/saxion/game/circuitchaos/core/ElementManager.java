@@ -56,7 +56,8 @@ public class ElementManager {
         GameApp.addTexture("level4", "textures/backgrounds/Mall.png");
         GameApp.addTexture("level5", "textures/backgrounds/electronics repair.png");
         GameApp.addTexture("level6", "textures/backgrounds/City power station.png");
-
+        GameApp.addTexture("news_background", "textures/backgrounds/breaking news.png")
+;
 
         // Switch textures
         GameApp.addTexture("switch_on", "textures/entities/switch on.png");
@@ -66,10 +67,13 @@ public class ElementManager {
 
         // Character textures
         GameApp.addTexture("char_lumen", "textures/characters/lumen.png");
+        GameApp.addTexture("char_barbara", "textures/characters/barbarita news.png");
+        GameApp.addTexture("char_sabrina", "textures/characters/sabrina.png");
         GameApp.addTexture("char_konstantin", "textures/characters/konstantin.png");
         GameApp.addTexture("char_georgi", "textures/characters/georgi.png");
         GameApp.addTexture("char_andrea", "textures/characters/Andrea.png");
         GameApp.addTexture("char_melany", "textures/characters/melany.png");
+        GameApp.addTexture("char_technician", "textures/characters/technician.png");
 
 
         // UI textures
