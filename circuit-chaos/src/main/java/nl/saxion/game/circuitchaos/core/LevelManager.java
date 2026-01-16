@@ -9,7 +9,6 @@ import java.util.ArrayList;
 
 public class LevelManager {
     public static int currentLevel = 1;
-    public static boolean introPlayed = false;
     private static ArrayList<ExtensionCord> extensionCords = new ArrayList<>();
     private static ArrayList<PowerPlug> plugs = new ArrayList<>();
     private static ArrayList<VoltageRegulator> regulators = new ArrayList<>();

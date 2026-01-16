@@ -15,6 +15,8 @@ import nl.saxion.gameapp.screens.ScalableGameScreen;
 import java.awt.*;
 import java.util.ArrayList;
 
+import static nl.saxion.game.circuitchaos.util.HelperMethods.windowToWorldMouse;
+
 public class YourGameScreen extends ScalableGameScreen {
     private Box centeredBox = new Box();
     private ToolManager toolManager;
@@ -123,13 +125,13 @@ public class YourGameScreen extends ScalableGameScreen {
 
         dialogueManager.initialize(getWorldWidth(), getWorldHeight());
 
-        if (LevelManager.currentLevel == 1 && !LevelManager.introPlayed) {
+        if (LevelManager.currentLevel == 1 && !GameState.introPlayed) {
 
             currentIntro = IntroType.LUMEN_INTRO;
             dialogueManager.startIntro(currentIntro);
             showingPreDialogue = true;
 
-            LevelManager.introPlayed = true;
+            GameState.introPlayed = true;
 
         } else {
             // Normal pre-level dialogue
@@ -140,22 +142,6 @@ public class YourGameScreen extends ScalableGameScreen {
             );
             showingPreDialogue = true;
         }
-
-        // Quit menu positions
-        panelW = 600;
-        panelH = 300;
-        panelX = getWorldWidth() / 2f - panelW / 2f;
-        panelY = getWorldHeight() / 2f - panelH / 2f;
-
-        btnYesW = 200;
-        btnYesH = 80;
-        btnYesX = panelX + 60;
-        btnYesY = panelY + 40;
-
-        btnNoW = 200;
-        btnNoH = 80;
-        btnNoX = panelX + panelW - btnNoW - 60;
-        btnNoY = panelY + 40;
 
         System.out.println("YourGameScreen.show() - Current level: " + LevelManager.currentLevel);
     }
@@ -204,7 +190,6 @@ public class YourGameScreen extends ScalableGameScreen {
         // =================================================================
         if (showQuitMenu) {
             renderQuitMenu();
-            renderQuitMenuClick();
             return;
         }
 
@@ -706,98 +691,53 @@ public class YourGameScreen extends ScalableGameScreen {
         }
     }
 
-    /*private void drawTimer(float gridX, float gridY) {
-        float timerHeight = 10f;
-        float timerY = gridY + centeredBox.height + 8f;
-
-        GameApp.drawRect(gridX, timerY, centeredBox.width, timerHeight, Color.GREEN);
-        GameApp.drawRect(gridX, timerY, centeredBox.width - 80f, timerHeight, Color.RED);
-    }*/
-
     private void renderQuitMenu() {
-        float[] m = windowToWorldMouse();
+        float[] m = windowToWorldMouse((int)getWorldWidth(), (int)getWorldHeight());
         float mx = m[0];
         float my = m[1];
 
-        // detect hover
-        yesHover = (mx >= btnYesX && mx <= btnYesX + btnYesW && my >= btnYesY && my <= btnYesY + btnYesH);
+        float panelW = 500;
+        float panelH = 200;
+        float panelX = getWorldWidth()/2f - panelW/2f;
+        float panelY = getWorldHeight()/2f - panelH/2f;
 
-        noHover = (mx >= btnNoX && mx <= btnNoX + btnNoW && my >= btnNoY && my <= btnNoY + btnNoH);
+        float btnW = 170;
+        float btnH = 70;
+        float btnRestartX = panelX + 40;
+        float btnQuitX = panelX + panelW - btnW - 40;
+        float btnY = panelY + 20;
 
-        // background of level stays
+        boolean restartHover = mx >= btnRestartX && mx <= btnRestartX + btnW && my >= btnY && my <= btnY + btnH;
+        boolean quitHover = mx >= btnQuitX && mx <= btnQuitX + btnW && my >= btnY && my <= btnY + btnH;
+
+        // Background
+        GameApp.startShapeRenderingFilled();
+        GameApp.drawRect(panelX, panelY, panelW, panelH, "gray-900");
+        GameApp.endShapeRendering();
+
+        // Buttons
+        GameApp.startShapeRenderingFilled();
+        GameApp.drawRect(btnRestartX, btnY, btnW, btnH, restartHover ? "blue-400" : "blue-300");
+        GameApp.drawRect(btnQuitX, btnY, btnW, btnH, quitHover ? "red-400" : "red-300");
+        GameApp.endShapeRendering();
+
+        // Text
         GameApp.startSpriteRendering();
-        GameApp.drawTexture("level1", 0, 0, getWorldWidth(), getWorldHeight());
+        GameApp.drawTextCentered("levelSelectFont", "Need a break?", getWorldWidth()/2f, panelY + panelH - 60, "white");
+        GameApp.drawTextCentered("quitFont", "RESTART", btnRestartX + btnW/2f, btnY + btnH/2f, "white");
+        GameApp.drawTextCentered("quitFont", "QUIT", btnQuitX + btnW/2f, btnY + btnH/2f, "white");
         GameApp.endSpriteRendering();
 
-        // ==== DRAW PANEL ====
-        GameApp.startShapeRenderingFilled();
-        GameApp.drawRect(panelX, panelY, panelW, panelH, "gray-800");
-        GameApp.endShapeRendering();
-
-        // ==== DRAW YES BUTTON ====
-        GameApp.startShapeRenderingFilled();
-        GameApp.drawRect(btnYesX - (yesHover ? 5 : 0), btnYesY - (yesHover ? 5 : 0), btnYesW + (yesHover ? 10 : 0), btnYesH + (yesHover ? 10 : 0), yesHover ? "blue-400" : "blue-300");
-        GameApp.endShapeRendering();
-
-        // ==== DRAW NO BUTTON ====
-        GameApp.startShapeRenderingFilled();
-        GameApp.drawRect(btnNoX - (noHover ? 5 : 0), btnNoY - (noHover ? 5 : 0), btnNoW + (noHover ? 10 : 0), btnNoH + (noHover ? 10 : 0), noHover ? "red-400" : "red-300");
-        GameApp.endShapeRendering();
-
-        // ==== TEXT ====
-        GameApp.startSpriteRendering();
-
-        GameApp.drawTextCentered("levelSelectFont", "Are you sure you", panelX + panelW / 2f, panelY + panelH - 60f, "white");
-
-        GameApp.drawTextCentered("levelSelectFont", "want to quit?", panelX + panelW / 2f, panelY + panelH - 130f, "white");
-
-        GameApp.drawTextCentered("quitFont", "Yes", btnYesX + btnYesW / 2f, btnYesY + btnYesH / 2f, "white");
-
-        GameApp.drawTextCentered("quitFont", "No", btnNoX + btnNoW / 2f, btnNoY + btnNoH / 2f, "white");
-
-        GameApp.endSpriteRendering();
-    }
-
-    private void renderQuitMenuClick() {
-        if (!GameApp.isButtonJustPressed(Input.Buttons.LEFT)) return;
-
-        float[] m = windowToWorldMouse();
-        float mx = m[0];
-        float my = m[1];
-
-        // YES
-        if (mx >= btnYesX && mx <= btnYesX + btnYesW && my >= btnYesY && my <= btnYesY + btnYesH) {
-            levelManager.resetLevel();
-            connectionManager.reset();
-            GameApp.switchScreen("MainMenuScreen");
-            showQuitMenu = false;
-            return;
+        if (GameApp.isButtonJustPressed(Input.Buttons.LEFT)) {
+            if (restartHover) {
+                levelManager.resetLevel();
+                GameApp.switchScreen("YourGameScreen");
+                showQuitMenu = false;
+            } else if (quitHover) {
+                GameApp.switchScreen("MainMenuScreen");
+                showQuitMenu = false;
+            }
         }
-
-        // NO
-        if (mx >= btnNoX && mx <= btnNoX + btnNoW && my >= btnNoY && my <= btnNoY + btnNoH) {
-            showQuitMenu = false;
-            return;
-        }
-    }
-
-    private float[] windowToWorldMouse() {
-        float wx = GameApp.getMousePositionInWindowX();
-        float wy = GameApp.getMousePositionInWindowY();
-
-        int winW = com.badlogic.gdx.Gdx.graphics.getWidth();
-        int winH = com.badlogic.gdx.Gdx.graphics.getHeight();
-
-        float worldW = getWorldWidth();
-        float worldH = getWorldHeight();
-
-        float sx = worldW / winW;
-        float sy = worldH / winH;
-
-        float worldX = wx * sx;
-        float worldY = (winH - wy) * sy; // flip Y
-
-        return new float[]{worldX, worldY};
     }
 
     private void renderDimmedBackground() {
@@ -1087,8 +1027,15 @@ public class YourGameScreen extends ScalableGameScreen {
 
         if (primaryBtn != null && primaryBtn.isHovered(mx, my)) {
             if (wonLevel) {
-                LevelManager.currentLevel++;
-                GameApp.switchScreen("YourGameScreen");
+                if (LevelManager.currentLevel == GameState.highestCompletedLevel + 1) {
+                    GameState.highestCompletedLevel = LevelManager.currentLevel;
+                }
+                if (GameState.highestCompletedLevel == 6) {
+                    GameApp.switchScreen("GameWinScreen");
+                } else {
+                    LevelManager.currentLevel++;
+                    GameApp.switchScreen("YourGameScreen");
+                }
             } else {
                 GameApp.switchScreen("YourGameScreen");
             }
